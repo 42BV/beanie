@@ -53,9 +53,8 @@ public class BeanBuilderTest {
     @Test
     public void testBuildWithDefaultBuilder() {
         SimpleBean bean = beanBuilder.newBean(SimpleBean.class)
-                                        .generateValues()
                                         .withValue("name", "success")
-                                            .build();
+                                            .fill().build();
         
         Assert.assertEquals("success", bean.getName());
         Assert.assertNotNull(bean.getNestedBean());

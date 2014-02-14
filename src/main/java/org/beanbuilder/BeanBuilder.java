@@ -5,7 +5,9 @@ package org.beanbuilder;
 
 import java.beans.PropertyDescriptor;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.beanbuilder.generate.ConstantValueGenerator;
 import org.beanbuilder.generate.TypeValueGenerator;
@@ -31,8 +33,10 @@ import org.springframework.core.GenericTypeResolver;
  */
 public class BeanBuilder implements ValueGenerator {
     
-    private final Map<PropertyReference, ValueGenerator> propertyValueGenerators = new HashMap<>();
+    private final Map<PropertyReference, ValueGenerator> propertyReferenceValueGenerators = new HashMap<>();
     
+    private final Map<String, ValueGenerator> propertyNameValueGenerators = new HashMap<>();
+
     private final TypeValueGenerator typeValueGenerator;
     
     private final ConstructingBeanGenerator beanGenerator;
@@ -40,11 +44,11 @@ public class BeanBuilder implements ValueGenerator {
     private final BeanSaver beanSaver;
 
     public BeanBuilder() {
-        this(new ShortestConstructorStrategy());
+        this(new UnsupportedBeanSaver());
     }
     
-    public BeanBuilder(ConstructorStrategy constructorStrategy) {
-        this(new ShortestConstructorStrategy(), new UnsupportedBeanSaver());
+    public BeanBuilder(BeanSaver beanSaver) {
+        this(new ShortestConstructorStrategy(), beanSaver);
     }
     
     public BeanBuilder(ConstructorStrategy constructorStrategy, BeanSaver beanSaver) {
@@ -91,7 +95,7 @@ public class BeanBuilder implements ValueGenerator {
         if (typeValueGenerator.contains(beanClass)) {
             return typeValueGenerator.generate(beanClass);
         } else {
-            return newBean(beanClass).generateValues().build();
+            return newBean(beanClass).fill().build();
         }
     }
     
@@ -102,36 +106,61 @@ public class BeanBuilder implements ValueGenerator {
     
     private ValueGenerator getPropertyGenerator(Class<?> beanClass, String propertyName) {
         PropertyReference propertyReference = new PropertyReference(beanClass, propertyName);
-        if (propertyValueGenerators.containsKey(propertyReference)) {
-            return propertyValueGenerators.get(propertyReference);
+        if (propertyReferenceValueGenerators.containsKey(propertyReference)) {
+            return propertyReferenceValueGenerators.get(propertyReference);
+        } else if (propertyNameValueGenerators.containsKey(propertyName)) {
+            return propertyNameValueGenerators.get(propertyReference);
         } else {
             return typeValueGenerator;
         }
     }
     
     /**
-    * Register a value generation strategy for a specific property.
-    * 
-    * @param declaringClass the bean class that declares our property
-    * @param propertyName the name of the property
-    * @param generator the generation strategy
-    * @return this instance
-    */
+     * Register a value generation strategy for a specific property reference.
+     * 
+     * @param declaringClass the bean class that declares our property
+     * @param propertyName the name of the property
+     * @param generator the generation strategy
+     * @return this instance
+     */
     public BeanBuilder register(Class<?> declaringClass, String propertyName, ValueGenerator generator) {
-        propertyValueGenerators.put(new PropertyReference(declaringClass, propertyName), generator);
+        propertyReferenceValueGenerators.put(new PropertyReference(declaringClass, propertyName), generator);
         return this;
     }
     
     /**
-    * Register a constant value for a specific property.
-    * 
-    * @param declaringClass the bean class that declares our property
-    * @param propertyName the name of the property
-    * @param value the value to return
-    * @return this instance
-    */
+     * Register a constant value for a specific property reference.
+     * 
+     * @param declaringClass the bean class that declares our property
+     * @param propertyName the name of the property
+     * @param value the value to return
+     * @return this instance
+     */
     public BeanBuilder registerValue(Class<?> declaringClass, String propertyName, Object value) {
         return register(declaringClass, propertyName, new ConstantValueGenerator(value));
+    }
+    
+    /**
+     * Register a value generation strategy for a specific property name.
+     * 
+     * @param propertyName the name of the property
+     * @param generator the generation strategy
+     * @return this instance
+     */
+    public BeanBuilder register(String propertyName, ValueGenerator generator) {
+        propertyNameValueGenerators.put(propertyName, generator);
+        return this;
+    }
+    
+    /**
+     * Register a constant value for a specific property name.
+     * 
+     * @param propertyName the name of the property
+     * @param value the value to return
+     * @return this instance
+     */
+    public BeanBuilder registerValue(String propertyName, Object value) {
+        return register(propertyName, new ConstantValueGenerator(value));
     }
     
     /**
@@ -165,11 +194,11 @@ public class BeanBuilder implements ValueGenerator {
     public interface BeanBuildCommand<T> {
         
         /**
-         * Generate all value in our to be generated bean.
+         * Generate all untouched values in our bean.
          * 
          * @return this instance, for chaining
          */
-        BeanBuildCommand<T> generateValues();
+        BeanBuildCommand<T> fill();
         
         /**
          * Build the new bean.
@@ -204,14 +233,6 @@ public class BeanBuilder implements ValueGenerator {
         ConfigurableBeanBuildCommand<T> generateValue(String propertyName);
         
         /**
-         * Generate all value in our to be generated bean.
-         * 
-         * @return this instance, for chaining
-         */
-        @Override
-        ConfigurableBeanBuildCommand<T> generateValues();
-        
-        /**
          * Declare a value in our to be generated bean.
          * 
          * @param propertyName the property name
@@ -230,6 +251,8 @@ public class BeanBuilder implements ValueGenerator {
      */
     private static class DefaultBeanBuildCommand<T> implements ConfigurableBeanBuildCommand<T> {
         
+        private final Set<String> touchedProperties = new HashSet<>();
+
         private final BeanBuilder beanBuilder;
         
         private final Class<T> beanClass;
@@ -250,6 +273,7 @@ public class BeanBuilder implements ValueGenerator {
         @Override
         public ConfigurableBeanBuildCommand<T> withValue(String propertyName, Object value) {
             beanWrapper.setPropertyValue(propertyName, value);
+            touchedProperties.add(propertyName);
             return this;
         }
 
@@ -267,11 +291,12 @@ public class BeanBuilder implements ValueGenerator {
          * {@inheritDoc}
          */
         @Override
-        public ConfigurableBeanBuildCommand<T> generateValues() {
+        public ConfigurableBeanBuildCommand<T> fill() {
             for (PropertyDescriptor propertyDescriptor : beanWrapper.getPropertyDescriptors()) {
-                if (propertyDescriptor.getWriteMethod() != null) {
+                String propertyName = propertyDescriptor.getName();
+                if (propertyDescriptor.getWriteMethod() != null && ! touchedProperties.contains(propertyName)) {
                     Object value = beanBuilder.generatePropertyValue(beanClass, propertyDescriptor);
-                    withValue(propertyDescriptor.getName(), value);
+                    withValue(propertyName, value);
                 }
             }
             return this;
