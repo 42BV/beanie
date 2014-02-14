@@ -1,5 +1,6 @@
 package org.beanbuilder;
 
+import org.beanbuilder.BeanBuilder.BeanBuildCommand;
 import org.beanbuilder.domain.NestedBean;
 import org.beanbuilder.domain.NestedBeanWithConstructor;
 import org.beanbuilder.domain.SimpleBean;
@@ -49,11 +50,36 @@ public class BeanBuilderTest {
 	}
 
     @Test
-    public void testGenerateWithCustomValue() {
-        SimpleBean bean = beanBuilder.start(SimpleBean.class).withGeneratedValues().withValue("value", "success").build();
+    public void testGenerateWithDefaultBuilder() {
+        SimpleBean bean = beanBuilder.start(SimpleBean.class)
+                                        .withGeneratedValues()
+                                        .withValue("value", "success")
+                                            .build();
+        
         Assert.assertEquals("success", bean.getValue());
         Assert.assertNotNull(bean.getNestedBean());
         Assert.assertNotNull(bean.getNestedBeanWithConstructor());
+    }
+    
+    @Test
+    public void testGenerateWithCustomBuilder() {
+        NestedBean nestedBean = new NestedBean();
+        
+        SimpleBean bean = beanBuilder.start(SimpleBean.class, SimpleBeanBuildCommand.class)
+                                        .withValue("success")
+                                        .withNestedBean(nestedBean)
+                                            .build();
+        
+        Assert.assertEquals("success", bean.getValue());
+        Assert.assertEquals(nestedBean, bean.getNestedBean());
+    }
+
+    public interface SimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
+        
+        SimpleBeanBuildCommand withValue(String value);
+        
+        SimpleBeanBuildCommand withNestedBean(NestedBean nestedBean);
+
     }
 
 }
