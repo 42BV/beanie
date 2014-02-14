@@ -1,10 +1,11 @@
 /*
  * (C) 2013 42 bv (www.42.nl). All rights reserved.
  */
-package org.beanbuilder.generate;
+package org.beanbuilder.generate.construction;
 
 import java.lang.reflect.Constructor;
 
+import org.beanbuilder.generate.ValueGenerator;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -13,17 +14,20 @@ import org.springframework.beans.BeanUtils;
  * @author jeroen
  * @since Feb 14, 2014
  */
-public class ShortestConstructorBeanGenerator implements ValueGenerator {
+public class ConstructingBeanGenerator implements ValueGenerator {
     
+    private final ConstructorStrategy constructorStrategy;
+
     private final ValueGenerator argumentsGenerator;
 
-    public ShortestConstructorBeanGenerator(ValueGenerator argumentsGenerator) {
+    public ConstructingBeanGenerator(ConstructorStrategy constructorStrategy, ValueGenerator argumentsGenerator) {
+        this.constructorStrategy = constructorStrategy;
         this.argumentsGenerator = argumentsGenerator;
     }
 
     @Override
     public Object generate(Class<?> beanClass) {
-        Constructor<?> constructor = getShortestConstructor(beanClass);
+        Constructor<?> constructor = constructorStrategy.getConstructor(beanClass);
         if (constructor != null) {
             Class<?>[] parameterTypes = constructor.getParameterTypes();
             Object[] arguments = new Object[parameterTypes.length];
@@ -34,16 +38,6 @@ public class ShortestConstructorBeanGenerator implements ValueGenerator {
         } else {
             return BeanUtils.instantiateClass(beanClass);
         }
-    }
-    
-    private Constructor<?> getShortestConstructor(Class<?> beanClass) {
-        Constructor<?> shortest = null;
-        for (Constructor<?> constructor : beanClass.getDeclaredConstructors()) {
-            if (shortest == null || shortest.getParameterTypes().length > constructor.getParameterTypes().length) {
-                shortest = constructor;
-            }
-        }
-        return shortest;
     }
 
 }

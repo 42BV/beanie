@@ -1,4 +1,4 @@
-package org.beanbuilder.sample;
+package org.beanbuilder.domain;
 
 public class SimpleBean {
 

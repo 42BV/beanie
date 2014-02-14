@@ -1,6 +1,6 @@
 package org.beanbuilder.tester;
 
-import org.beanbuilder.sample.FullBean;
+import org.beanbuilder.domain.FullBean;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

@@ -25,6 +25,7 @@ import org.springframework.core.type.filter.TypeFilter;
 /**
  * Verifies the getter and setter methods of beans. The retrieved
  * value should be semantically equal to the initially set value.
+ * 
  * @author Jeroen van Schagen
  */
 public class BeanTester {
@@ -47,8 +48,8 @@ public class BeanTester {
     }
 
     /**
-     * Verify the getter and setters of each bean, with an empty constructor,
-     * in the specified base package.
+     * Verify the getter and setters of each bean, with an empty constructor, in the specified base package.
+     * 
      * @param basePackage the base package to search for beans
      */
     public int verifyBeans(String basePackage) {
@@ -63,6 +64,7 @@ public class BeanTester {
 
     /**
      * Verify the getter and setters of the specified bean.
+     * 
      * @param beanClass the bean class
      */
     public void verifyBean(Class<?> beanClass) {
@@ -106,6 +108,7 @@ public class BeanTester {
     
     /**
      * Verify the getter and setter of a property.
+     * 
      * @param beanClass the bean class
      * @param propertyName the property name
      */
@@ -169,6 +172,7 @@ public class BeanTester {
 
     /**
      * Excludes a property from testing.
+     * 
      * @param declaringClass the declaring class
      * @param propertyName name of the property
      */

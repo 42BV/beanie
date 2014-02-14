@@ -1,4 +1,4 @@
-package org.beanbuilder.sample;
+package org.beanbuilder.domain;
 
 import java.util.Date;
 

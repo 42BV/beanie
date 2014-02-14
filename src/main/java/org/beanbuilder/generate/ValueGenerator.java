@@ -2,12 +2,14 @@ package org.beanbuilder.generate;
 
 /**
  * Generates a value.
+ * 
  * @author Jeroen van Schagen
  */
 public interface ValueGenerator {
 
     /**
      * Generate a new value of the specified type.
+     * 
      * @param valueType the type of value
      * @return the generation value
      */
