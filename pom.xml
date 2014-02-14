@@ -4,12 +4,19 @@
 
     <groupId>nl.mad</groupId>
     <artifactId>bean-builder</artifactId>
-    <version>0.1.3-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
     
     <properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     	<jdk.version>1.7</jdk.version>
     </properties>
+    
+	<scm>
+		<connection>scm:git:https://github.com/42BV/bean-builder.git</connection>
+		<developerConnection>scm:git:https://github.com/42BV/bean-builder.git</developerConnection>
+		<url>https://github.com/42BV/bean-builder</url>
+		<tag>HEAD</tag>
+	</scm>
 
     <dependencies>
         <dependency>
