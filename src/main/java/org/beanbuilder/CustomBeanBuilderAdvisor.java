@@ -11,16 +11,24 @@ import org.beanbuilder.BeanBuilder.ConfigurableBeanBuildCommand;
 import org.springframework.aop.Advisor;
 
 /**
- * Advisor to support custom bean builders. 
+ * Appends bean building logic to builders, allowing custom builder interfaces.
+ * Whenever a custom method is invoked, such as <code>withId(1)</code> we will
+ * automatically decorate the bean with an "id" property value of 1.
+ * <p>
+ * Providing no argument, such as <code>withId()</code>, we decorate the bean
+ * with a generated "id" property value. The property value is generated using
+ * the same bean builder.
  *
- * @author jeroen
+ * @author Jeroen van Schagen
  * @since Feb 14, 2014
  */
-public class CustomBeanBuilderAdvisor implements Advisor {
+public final class CustomBeanBuilderAdvisor implements Advisor {
     
+    private static final String WITH_PREFIX = "with";
+
     private final ConfigurableBeanBuildCommand<?> command;
     
-    public CustomBeanBuilderAdvisor(ConfigurableBeanBuildCommand<?> command) {
+    CustomBeanBuilderAdvisor(ConfigurableBeanBuildCommand<?> command) {
         this.command = command;
     }
 
@@ -31,20 +39,27 @@ public class CustomBeanBuilderAdvisor implements Advisor {
     
     @Override
     public Advice getAdvice() {
-        return new MethodInterceptor() {
-            
-            @Override
-            public Object invoke(MethodInvocation invocation) throws Throwable {
-                String methodName = invocation.getMethod().getName();
-                if (methodName.startsWith("with")) {
-                    String propertyName = StringUtils.substringAfter(methodName, "with");
-                    return command.withValue(propertyName, invocation.getArguments()[0]);
+        return new CustomBeanBuilderAdvice();
+    }
+    
+    private class CustomBeanBuilderAdvice implements MethodInterceptor {
+        
+        @Override
+        public Object invoke(MethodInvocation invocation) throws Throwable {
+            final String methodName = invocation.getMethod().getName();
+            if (methodName.startsWith(WITH_PREFIX)) {
+                String propertyName = StringUtils.substringAfter(methodName, WITH_PREFIX);
+                Object[] arguments = invocation.getArguments();
+                if (arguments.length == 0) {
+                    return command.generateValue(propertyName);
                 } else {
-                    return invocation.proceed();
+                    return command.withValue(propertyName, arguments[0]);
                 }
+            } else {
+                return invocation.proceed();
             }
-            
-        };
+        }
+
     }
 
 }

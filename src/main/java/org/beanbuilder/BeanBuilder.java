@@ -91,7 +91,7 @@ public class BeanBuilder implements ValueGenerator {
         if (typeValueGenerator.contains(beanClass)) {
             return typeValueGenerator.generate(beanClass);
         } else {
-            return newBean(beanClass).withGeneratedValues().build();
+            return newBean(beanClass).generateValues().build();
         }
     }
     
@@ -169,7 +169,7 @@ public class BeanBuilder implements ValueGenerator {
          * 
          * @return this instance, for chaining
          */
-        BeanBuildCommand<T> withGeneratedValues();
+        BeanBuildCommand<T> generateValues();
         
         /**
          * Build the new bean.
@@ -201,7 +201,7 @@ public class BeanBuilder implements ValueGenerator {
          * @param propertyName the property name
          * @return this instance, for chaining
          */
-        ConfigurableBeanBuildCommand<T> withGeneratedValue(String propertyName);
+        ConfigurableBeanBuildCommand<T> generateValue(String propertyName);
         
         /**
          * Generate all value in our to be generated bean.
@@ -209,7 +209,7 @@ public class BeanBuilder implements ValueGenerator {
          * @return this instance, for chaining
          */
         @Override
-        ConfigurableBeanBuildCommand<T> withGeneratedValues();
+        ConfigurableBeanBuildCommand<T> generateValues();
         
         /**
          * Declare a value in our to be generated bean.
@@ -257,7 +257,7 @@ public class BeanBuilder implements ValueGenerator {
          * {@inheritDoc}
          */
         @Override
-        public ConfigurableBeanBuildCommand<T> withGeneratedValue(String propertyName) {
+        public ConfigurableBeanBuildCommand<T> generateValue(String propertyName) {
             PropertyDescriptor propertyDescriptor = beanWrapper.getPropertyDescriptor(propertyName);
             Object value = beanBuilder.generatePropertyValue(beanClass, propertyDescriptor);
             return this.withValue(propertyName, value);
@@ -267,7 +267,7 @@ public class BeanBuilder implements ValueGenerator {
          * {@inheritDoc}
          */
         @Override
-        public ConfigurableBeanBuildCommand<T> withGeneratedValues() {
+        public ConfigurableBeanBuildCommand<T> generateValues() {
             for (PropertyDescriptor propertyDescriptor : beanWrapper.getPropertyDescriptors()) {
                 if (propertyDescriptor.getWriteMethod() != null) {
                     Object value = beanBuilder.generatePropertyValue(beanClass, propertyDescriptor);

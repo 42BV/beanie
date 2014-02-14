@@ -21,7 +21,8 @@ public class BeanBuilderTest {
 	public void testGenerate() {
 		SimpleBean bean = (SimpleBean) beanBuilder.generate(SimpleBean.class);
 		Assert.assertNotNull(bean);
-		Assert.assertNotNull(bean.getValue());
+        
+        Assert.assertNotNull(bean.getName());
 		
 		NestedBean nestedBean = bean.getNestedBean();
 		Assert.assertNotNull(nestedBean);
@@ -52,26 +53,25 @@ public class BeanBuilderTest {
     @Test
     public void testBuildWithDefaultBuilder() {
         SimpleBean bean = beanBuilder.newBean(SimpleBean.class)
-                                        .withGeneratedValues()
-                                        .withValue("value", "success")
+                                        .generateValues()
+                                        .withValue("name", "success")
                                             .build();
         
-        Assert.assertEquals("success", bean.getValue());
+        Assert.assertEquals("success", bean.getName());
         Assert.assertNotNull(bean.getNestedBean());
         Assert.assertNotNull(bean.getNestedBeanWithConstructor());
     }
     
     @Test
-    public void testBuildWithCustomBuilder() {
-        NestedBean nestedBean = new NestedBean();
-        
+    public void testBuildWithCustomBuilder() {        
         SimpleBean bean = beanBuilder.newBeanBy(SimpleBeanBuildCommand.class)
-                                        .withValue("success")
-                                        .withNestedBean(nestedBean)
+                                        .withName("success")
+                                        .withNestedBean()
                                             .build();
         
-        Assert.assertEquals("success", bean.getValue());
-        Assert.assertEquals(nestedBean, bean.getNestedBean());
+        Assert.assertNull(bean.getShortName());
+        Assert.assertEquals("success", bean.getName());
+        Assert.assertNotNull(bean.getNestedBean());
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -80,10 +80,10 @@ public class BeanBuilderTest {
     }
 
     public interface SimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
+
+        SimpleBeanBuildCommand withName(String name);
         
-        SimpleBeanBuildCommand withValue(String value);
-        
-        SimpleBeanBuildCommand withNestedBean(NestedBean nestedBean);
+        SimpleBeanBuildCommand withNestedBean();
 
     }
 

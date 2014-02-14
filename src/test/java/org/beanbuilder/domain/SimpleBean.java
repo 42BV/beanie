@@ -2,20 +2,30 @@ package org.beanbuilder.domain;
 
 public class SimpleBean {
 
-	private String value;
-	
+    private String name;
+    
+    private String shortName;
+
 	private NestedBean nestedBean;
 	
 	private NestedBeanWithConstructor nestedBeanWithConstructor;
-	
-	public String getValue() {
-		return value;
-	}
-	
-	public void setValue(String value) {
-		this.value = value;
-	}
-	
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public String getShortName() {
+        return shortName;
+    }
+    
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
+
 	public NestedBean getNestedBean() {
 		return nestedBean;
 	}
