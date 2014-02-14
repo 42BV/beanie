@@ -7,8 +7,8 @@ import java.beans.PropertyDescriptor;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.beanbuilder.generate.ConfigurableValueGenerator;
 import org.beanbuilder.generate.ConstantValueGenerator;
+import org.beanbuilder.generate.TypeValueGenerator;
 import org.beanbuilder.generate.ValueGenerator;
 import org.beanbuilder.generate.construction.ConstructingBeanGenerator;
 import org.beanbuilder.generate.construction.ConstructorStrategy;
@@ -28,20 +28,19 @@ import org.springframework.beans.BeanWrapperImpl;
  */
 public class BeanBuilder implements ValueGenerator {
     
-    private final Map<PropertyReference, ValueGenerator> propertyValueGenerators;
+    private final Map<PropertyReference, ValueGenerator> propertyValueGenerators = new HashMap<>();
     
-    private final ConfigurableValueGenerator typeValueGenerator;
+    private final TypeValueGenerator typeValueGenerator;
     
-    private final ConstructingBeanGenerator constructingGenerator;
+    private final ConstructingBeanGenerator beanGenerator;
 
     public BeanBuilder() {
         this(new ShortestConstructorStrategy());
     }
     
     public BeanBuilder(ConstructorStrategy constructorStrategy) {
-        propertyValueGenerators = new HashMap<PropertyReference, ValueGenerator>();
-        typeValueGenerator = new ConfigurableValueGenerator(this);
-        constructingGenerator = new ConstructingBeanGenerator(constructorStrategy, typeValueGenerator);
+        beanGenerator = new ConstructingBeanGenerator(constructorStrategy, this);
+        typeValueGenerator = new TypeValueGenerator(this);
     }
 
     /**
@@ -65,6 +64,16 @@ public class BeanBuilder implements ValueGenerator {
         return (T) proxyFactory.getProxy();
     }
     
+    /**
+     * Saves the bean.
+     * 
+     * @param bean the bean to save
+     * @return the saved bean
+     */
+    public <T> T save(T bean) {
+        throw new UnsupportedOperationException("Could not save bean.");
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -160,6 +169,13 @@ public class BeanBuilder implements ValueGenerator {
          */
         T build();
         
+        /**
+         * Build and save new bean.
+         * 
+         * @return the saved bean
+         */
+        T buildAndSave();
+
     }
     
     /**
@@ -215,7 +231,7 @@ public class BeanBuilder implements ValueGenerator {
             this.beanBuilder = beanBuilder;
             this.beanClass = beanClass;
 
-            Object bean = beanBuilder.constructingGenerator.generate(beanClass);
+            Object bean = beanBuilder.beanGenerator.generate(beanClass);
             beanWrapper = new BeanWrapperImpl(bean);
         }
         
@@ -259,6 +275,15 @@ public class BeanBuilder implements ValueGenerator {
         @SuppressWarnings("unchecked")
         public T build() {
             return (T) beanWrapper.getWrappedInstance();
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public T buildAndSave() {
+            T bean = build();
+            return beanBuilder.save(bean);
         }
 
     }

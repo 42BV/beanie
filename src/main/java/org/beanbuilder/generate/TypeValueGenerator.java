@@ -14,17 +14,17 @@ import java.util.Set;
  * Generates values of any type, using the behavior registered to that value type.
  * @author Jeroen van Schagen
  */
-public final class ConfigurableValueGenerator implements ValueGenerator {
+public final class TypeValueGenerator implements ValueGenerator {
 
     private final Map<Class<?>, ValueGenerator> generators;
 
     private final ValueGenerator fallbackGenerator;
 
-    public ConfigurableValueGenerator() {
+    public TypeValueGenerator() {
         this(new NoArgEmptyBeanGenerator());
     }
 
-    public ConfigurableValueGenerator(ValueGenerator fallbackGenerator) {
+    public TypeValueGenerator(ValueGenerator fallbackGenerator) {
     	generators = new LinkedHashMap<Class<?>, ValueGenerator>();
         this.fallbackGenerator = fallbackGenerator;
 
@@ -97,7 +97,7 @@ public final class ConfigurableValueGenerator implements ValueGenerator {
      * @param generator the generation strategy
      * @return this instance
      */
-    public ConfigurableValueGenerator register(Class<?> valueType, ValueGenerator generator) {
+    public TypeValueGenerator register(Class<?> valueType, ValueGenerator generator) {
         generators.put(valueType, generator);
         return this;
     }
@@ -109,7 +109,7 @@ public final class ConfigurableValueGenerator implements ValueGenerator {
      * @param value the value to return
      * @return this instance
      */
-    public ConfigurableValueGenerator registerValue(Class<?> valueType, Object value) {
+    public TypeValueGenerator registerValue(Class<?> valueType, Object value) {
         return register(valueType, new ConstantValueGenerator(value));
     }
     

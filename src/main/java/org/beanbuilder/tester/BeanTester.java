@@ -8,7 +8,7 @@ import java.util.Set;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
-import org.beanbuilder.generate.ConfigurableValueGenerator;
+import org.beanbuilder.generate.TypeValueGenerator;
 import org.beanbuilder.generate.ValueGenerator;
 import org.beanbuilder.support.Classes;
 import org.beanbuilder.support.PropertyReference;
@@ -39,7 +39,7 @@ public class BeanTester {
     private boolean inherit = true;
 
     public BeanTester() {
-        this(new ConfigurableValueGenerator());
+        this(new TypeValueGenerator());
     }
 
     public BeanTester(ValueGenerator valueGenerator) {
