@@ -1,7 +1,5 @@
-package org.beanbuilder;
+package org.beanbuilder.tester;
 
-import org.beanbuilder.BeanTester;
-import org.beanbuilder.InconsistentGetterAndSetterException;
 import org.beanbuilder.sample.FullBean;
 import org.junit.Assert;
 import org.junit.Before;

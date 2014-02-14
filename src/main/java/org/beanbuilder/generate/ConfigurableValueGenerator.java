@@ -14,19 +14,19 @@ import java.util.Set;
  * Generates values of any type, using the behavior registered to that value type.
  * @author Jeroen van Schagen
  */
-public final class TypeValueGenerator implements ValueGenerator {
+public final class ConfigurableValueGenerator implements ValueGenerator {
 
-    private final Map<Class<?>, ValueGenerator> typeGenerators;
+    private final Map<Class<?>, ValueGenerator> generators;
 
-    private final ValueGenerator defaultGenerator;
+    private final ValueGenerator fallbackGenerator;
 
-    public TypeValueGenerator() {
+    public ConfigurableValueGenerator() {
         this(new NoArgEmptyBeanGenerator());
     }
 
-    public TypeValueGenerator(ValueGenerator defaultGenerator) {
-    	typeGenerators = new LinkedHashMap<Class<?>, ValueGenerator>();
-        this.defaultGenerator = defaultGenerator;
+    public ConfigurableValueGenerator(ValueGenerator fallbackGenerator) {
+    	generators = new LinkedHashMap<Class<?>, ValueGenerator>();
+        this.fallbackGenerator = fallbackGenerator;
 
         registerValue(short.class, 0);
         registerValue(byte.class, 0);
@@ -58,27 +58,30 @@ public final class TypeValueGenerator implements ValueGenerator {
         registerValue(Collection.class, Collections.emptyList());
         registerValue(Map.class, Collections.emptyMap());
         registerValue(Class.class, Object.class);
-        register(Object[].class, new ArrayValueGenerator());
-        register(Enum.class, new EnumValueGenerator());
+        register(Object[].class, new EmptyArrayValueGenerator());
+        register(Enum.class, new FirstEnumValueGenerator());
     }
 
 	@Override
     public Object generate(Class<?> valueType) {
 		ValueGenerator generator = getSupportedGenerator(valueType);
+        if (generator == null) {
+            throw new IllegalArgumentException("Could not generate value for '" + valueType.getName() + "'.");
+        }
         return generator.generate(valueType);
     }
 
     private ValueGenerator getSupportedGenerator(Class<?> valueType) {
-    	ValueGenerator generator = typeGenerators.get(valueType);
+    	ValueGenerator generator = generators.get(valueType);
     	if (generator == null) {
-        	generator = getFirstAssignableGenerator(valueType);
+        	generator = findFirstSupportedGenerator(valueType);
     	}
         return generator;
     }
 
-	private ValueGenerator getFirstAssignableGenerator(Class<?> valueType) {
-    	ValueGenerator generator = defaultGenerator;
-		for (Entry<Class<?>, ValueGenerator> entry : typeGenerators.entrySet()) {
+	private ValueGenerator findFirstSupportedGenerator(Class<?> valueType) {
+    	ValueGenerator generator = fallbackGenerator;
+		for (Entry<Class<?>, ValueGenerator> entry : generators.entrySet()) {
             if (entry.getKey().isAssignableFrom(valueType)) {
             	generator = entry.getValue();
             	break;
@@ -89,33 +92,36 @@ public final class TypeValueGenerator implements ValueGenerator {
 
     /**
      * Register a value generation strategy for a specific type.
+     * 
      * @param valueType the type of value
      * @param generator the generation strategy
      * @return this instance
      */
-    public TypeValueGenerator register(Class<?> valueType, ValueGenerator generator) {
-        typeGenerators.put(valueType, generator);
+    public ConfigurableValueGenerator register(Class<?> valueType, ValueGenerator generator) {
+        generators.put(valueType, generator);
         return this;
     }
 
     /**
      * Register a constant value for a specific type.
+     * 
      * @param valueType the type of value
      * @param value the value to return
      * @return this instance
      */
-    public TypeValueGenerator registerValue(Class<?> valueType, Object value) {
+    public ConfigurableValueGenerator registerValue(Class<?> valueType, Object value) {
         return register(valueType, new ConstantValueGenerator(value));
     }
     
     /**
      * Determine if the value is known in our mapping.
+     * 
      * @param valueType the type of value
      * @return if it exists
      */
     public boolean contains(Class<?> valueType) {
     	boolean found = false;
-        for (Entry<Class<?>, ValueGenerator> entry : typeGenerators.entrySet()) {
+        for (Entry<Class<?>, ValueGenerator> entry : generators.entrySet()) {
             if (entry.getKey().isAssignableFrom(valueType)) {
             	found = true;
             	break;

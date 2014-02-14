@@ -1,4 +1,4 @@
-package org.beanbuilder;
+package org.beanbuilder.tester;
 
 /**
  * Exception thrown when the getter returns a different value

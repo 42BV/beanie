@@ -1,4 +1,4 @@
-package org.beanbuilder;
+package org.beanbuilder.tester;
 
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
@@ -8,8 +8,10 @@ import java.util.Set;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
-import org.beanbuilder.generate.TypeValueGenerator;
+import org.beanbuilder.generate.ConfigurableValueGenerator;
 import org.beanbuilder.generate.ValueGenerator;
+import org.beanbuilder.support.Classes;
+import org.beanbuilder.support.PropertyReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -36,7 +38,7 @@ public class BeanTester {
     private boolean inherit = true;
 
     public BeanTester() {
-        this(new TypeValueGenerator());
+        this(new ConfigurableValueGenerator());
     }
 
     public BeanTester(ValueGenerator valueGenerator) {

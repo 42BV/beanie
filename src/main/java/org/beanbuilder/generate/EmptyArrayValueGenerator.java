@@ -2,7 +2,7 @@ package org.beanbuilder.generate;
 
 import java.lang.reflect.Array;
 
-public class ArrayValueGenerator implements ValueGenerator {
+public class EmptyArrayValueGenerator implements ValueGenerator {
 
 	@Override
 	public Object generate(Class<?> valueType) {

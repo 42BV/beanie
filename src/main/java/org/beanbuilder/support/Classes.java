@@ -1,4 +1,4 @@
-package org.beanbuilder;
+package org.beanbuilder.support;
 
 import java.util.Arrays;
 

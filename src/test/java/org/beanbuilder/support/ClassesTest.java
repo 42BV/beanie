@@ -1,6 +1,6 @@
-package org.beanbuilder;
+package org.beanbuilder.support;
 
-import org.beanbuilder.Classes;
+import org.beanbuilder.support.Classes;
 import org.junit.Assert;
 import org.junit.Test;
 

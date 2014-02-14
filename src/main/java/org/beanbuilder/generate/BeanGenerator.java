@@ -1,12 +1,10 @@
 package org.beanbuilder.generate;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.beanbuilder.PropertyReference;
-import org.springframework.beans.BeanUtils;
+import org.beanbuilder.support.PropertyReference;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
@@ -19,60 +17,40 @@ public final class BeanGenerator implements ValueGenerator {
 
 	private final Map<PropertyReference, ValueGenerator> propertyGenerators;
 	
-	private final TypeValueGenerator typeValueGenerator;
+	private final ConfigurableValueGenerator typeGenerator;
+    
+    private final ValueGenerator beanConstructor;
 	
 	public BeanGenerator() {
 		propertyGenerators = new HashMap<PropertyReference, ValueGenerator>();
-		typeValueGenerator = new TypeValueGenerator(this);
+		typeGenerator = new ConfigurableValueGenerator(this);
+        beanConstructor = new ShortestConstructorBeanGenerator(typeGenerator);
 	}
 	
 	@Override
 	public Object generate(Class<?> beanClass) {
-		Object bean;
-		if (typeValueGenerator.contains(beanClass)) {
-			// Check if a specific generator is registered for this type
-			bean = typeValueGenerator.generate(beanClass);
+		if (typeGenerator.contains(beanClass)) {
+            return typeGenerator.generate(beanClass);
 		} else {
-			bean = generateBean(beanClass);
+            return generateBean(beanClass);
 		}
-		return bean;
 	}
 
 	private Object generateBean(Class<?> beanClass) {
-		Object bean = instantiateBean(beanClass);
-        BeanWrapper beanWrapper = new BeanWrapperImpl(bean);
-        for (PropertyDescriptor propertyDescriptor : beanWrapper.getPropertyDescriptors()) {
-        	if (isGeneratableProperty(propertyDescriptor)) {
-        		Object value = generatePropertyValue(beanClass, propertyDescriptor);
-                beanWrapper.setPropertyValue(propertyDescriptor.getName(), value);
-        	}
-        }
+        Object bean = beanConstructor.generate(beanClass);
+        setProperties(bean);
 		return bean;
 	}
 
-	private Object instantiateBean(Class<?> beanClass) {
-		Constructor<?> constructor = getShortestConstructor(beanClass);
-		if (constructor != null) {
-			Class<?>[] parameterTypes = constructor.getParameterTypes();
-			Object[] arguments = new Object[parameterTypes.length];
-			for (int index = 0; index < parameterTypes.length; index++) {
-				arguments[index] = typeValueGenerator.generate(parameterTypes[index]);
-			}
-			return BeanUtils.instantiateClass(constructor, arguments);
-		} else {
-			return BeanUtils.instantiateClass(beanClass);
-		}
-	}
-	
-	private Constructor<?> getShortestConstructor(Class<?> beanClass) {
-		Constructor<?> shortest = null;
-		for (Constructor<?> constructor : beanClass.getDeclaredConstructors()) {
-			if (shortest == null || shortest.getParameterTypes().length > constructor.getParameterTypes().length) {
-				shortest = constructor;
-			}
-		}
-		return shortest;
-	}
+    private void setProperties(Object bean) {
+        BeanWrapper beanWrapper = new BeanWrapperImpl(bean);
+        for (PropertyDescriptor propertyDescriptor : beanWrapper.getPropertyDescriptors()) {
+        	if (isGeneratableProperty(propertyDescriptor)) {
+                Object value = generatePropertyValue(bean.getClass(), propertyDescriptor);
+                beanWrapper.setPropertyValue(propertyDescriptor.getName(), value);
+        	}
+        }
+    }
 
 	private boolean isGeneratableProperty(PropertyDescriptor propertyDescriptor) {
 		return propertyDescriptor.getWriteMethod() != null;
@@ -89,7 +67,7 @@ public final class BeanGenerator implements ValueGenerator {
 		if (propertyGenerators.containsKey(propertyReference)) {
 			return propertyGenerators.get(propertyReference);
 		} else {
-			return typeValueGenerator;
+			return typeGenerator;
 		}
 	}
 	
@@ -123,7 +101,7 @@ public final class BeanGenerator implements ValueGenerator {
      * @return this instance
      */
     public BeanGenerator register(Class<?> valueType, ValueGenerator generator) {
-    	typeValueGenerator.register(valueType, generator);
+    	typeGenerator.register(valueType, generator);
         return this;
     }
 

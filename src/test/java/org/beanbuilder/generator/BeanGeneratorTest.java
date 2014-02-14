@@ -33,7 +33,7 @@ public class BeanGeneratorTest {
 	}
 	
 	@Test
-	public void testRegisterProperty() {
+    public void testCustomProperty() {
 		NestedBeanWithConstructor nestedBeanWithConstructor = new NestedBeanWithConstructor("bla");
 		beanGenerator.registerValue(SimpleBean.class, "nestedBeanWithConstructor", nestedBeanWithConstructor);
 
@@ -42,7 +42,7 @@ public class BeanGeneratorTest {
 	}
 	
 	@Test
-	public void testRegisterType() {
+    public void testCustomType() {
 		SimpleBean bean = new SimpleBean();
 		beanGenerator.registerValue(SimpleBean.class, bean);
 		
