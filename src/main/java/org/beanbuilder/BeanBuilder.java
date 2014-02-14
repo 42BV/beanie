@@ -13,11 +13,14 @@ import org.beanbuilder.generate.ValueGenerator;
 import org.beanbuilder.generate.construction.ConstructingBeanGenerator;
 import org.beanbuilder.generate.construction.ConstructorStrategy;
 import org.beanbuilder.generate.construction.ShortestConstructorStrategy;
+import org.beanbuilder.save.BeanSaver;
+import org.beanbuilder.save.UnsupportedBeanSaver;
 import org.beanbuilder.support.PropertyReference;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.core.GenericTypeResolver;
 
 
 /**
@@ -33,14 +36,22 @@ public class BeanBuilder implements ValueGenerator {
     private final TypeValueGenerator typeValueGenerator;
     
     private final ConstructingBeanGenerator beanGenerator;
+    
+    private final BeanSaver beanSaver;
 
     public BeanBuilder() {
         this(new ShortestConstructorStrategy());
     }
     
     public BeanBuilder(ConstructorStrategy constructorStrategy) {
-        beanGenerator = new ConstructingBeanGenerator(constructorStrategy, this);
-        typeValueGenerator = new TypeValueGenerator(this);
+        this(new ShortestConstructorStrategy(), new UnsupportedBeanSaver());
+    }
+    
+    public BeanBuilder(ConstructorStrategy constructorStrategy, BeanSaver beanSaver) {
+        this.typeValueGenerator = new TypeValueGenerator(this);
+        
+        this.beanGenerator = new ConstructingBeanGenerator(constructorStrategy, this);
+        this.beanSaver = beanSaver;
     }
 
     /**
@@ -49,29 +60,27 @@ public class BeanBuilder implements ValueGenerator {
      * @param beanClass the type of bean to start building
      * @return the bean build command
      */
-    public <T> ConfigurableBeanBuildCommand<T> start(Class<T> beanClass) {
+    public <T> ConfigurableBeanBuildCommand<T> newBean(Class<T> beanClass) {
         return new DefaultBeanBuildCommand<T>(this, beanClass);
     }
     
+    /**
+     * Start building a new bean, using a custom builder interface.
+     * 
+     * @param beanClass the type of bean to start building
+     * @param commandType the build command interface
+     * @return the builder instance, capable of building beans
+     */
     @SuppressWarnings("unchecked")
-    public <T> T start(Class<?> beanClass, Class<T> builderClass) {
-        final ConfigurableBeanBuildCommand<?> command = start(beanClass);
+    public <T extends BeanBuildCommand<?>> T newBeanBy(Class<T> commandType) {
+        final Class<?> beanClass = GenericTypeResolver.resolveTypeArguments(commandType, BeanBuildCommand.class)[0];
+        final ConfigurableBeanBuildCommand<?> command = newBean(beanClass);
 
         ProxyFactory proxyFactory = new ProxyFactory();
         proxyFactory.setTargetSource(new SingletonTargetSource(command));
-        proxyFactory.addInterface(builderClass);
+        proxyFactory.addInterface(commandType);
         proxyFactory.addAdvisor(new CustomBeanBuilderAdvisor(command));
         return (T) proxyFactory.getProxy();
-    }
-    
-    /**
-     * Saves the bean.
-     * 
-     * @param bean the bean to save
-     * @return the saved bean
-     */
-    public <T> T save(T bean) {
-        throw new UnsupportedOperationException("Could not save bean.");
     }
 
     /**
@@ -82,7 +91,7 @@ public class BeanBuilder implements ValueGenerator {
         if (typeValueGenerator.contains(beanClass)) {
             return typeValueGenerator.generate(beanClass);
         } else {
-            return start(beanClass).withGeneratedValues().build();
+            return newBean(beanClass).withGeneratedValues().build();
         }
     }
     
@@ -283,7 +292,7 @@ public class BeanBuilder implements ValueGenerator {
         @Override
         public T buildAndSave() {
             T bean = build();
-            return beanBuilder.save(bean);
+            return beanBuilder.beanSaver.save(bean);
         }
 
     }

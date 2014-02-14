@@ -50,8 +50,8 @@ public class BeanBuilderTest {
 	}
 
     @Test
-    public void testGenerateWithDefaultBuilder() {
-        SimpleBean bean = beanBuilder.start(SimpleBean.class)
+    public void testBuildWithDefaultBuilder() {
+        SimpleBean bean = beanBuilder.newBean(SimpleBean.class)
                                         .withGeneratedValues()
                                         .withValue("value", "success")
                                             .build();
@@ -62,16 +62,21 @@ public class BeanBuilderTest {
     }
     
     @Test
-    public void testGenerateWithCustomBuilder() {
+    public void testBuildWithCustomBuilder() {
         NestedBean nestedBean = new NestedBean();
         
-        SimpleBean bean = beanBuilder.start(SimpleBean.class, SimpleBeanBuildCommand.class)
+        SimpleBean bean = beanBuilder.newBeanBy(SimpleBeanBuildCommand.class)
                                         .withValue("success")
                                         .withNestedBean(nestedBean)
                                             .build();
         
         Assert.assertEquals("success", bean.getValue());
         Assert.assertEquals(nestedBean, bean.getNestedBean());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testBuildAndSaveUnsupported() {
+        beanBuilder.newBean(SimpleBean.class).buildAndSave();
     }
 
     public interface SimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
