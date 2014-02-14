@@ -10,7 +10,7 @@ package org.beanbuilder.save;
  * @since Feb 14, 2014
  */
 public class UnsupportedBeanSaver implements BeanSaver {
-    
+
     /**
      * {@inheritDoc}
      */

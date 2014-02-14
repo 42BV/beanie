@@ -1,5 +1,7 @@
 package org.beanbuilder.support;
 
+import java.beans.PropertyDescriptor;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -8,6 +10,11 @@ public class PropertyReference {
 	private final Class<?> declaringClass;
 	
 	private final String propertyName;
+    
+    public PropertyReference(PropertyDescriptor description) {
+        this.declaringClass = description.getWriteMethod().getDeclaringClass();
+        this.propertyName = description.getName();
+    }
 
 	public PropertyReference(Class<?> declaringClass, String propertyName) {
 		this.declaringClass = declaringClass;

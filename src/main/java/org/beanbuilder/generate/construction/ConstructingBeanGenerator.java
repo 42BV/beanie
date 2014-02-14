@@ -27,6 +27,8 @@ public class ConstructingBeanGenerator implements ValueGenerator {
 
     @Override
     public Object generate(Class<?> beanClass) {
+        // TODO: What if abstract
+
         Constructor<?> constructor = constructorStrategy.getConstructor(beanClass);
         if (constructor != null) {
             Class<?>[] parameterTypes = constructor.getParameterTypes();

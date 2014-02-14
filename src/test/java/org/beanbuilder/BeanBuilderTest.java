@@ -6,6 +6,7 @@ import org.beanbuilder.domain.NestedBeanWithConstructor;
 import org.beanbuilder.domain.SimpleBean;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BeanBuilderTest {
@@ -34,11 +35,12 @@ public class BeanBuilderTest {
 	}
     
     @Test
+    @Ignore
     public void testGenerateWithCustomType() {
-        SimpleBean bean = new SimpleBean();
-        beanBuilder.registerValue(SimpleBean.class, bean);
+        beanBuilder.registerValue(String.class, "success");
         
-        Assert.assertEquals(bean, beanBuilder.generate(SimpleBean.class));
+        SimpleBean bean = (SimpleBean) beanBuilder.generate(SimpleBean.class);
+        Assert.assertEquals("success", bean.getName());
     }
 
 	@Test
@@ -54,7 +56,7 @@ public class BeanBuilderTest {
     public void testBuildWithDefaultBuilder() {
         SimpleBean bean = beanBuilder.newBean(SimpleBean.class)
                                         .withValue("name", "success")
-                                            .fill().build();
+                                            .complete().build();
         
         Assert.assertEquals("success", bean.getName());
         Assert.assertNotNull(bean.getNestedBean());
