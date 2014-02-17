@@ -94,6 +94,9 @@ public class BeanBuilder implements SavableValueGenerator {
      */
     @Override
     public Object generate(Class<?> beanClass) {
+        if (typeValueGenerator.contains(beanClass)) {
+            return typeValueGenerator.generate(beanClass);
+        }
         return newBean(beanClass).complete().build();
     }
 
@@ -102,6 +105,10 @@ public class BeanBuilder implements SavableValueGenerator {
      */
     @Override
     public Object generateAndSave(Class<?> beanClass) {
+        if (typeValueGenerator.contains(beanClass)) {
+            Object result = typeValueGenerator.generate(beanClass);
+            return beanSaver.save(result);
+        }
         return newBean(beanClass).complete().buildAndSave();
     }
 
@@ -121,12 +128,12 @@ public class BeanBuilder implements SavableValueGenerator {
             propertyGenerator = referenceValueGenerators.get(propertyReference);
         } else if (nameValueGenerators.containsKey(propertyDescriptor.getName())) {
             propertyGenerator = nameValueGenerators.get(propertyDescriptor.getName());
-        } else if (typeValueGenerator.contains(beanClass)) {
+        } else if (typeValueGenerator.contains(propertyDescriptor.getPropertyType())) {
             propertyGenerator = typeValueGenerator;
         }
         return propertyGenerator;
     }
-    
+
     /**
      * Skip a property from being generated.
      * 

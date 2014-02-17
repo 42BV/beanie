@@ -4,9 +4,10 @@ import org.beanbuilder.BeanBuilder.BeanBuildCommand;
 import org.beanbuilder.domain.NestedBean;
 import org.beanbuilder.domain.NestedBeanWithConstructor;
 import org.beanbuilder.domain.SimpleBean;
+import org.beanbuilder.domain.SomeImplementation;
+import org.beanbuilder.domain.SomeInterface;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class BeanBuilderTest {
@@ -35,7 +36,6 @@ public class BeanBuilderTest {
 	}
     
     @Test
-    @Ignore
     public void testGenerateWithCustomType() {
         beanBuilder.registerValue(String.class, "success");
         
@@ -51,6 +51,12 @@ public class BeanBuilderTest {
 		SimpleBean bean = (SimpleBean) beanBuilder.generate(SimpleBean.class);
 		Assert.assertEquals(nestedBeanWithConstructor, bean.getNestedBeanWithConstructor());
 	}
+
+    @Test
+    public void testGenerateWithSomeImplementation() {
+        SomeInterface someInterface = (SomeInterface) beanBuilder.generate(SomeInterface.class);
+        Assert.assertEquals(SomeImplementation.class, someInterface.getClass());
+    }
 
     @Test
     public void testBuildWithDefaultBuilder() {

@@ -1,5 +1,6 @@
 package org.beanbuilder.support;
 
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
@@ -13,7 +14,7 @@ public class Classes {
 		try {
 			return (Class<T>) Class.forName(className);
 		} catch (ClassNotFoundException e) {
-			throw new IllegalArgumentException("Could not load class: " + className, e);
+            throw new IllegalArgumentException("Could find class '" + className + "' on classpath.", e);
 		}
 	}
 
@@ -30,5 +31,9 @@ public class Classes {
 			return false;
 		}
 	}
+    
+    public static boolean isNotImplementation(Class<?> beanClass) {
+        return beanClass.isInterface() || Modifier.isAbstract(beanClass.getModifiers());
+    }
 
 }

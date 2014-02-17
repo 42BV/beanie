@@ -49,6 +49,8 @@ public final class CustomBeanBuilderAdvisor implements Advisor {
             final String methodName = invocation.getMethod().getName();
             if (methodName.startsWith(WITH_PREFIX)) {
                 String propertyName = StringUtils.substringAfter(methodName, WITH_PREFIX);
+                propertyName = StringUtils.uncapitalize(propertyName);
+
                 Object[] arguments = invocation.getArguments();
                 if (arguments.length == 0) {
                     return command.generateValue(propertyName);

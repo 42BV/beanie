@@ -3,10 +3,19 @@
  */
 package org.beanbuilder.generate.construction;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.Set;
 
 import org.beanbuilder.generate.ValueGenerator;
+import org.beanbuilder.support.Classes;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.core.type.filter.TypeFilter;
 
 /**
  * Generator that constructs a bean. 
@@ -27,7 +36,9 @@ public class ConstructingBeanGenerator implements ValueGenerator {
 
     @Override
     public Object generate(Class<?> beanClass) {
-        // TODO: What if abstract
+        if (Classes.isNotImplementation(beanClass)) {
+            beanClass = getSomeImplementationClass(beanClass);
+        }
 
         Constructor<?> constructor = constructorStrategy.getConstructor(beanClass);
         if (constructor != null) {
@@ -40,6 +51,32 @@ public class ConstructingBeanGenerator implements ValueGenerator {
         } else {
             return BeanUtils.instantiateClass(beanClass);
         }
+    }
+
+    private Class<?> getSomeImplementationClass(Class<?> beanClass) {
+        String implementationName = getSomeImplementationName(beanClass);
+        return Classes.forName(implementationName);
+    }
+    
+    private static String getSomeImplementationName(final Class<?> beanClass) {
+        ClassPathScanningCandidateComponentProvider implementationsProvider = new ClassPathScanningCandidateComponentProvider(false);
+        implementationsProvider.addIncludeFilter(new AssignableTypeFilter(beanClass));
+        implementationsProvider.addExcludeFilter(new IsNotConcreteFilter());
+
+        Set<BeanDefinition> implementations = implementationsProvider.findCandidateComponents(beanClass.getPackage().getName());
+        if (implementations.isEmpty()) {
+            throw new IllegalStateException("Could not find an implementation class of " + beanClass.getName() + " in (sub)package.");
+        }
+        return implementations.iterator().next().getBeanClassName();
+    }
+    
+    private static class IsNotConcreteFilter implements TypeFilter {
+        
+        @Override
+        public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
+            return !metadataReader.getClassMetadata().isConcrete();
+        }
+        
     }
 
 }
