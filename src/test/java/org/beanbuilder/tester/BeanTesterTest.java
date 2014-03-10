@@ -19,7 +19,7 @@ public class BeanTesterTest {
 	
 	@Test
 	public void testAllBeans() {		
-		int verified = beanTester.verifyBeans(this.getClass().getPackage().getName());
+        int verified = beanTester.verifyBeans(this.getClass());
 		Assert.assertTrue("Expected atleast one bean to be verified.", verified > 0);
 	}
 

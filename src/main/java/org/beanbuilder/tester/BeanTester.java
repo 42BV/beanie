@@ -51,9 +51,22 @@ public class BeanTester {
     }
 
     /**
-     * Verify the getter and setters of each bean, in the specified base package.
+     * Verify the getter and setters of each bean classes, declared in
+     * the same package, or child packages, as the specified class.
+     * 
+     * @param basePackageClass the base package class
+     * @return the number of verified beans
+     */
+    public int verifyBeans(Class<?> basePackageClass) {
+        return verifyBeans(basePackageClass.getPackage().getName());
+    }
+
+    /**
+     * Verify the getter and setters of each bean classes, declared in
+     * the specified package, or child packages.
      * 
      * @param basePackage the base package to search for beans
+     * @return the number of verified beans
      */
     public int verifyBeans(String basePackage) {
         Set<BeanDefinition> beanDefinitions = beanProvider.findCandidateComponents(basePackage);
