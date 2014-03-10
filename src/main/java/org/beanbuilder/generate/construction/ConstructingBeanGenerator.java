@@ -53,7 +53,7 @@ public class ConstructingBeanGenerator implements ValueGenerator {
         }
     }
 
-    private Class<?> getSomeImplementationClass(Class<?> beanClass) {
+    private static Class<?> getSomeImplementationClass(Class<?> beanClass) {
         String implementationName = getSomeImplementationName(beanClass);
         return Classes.forName(implementationName);
     }

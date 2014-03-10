@@ -1,14 +1,14 @@
 package org.beanbuilder.tester;
 
 import java.beans.PropertyDescriptor;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
-import org.beanbuilder.generate.TypeValueGenerator;
-import org.beanbuilder.generate.ValueGenerator;
+import org.beanbuilder.BeanBuilder;
 import org.beanbuilder.support.Classes;
 import org.beanbuilder.support.PropertyReference;
 import org.springframework.beans.BeanWrapper;
@@ -31,17 +31,17 @@ public class BeanTester {
     
     private final ClassPathScanningCandidateComponentProvider beanProvider;
 
-    private final ValueGenerator valueGenerator;
+    private final BeanBuilder beanBuilder;
     
     private boolean inherit = true;
 
     public BeanTester() {
-        this(new TypeValueGenerator());
+        this(new BeanBuilder());
     }
 
-    public BeanTester(ValueGenerator valueGenerator) {
+    public BeanTester(BeanBuilder beanBuilder) {
         this.beanProvider = new ClassPathScanningCandidateComponentProvider(false);
-        this.valueGenerator = valueGenerator;
+        this.beanBuilder = beanBuilder;
         excludeProperty(Throwable.class, "stackTrace");
     }
 
@@ -89,7 +89,7 @@ public class BeanTester {
     }
 
     private BeanWrapper newBeanWrapper(Class<?> beanClass) {
-        Object bean = valueGenerator.generate(beanClass);
+        Object bean = beanBuilder.generate(beanClass);
         return new BeanWrapperImpl(bean);
     }
 
@@ -134,7 +134,7 @@ public class BeanTester {
         }
         
         // Check with not-null value
-        Object generatedValue = valueGenerator.generate(propertyType);
+        Object generatedValue = beanBuilder.generate(propertyType);
         verifyPropertyWithValue(beanWrapper, propertyName, generatedValue);
     }
     
@@ -166,6 +166,8 @@ public class BeanTester {
         } else if (expected != null && actual != null && expected.getClass().equals(actual.getClass())) {
             if (expected.getClass().isArray()) {
                 equals = ArrayUtils.isEquals(expected, actual);
+            } else if (expected instanceof BigDecimal) {
+                equals = ((BigDecimal) expected).compareTo((BigDecimal) actual) == 0;
             } else {
                 equals = ObjectUtils.equals(expected, actual);
             }
@@ -214,6 +216,7 @@ public class BeanTester {
      */
     public BeanTester excludeProperty(Class<?> declaringClass, String propertyName) {
         excludedProperties.add(new PropertyReference(declaringClass, propertyName));
+        beanBuilder.skip(declaringClass, propertyName);
         return this;
     }
 
