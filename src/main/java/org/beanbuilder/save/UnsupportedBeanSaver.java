@@ -9,7 +9,7 @@ package org.beanbuilder.save;
  * @author jeroen
  * @since Feb 14, 2014
  */
-public class UnsupportedBeanSaver implements BeanSaver {
+public class UnsupportedBeanSaver implements ValueSaver {
 
     /**
      * {@inheritDoc}

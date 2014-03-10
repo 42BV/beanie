@@ -10,14 +10,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.beanbuilder.generate.ConstantValueGenerator;
-import org.beanbuilder.generate.SavableValueGenerator;
 import org.beanbuilder.generate.TypeValueGenerator;
 import org.beanbuilder.generate.ValueGenerator;
 import org.beanbuilder.generate.construction.ConstructingBeanGenerator;
 import org.beanbuilder.generate.construction.ConstructorStrategy;
 import org.beanbuilder.generate.construction.ShortestConstructorStrategy;
-import org.beanbuilder.save.BeanSaver;
 import org.beanbuilder.save.UnsupportedBeanSaver;
+import org.beanbuilder.save.ValueSaver;
 import org.beanbuilder.support.PropertyReference;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -32,7 +31,7 @@ import org.springframework.core.GenericTypeResolver;
  * @author Jeroen van Schagen
  * @since Feb 14, 2014
  */
-public class BeanBuilder implements SavableValueGenerator {
+public class BeanBuilder implements ValueGenerator {
     
     private final Set<PropertyReference> skippedProperties = new HashSet<>();
 
@@ -44,17 +43,17 @@ public class BeanBuilder implements SavableValueGenerator {
     
     private final ValueGenerator beanGenerator;
     
-    private final BeanSaver beanSaver;
+    private final ValueSaver beanSaver;
 
     public BeanBuilder() {
         this(new UnsupportedBeanSaver());
     }
     
-    public BeanBuilder(BeanSaver beanSaver) {
+    public BeanBuilder(ValueSaver beanSaver) {
         this(new ShortestConstructorStrategy(), beanSaver);
     }
     
-    public BeanBuilder(ConstructorStrategy constructorStrategy, BeanSaver beanSaver) {
+    public BeanBuilder(ConstructorStrategy constructorStrategy, ValueSaver beanSaver) {
         this.typeValueGenerator = new TypeValueGenerator(this);
         this.beanGenerator = new ConstructingBeanGenerator(constructorStrategy, this);
         this.beanSaver = beanSaver;
@@ -100,25 +99,9 @@ public class BeanBuilder implements SavableValueGenerator {
         return newBean(beanClass).complete().build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object generateAndSave(Class<?> beanClass) {
-        if (typeValueGenerator.contains(beanClass)) {
-            Object result = typeValueGenerator.generate(beanClass);
-            return beanSaver.save(result);
-        }
-        return newBean(beanClass).complete().buildAndSave();
-    }
-
-    private Object generatePropertyValue(Class<?> beanClass, PropertyDescriptor propertyDescriptor, boolean autoSave) {
-        ValueGenerator propertyGenerator = getPropertyGenerator(beanClass, propertyDescriptor);
-        if (autoSave && propertyGenerator instanceof SavableValueGenerator) {
-            return ((SavableValueGenerator) propertyGenerator).generateAndSave(propertyDescriptor.getPropertyType());
-        } else {
-            return propertyGenerator.generate(propertyDescriptor.getPropertyType());
-        }
+    private Object generatePropertyValue(Class<?> beanClass, PropertyDescriptor propertyDescriptor) {
+        ValueGenerator generator = getPropertyGenerator(beanClass, propertyDescriptor);
+        return generator.generate(propertyDescriptor.getPropertyType());
     }
 
     private ValueGenerator getPropertyGenerator(Class<?> beanClass, PropertyDescriptor propertyDescriptor) {
@@ -358,7 +341,10 @@ public class BeanBuilder implements SavableValueGenerator {
         private T build(boolean autoSave) {
             for (String generatedProperty : new HashSet<>(generatedProperties)) {
                 PropertyDescriptor propertyDescriptor = beanWrapper.getPropertyDescriptor(generatedProperty);
-                Object generatedValue = builder.generatePropertyValue(beanClass, propertyDescriptor, autoSave);
+                Object generatedValue = builder.generatePropertyValue(beanClass, propertyDescriptor);
+                if (autoSave) {
+                    generatedValue = builder.beanSaver.save(generatedValue);
+                }
                 withValue(generatedProperty, generatedValue);
             }
             return (T) beanWrapper.getWrappedInstance();
