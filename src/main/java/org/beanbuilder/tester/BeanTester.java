@@ -1,12 +1,9 @@
 package org.beanbuilder.tester;
 
 import java.beans.PropertyDescriptor;
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
 import org.beanbuilder.BeanBuilder;
 import org.beanbuilder.support.Classes;
@@ -29,19 +26,24 @@ public class BeanTester {
 
     private final Set<PropertyReference> excludedProperties = new HashSet<PropertyReference>();
     
-    private final ClassPathScanningCandidateComponentProvider beanProvider;
+    private final ClassPathScanningCandidateComponentProvider provider;
 
-    private final BeanBuilder beanBuilder;
+    private final BeanBuilder builder;
     
+    private final ObjectEqualizer equalizer;
+
     private boolean inherit = true;
 
     public BeanTester() {
-        this(new BeanBuilder());
+        this(new BeanBuilder(), new ObjectEqualizer());
     }
 
-    public BeanTester(BeanBuilder beanBuilder) {
-        this.beanProvider = new ClassPathScanningCandidateComponentProvider(false);
-        this.beanBuilder = beanBuilder;
+    public BeanTester(BeanBuilder builder, ObjectEqualizer equalizer) {
+        this.provider = new ClassPathScanningCandidateComponentProvider(false);
+        this.builder = builder;
+        this.equalizer = equalizer;
+        
+        // Exclude default property that have unusable getter and setters
         excludeProperty(Throwable.class, "stackTrace");
     }
 
@@ -64,7 +66,7 @@ public class BeanTester {
      * @return the number of verified beans
      */
     public int verifyBeans(String basePackage) {
-        Set<BeanDefinition> beanDefinitions = beanProvider.findCandidateComponents(basePackage);
+        Set<BeanDefinition> beanDefinitions = provider.findCandidateComponents(basePackage);
         for (BeanDefinition beanDefinition : beanDefinitions) {
             verifyBean(Classes.forName(beanDefinition.getBeanClassName()));
         }
@@ -89,7 +91,7 @@ public class BeanTester {
     }
 
     private BeanWrapper newBeanWrapper(Class<?> beanClass) {
-        Object bean = beanBuilder.generate(beanClass);
+        Object bean = builder.generate(beanClass);
         return new BeanWrapperImpl(bean);
     }
 
@@ -134,7 +136,7 @@ public class BeanTester {
         }
         
         // Check with not-null value
-        Object generatedValue = beanBuilder.generate(propertyType);
+        Object generatedValue = builder.generate(propertyType);
         verifyPropertyWithValue(beanWrapper, propertyName, generatedValue);
     }
     
@@ -150,29 +152,13 @@ public class BeanTester {
                     propertyName, beanWrapper.getWrappedClass().getName());
             throw new IllegalStateException(message, rte);
         }
-
-        if (! isEqual(value, result)) {
+        
+        if (! equalizer.isEqual(value, result)) {
             String message = String.format(
                     "Property '%s' of '%s' returned a different value than initially set (original: %s, actual: %s).",
                     propertyName, beanWrapper.getWrappedClass().getName(), value, result);
             throw new InconsistentGetterAndSetterException(message);
         }
-    }
-
-    private boolean isEqual(Object expected, Object actual) {
-        boolean equals = false;
-        if (expected == actual) {
-            equals = true;
-        } else if (expected != null && actual != null && expected.getClass().equals(actual.getClass())) {
-            if (expected.getClass().isArray()) {
-                equals = ArrayUtils.isEquals(expected, actual);
-            } else if (expected instanceof BigDecimal) {
-                equals = ((BigDecimal) expected).compareTo((BigDecimal) actual) == 0;
-            } else {
-                equals = ObjectUtils.equals(expected, actual);
-            }
-        }
-        return equals;
     }
 
     /**
@@ -182,7 +168,7 @@ public class BeanTester {
      * @return this instance for chaining
      */
     public BeanTester include(TypeFilter filter) {
-        beanProvider.addIncludeFilter(filter);
+        provider.addIncludeFilter(filter);
         return this;
     }
     
@@ -203,7 +189,7 @@ public class BeanTester {
      * @return this instance for chaining
      */
     public BeanTester exclude(TypeFilter filter) {
-        beanProvider.addExcludeFilter(filter);
+        provider.addExcludeFilter(filter);
         return this;
     }
 
@@ -216,7 +202,7 @@ public class BeanTester {
      */
     public BeanTester excludeProperty(Class<?> declaringClass, String propertyName) {
         excludedProperties.add(new PropertyReference(declaringClass, propertyName));
-        beanBuilder.skip(declaringClass, propertyName);
+        builder.skip(declaringClass, propertyName);
         return this;
     }
 
