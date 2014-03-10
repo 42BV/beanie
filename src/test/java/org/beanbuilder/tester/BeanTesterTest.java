@@ -15,6 +15,7 @@ public class BeanTesterTest {
 		beanTester.excludeProperty(FullBean.class, "unsupportedValue");
 		beanTester.excludeProperty(FullBean.class, "differentValue");
 		beanTester.excludeProperty(FullBean.class, "differentTypeValue");
+        beanTester.includeAllWithNullaryConstructor();
 	}
 	
 	@Test
@@ -25,8 +26,7 @@ public class BeanTesterTest {
 
 	@Test
 	public void testSkipInherit() {
-		beanTester.setInherit(false);
-		beanTester.verifyBean(FullBean.class);
+        beanTester.inherit(false).verifyBean(FullBean.class);
 	}
 	
 	@Test(expected = InconsistentGetterAndSetterException.class)

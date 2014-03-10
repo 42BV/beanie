@@ -1,7 +1,6 @@
 package org.beanbuilder.tester;
 
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,9 +15,6 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.type.ClassMetadata;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 
 /**
@@ -45,7 +41,6 @@ public class BeanTester {
 
     public BeanTester(ValueGenerator valueGenerator) {
         this.beanProvider = new ClassPathScanningCandidateComponentProvider(false);
-        this.beanProvider.addIncludeFilter(new HasNullaryConstructorFilter());
         this.valueGenerator = valueGenerator;
         excludeProperty(Throwable.class, "stackTrace");
     }
@@ -80,6 +75,7 @@ public class BeanTester {
      * Verify the getter and setters of the specified bean.
      * 
      * @param beanClass the bean class
+     * @throws InconsistentGetterAndSetterException whenever an inconsistency was found
      */
     public void verifyBean(Class<?> beanClass) {
         LOGGER.debug("Verifying bean: " + beanClass.getName());
@@ -91,7 +87,7 @@ public class BeanTester {
             }
         }
     }
-    
+
     private BeanWrapper newBeanWrapper(Class<?> beanClass) {
         Object bean = valueGenerator.generate(beanClass);
         return new BeanWrapperImpl(bean);
@@ -114,7 +110,7 @@ public class BeanTester {
         PropertyReference propertyReference = new PropertyReference(declaringClass, propertyName);
 		return ! excludedProperties.contains(propertyReference);
     }
-    
+
     /**
      * Verify the getter and setter of a property.
      * 
@@ -132,33 +128,33 @@ public class BeanTester {
         
         LOGGER.debug("Verifying property '" + propertyName + "' of bean: " + beanWrapper.getWrappedClass().getName());
 
-        try {
-            // Check with null value
-            if (!propertyType.isPrimitive()) {
-                checkPropertyWithValue(beanWrapper, propertyName, null);
-            }
+        // Check with null value
+        if (!propertyType.isPrimitive()) {
+            verifyPropertyWithValue(beanWrapper, propertyName, null);
+        }
+        
+        // Check with not-null value
+        Object generatedValue = valueGenerator.generate(propertyType);
+        verifyPropertyWithValue(beanWrapper, propertyName, generatedValue);
+    }
+    
+    private void verifyPropertyWithValue(BeanWrapper beanWrapper, String propertyName, Object value) {
+        Object result;
 
-            // Check with not-null value
-            Object generatedValue = valueGenerator.generate(propertyType);
-            checkPropertyWithValue(beanWrapper, propertyName, generatedValue);
-        } catch(InconsistentGetterAndSetterException igse) {
-        	throw igse;
+        try {
+            beanWrapper.setPropertyValue(propertyName, value);
+            result = beanWrapper.getPropertyValue(propertyName);
         } catch (RuntimeException rte) {
             String message = String.format(
                     "Property '%s' of '%s' has an unusable getter and/or setter.",
                     propertyName, beanWrapper.getWrappedClass().getName());
             throw new IllegalStateException(message, rte);
         }
-    }
 
-    private void checkPropertyWithValue(BeanWrapper beanWrapper, String propertyName, Object value) {
-        beanWrapper.setPropertyValue(propertyName, value);
-        Object retrievedValue = beanWrapper.getPropertyValue(propertyName);
-
-        if (! isEqual(value, retrievedValue)) {
+        if (! isEqual(value, result)) {
             String message = String.format(
                     "Property '%s' of '%s' returned a different value than initially set (original: %s, actual: %s).",
-                    propertyName, beanWrapper.getWrappedClass().getName(), value, retrievedValue);
+                    propertyName, beanWrapper.getWrappedClass().getName(), value, result);
             throw new InconsistentGetterAndSetterException(message);
         }
     }
@@ -181,18 +177,32 @@ public class BeanTester {
      * Add an inclusion filter.
      * 
      * @param filter the filter
+     * @return this instance for chaining
      */
-    public void include(TypeFilter filter) {
+    public BeanTester include(TypeFilter filter) {
         beanProvider.addIncludeFilter(filter);
+        return this;
+    }
+    
+    /**
+     * Include all beans with a nullary constructor.
+     * 
+     * @return this instance for chaining
+     */
+    public BeanTester includeAllWithNullaryConstructor() {
+        include(new HasNullaryConstructorFilter());
+        return this;
     }
 
     /**
      * Add an exclusion filter.
      * 
      * @param filter the filter
+     * @return this instance for chaining
      */
-    public void exclude(TypeFilter filter) {
+    public BeanTester exclude(TypeFilter filter) {
         beanProvider.addExcludeFilter(filter);
+        return this;
     }
 
     /**
@@ -200,31 +210,22 @@ public class BeanTester {
      * 
      * @param declaringClass the declaring class
      * @param propertyName name of the property
+     * @return this instance for chaining
      */
-    public void excludeProperty(Class<?> declaringClass, String propertyName) {
+    public BeanTester excludeProperty(Class<?> declaringClass, String propertyName) {
         excludedProperties.add(new PropertyReference(declaringClass, propertyName));
+        return this;
     }
 
     /**
      * If we should also test the parent properties.
      * 
-     * @param inherit to inherit or not
+     * @param inherit to inherit
+     * @return this instance for chaining
      */
-    public void setInherit(boolean inherit) {
+    public BeanTester inherit(boolean inherit) {
         this.inherit = inherit;
-    }
-
-    /**
-     * Only matches classes with a no argument constructor.
-     */
-    private static class HasNullaryConstructorFilter implements TypeFilter {
-
-        public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
-            ClassMetadata metadata = metadataReader.getClassMetadata();
-            Class<?> clazz = Classes.forName(metadata.getClassName());
-            return Classes.hasNullaryConstructor(clazz);
-        }
-
+        return this;
     }
 
 }

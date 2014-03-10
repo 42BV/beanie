@@ -11,5 +11,9 @@ public class InconsistentGetterAndSetterException extends RuntimeException {
 	public InconsistentGetterAndSetterException(String message) {
 		super(message);
 	}
-	
+    
+    public InconsistentGetterAndSetterException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }
