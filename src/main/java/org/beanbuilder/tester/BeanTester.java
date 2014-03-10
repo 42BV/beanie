@@ -12,7 +12,6 @@ import org.beanbuilder.generate.TypeValueGenerator;
 import org.beanbuilder.generate.ValueGenerator;
 import org.beanbuilder.support.Classes;
 import org.beanbuilder.support.PropertyReference;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -30,11 +29,13 @@ import org.springframework.core.type.filter.TypeFilter;
  */
 public class BeanTester {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private static final Logger LOGGER = Logger.getLogger(BeanTester.class);
+
+    private final Set<PropertyReference> excludedProperties = new HashSet<PropertyReference>();
+    
+    private final ClassPathScanningCandidateComponentProvider beanProvider;
 
     private final ValueGenerator valueGenerator;
-
-    private final Set<PropertyReference> propertiesToExclude = new HashSet<PropertyReference>();
     
     private boolean inherit = true;
 
@@ -43,19 +44,19 @@ public class BeanTester {
     }
 
     public BeanTester(ValueGenerator valueGenerator) {
+        this.beanProvider = new ClassPathScanningCandidateComponentProvider(false);
+        this.beanProvider.addIncludeFilter(new HasNullaryConstructorFilter());
         this.valueGenerator = valueGenerator;
         excludeProperty(Throwable.class, "stackTrace");
     }
 
     /**
-     * Verify the getter and setters of each bean, with an empty constructor, in the specified base package.
+     * Verify the getter and setters of each bean, in the specified base package.
      * 
      * @param basePackage the base package to search for beans
      */
     public int verifyBeans(String basePackage) {
-        ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
-        provider.addIncludeFilter(new HasNullaryConstructorFilter());
-        Set<BeanDefinition> beanDefinitions = provider.findCandidateComponents(basePackage);
+        Set<BeanDefinition> beanDefinitions = beanProvider.findCandidateComponents(basePackage);
         for (BeanDefinition beanDefinition : beanDefinitions) {
             verifyBean(Classes.forName(beanDefinition.getBeanClassName()));
         }
@@ -68,27 +69,26 @@ public class BeanTester {
      * @param beanClass the bean class
      */
     public void verifyBean(Class<?> beanClass) {
-        logger.debug("Verifying bean: " + beanClass.getName());
-        final BeanWrapper beanWrapper = createBeanWrapper(beanClass);
+        LOGGER.debug("Verifying bean: " + beanClass.getName());
+        final BeanWrapper beanWrapper = newBeanWrapper(beanClass);
 
         for (PropertyDescriptor propertyDescriptor : beanWrapper.getPropertyDescriptors()) {
-            if (isAllowedProperty(beanClass, propertyDescriptor)) {
+            if (isPropertyToVerify(beanClass, propertyDescriptor)) {
                 verifyProperty(beanWrapper, propertyDescriptor);
             }
         }
     }
     
-    private BeanWrapper createBeanWrapper(Class<?> beanClass) {
-        Object bean = BeanUtils.instantiateClass(beanClass);
+    private BeanWrapper newBeanWrapper(Class<?> beanClass) {
+        Object bean = valueGenerator.generate(beanClass);
         return new BeanWrapperImpl(bean);
     }
 
-    private boolean isAllowedProperty(Class<?> beanClass, PropertyDescriptor propertyDescriptor) {
+    private boolean isPropertyToVerify(Class<?> beanClass, PropertyDescriptor propertyDescriptor) {
         boolean verify = false;
-        if (isReadWriteProperty(propertyDescriptor)) {
-        	String propertyName = propertyDescriptor.getName();
+        if (propertyDescriptor.getReadMethod() != null && propertyDescriptor.getWriteMethod() != null) {
         	Class<?> declaringClass = propertyDescriptor.getWriteMethod().getDeclaringClass();
-        	verify = isDeclaredInBean(beanClass, declaringClass) && isNotExcluded(declaringClass, propertyName);
+            verify = isDeclaredInBean(beanClass, declaringClass) && isNotExcluded(declaringClass, propertyDescriptor.getName());
         }
         return verify;
     }
@@ -97,13 +97,9 @@ public class BeanTester {
 		return inherit || declaringClass.equals(beanClass);
 	}
 
-    private boolean isReadWriteProperty(PropertyDescriptor propertyDescriptor) {
-        return propertyDescriptor.getReadMethod() != null && propertyDescriptor.getWriteMethod() != null;
-    }
-    
     private boolean isNotExcluded(Class<?> declaringClass, String propertyName) {
         PropertyReference propertyReference = new PropertyReference(declaringClass, propertyName);
-		return ! propertiesToExclude.contains(propertyReference);
+		return ! excludedProperties.contains(propertyReference);
     }
     
     /**
@@ -113,7 +109,7 @@ public class BeanTester {
      * @param propertyName the property name
      */
     public void verifyProperty(Class<?> beanClass, String propertyName) {
-        final BeanWrapper beanWrapper = createBeanWrapper(beanClass);
+        BeanWrapper beanWrapper = newBeanWrapper(beanClass);
         verifyProperty(beanWrapper, beanWrapper.getPropertyDescriptor(propertyName));
     }
 
@@ -121,13 +117,15 @@ public class BeanTester {
         final String propertyName = propertyDescriptor.getName();
         final Class<?> propertyType = propertyDescriptor.getPropertyType();
         
-        logger.debug("Verifying property '" + propertyName + "' of bean: " + beanWrapper.getWrappedClass().getName());
+        LOGGER.debug("Verifying property '" + propertyName + "' of bean: " + beanWrapper.getWrappedClass().getName());
 
         try {
-            if (isNullAllowed(propertyType)) {
+            // Check with null value
+            if (!propertyType.isPrimitive()) {
                 checkPropertyWithValue(beanWrapper, propertyName, null);
             }
-            
+
+            // Check with not-null value
             Object generatedValue = valueGenerator.generate(propertyType);
             checkPropertyWithValue(beanWrapper, propertyName, generatedValue);
         } catch(InconsistentGetterAndSetterException igse) {
@@ -139,10 +137,6 @@ public class BeanTester {
             throw new IllegalStateException(message, rte);
         }
     }
-
-	private boolean isNullAllowed(final Class<?> propertyType) {
-		return ! propertyType.isPrimitive();
-	}
 
     private void checkPropertyWithValue(BeanWrapper beanWrapper, String propertyName, Object value) {
         beanWrapper.setPropertyValue(propertyName, value);
@@ -171,15 +165,38 @@ public class BeanTester {
     }
 
     /**
+     * Add an inclusion filter.
+     * 
+     * @param filter the filter
+     */
+    public void include(TypeFilter filter) {
+        beanProvider.addIncludeFilter(filter);
+    }
+
+    /**
+     * Add an exclusion filter.
+     * 
+     * @param filter the filter
+     */
+    public void exclude(TypeFilter filter) {
+        beanProvider.addExcludeFilter(filter);
+    }
+
+    /**
      * Excludes a property from testing.
      * 
      * @param declaringClass the declaring class
      * @param propertyName name of the property
      */
     public void excludeProperty(Class<?> declaringClass, String propertyName) {
-        propertiesToExclude.add(new PropertyReference(declaringClass, propertyName));
+        excludedProperties.add(new PropertyReference(declaringClass, propertyName));
     }
 
+    /**
+     * If we should also test the parent properties.
+     * 
+     * @param inherit to inherit or not
+     */
     public void setInherit(boolean inherit) {
         this.inherit = inherit;
     }

@@ -3,7 +3,6 @@ package org.beanbuilder.support;
 import java.beans.PropertyDescriptor;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 
 public class PropertyReference {
 
@@ -31,7 +30,7 @@ public class PropertyReference {
 	
 	@Override
 	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
+        return declaringClass.hashCode() * propertyName.hashCode();
 	}
 	
 	@Override

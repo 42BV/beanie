@@ -27,9 +27,15 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>3.2.3.RELEASE</version>
+            <version>4.0.2.RELEASE</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+		    <groupId>org.hibernate.javax.persistence</groupId>
+		    <artifactId>hibernate-jpa-2.0-api</artifactId>
+		    <version>1.0.1.Final</version>
+		    <scope>provided</scope>
+		</dependency>
 		<dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>

@@ -6,7 +6,7 @@ package org.beanbuilder.save;
 /**
  * Saves the generated beans.
  *
- * @author jeroen
+ * @author Jeroen van Schagen
  * @since Feb 14, 2014
  */
 public interface ValueSaver {
