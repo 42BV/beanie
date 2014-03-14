@@ -210,7 +210,7 @@ public class BeanBuilder implements ValueGenerator {
     public interface BeanBuildCommand<T> {
         
         /**
-         * Generate all untouched values in our bean.
+         * Generate all untouched, changable, values in our bean.
          * 
          * @return this instance, for chaining
          */
