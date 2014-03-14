@@ -1,6 +1,8 @@
 package org.beanbuilder.domain;
 
 public class SimpleBean {
+    
+    private Long id;
 
     private String name;
     
@@ -10,6 +12,10 @@ public class SimpleBean {
 	
 	private NestedBeanWithConstructor nestedBeanWithConstructor;
     
+    public Long getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }

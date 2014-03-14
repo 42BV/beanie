@@ -61,9 +61,11 @@ public class BeanBuilderTest {
     @Test
     public void testBuildWithDefaultBuilder() {
         SimpleBean bean = beanBuilder.newBean(SimpleBean.class)
+                                        .withValue("id", 42L)
                                         .withValue("name", "success")
                                             .complete().build();
         
+        Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertEquals("success", bean.getName());
         Assert.assertNotNull(bean.getNestedBean());
         Assert.assertNotNull(bean.getNestedBeanWithConstructor());
@@ -72,10 +74,12 @@ public class BeanBuilderTest {
     @Test
     public void testBuildWithCustomBuilder() {        
         SimpleBean bean = beanBuilder.newBeanBy(SimpleBeanBuildCommand.class)
+                                        .withId(42L)
                                         .withName("success")
                                         .withNestedBean()
                                             .build();
         
+        Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertNull(bean.getShortName());
         Assert.assertEquals("success", bean.getName());
         Assert.assertNotNull(bean.getNestedBean());
@@ -87,6 +91,8 @@ public class BeanBuilderTest {
     }
 
     public interface SimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
+
+        SimpleBeanBuildCommand withId(Long id);
 
         SimpleBeanBuildCommand withName(String name);
         

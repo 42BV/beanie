@@ -3,10 +3,12 @@
  */
 package org.beanbuilder;
 
+import static org.apache.commons.lang.StringUtils.substringAfter;
+import static org.apache.commons.lang.StringUtils.uncapitalize;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.lang.StringUtils;
 import org.beanbuilder.BeanBuilder.ConfigurableBeanBuildCommand;
 import org.springframework.aop.Advisor;
 
@@ -48,12 +50,12 @@ public final class CustomBeanBuilderAdvisor implements Advisor {
         public Object invoke(MethodInvocation invocation) throws Throwable {
             final String methodName = invocation.getMethod().getName();
             if (methodName.startsWith(WITH_PREFIX)) {
-                String propertyName = StringUtils.substringAfter(methodName, WITH_PREFIX);
-                propertyName = StringUtils.uncapitalize(propertyName);
+                String propertyName = substringAfter(methodName, WITH_PREFIX);
+                propertyName = uncapitalize(propertyName);
 
                 Object[] arguments = invocation.getArguments();
                 if (arguments.length == 0) {
-                    return command.generateValue(propertyName);
+                    return command.withGeneratedValue(propertyName);
                 } else {
                     return command.withValue(propertyName, arguments[0]);
                 }

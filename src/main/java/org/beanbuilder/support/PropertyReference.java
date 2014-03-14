@@ -11,7 +11,11 @@ public class PropertyReference {
 	private final String propertyName;
     
     public PropertyReference(PropertyDescriptor description) {
-        this.declaringClass = description.getWriteMethod().getDeclaringClass();
+        if (description.getWriteMethod() != null) {
+            this.declaringClass = description.getWriteMethod().getDeclaringClass();
+        } else {
+            this.declaringClass = description.getReadMethod().getDeclaringClass();
+        }
         this.propertyName = description.getName();
     }
 
