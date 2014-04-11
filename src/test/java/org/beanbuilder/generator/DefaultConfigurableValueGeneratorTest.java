@@ -3,7 +3,7 @@
  */
 package org.beanbuilder.generator;
 
-import org.beanbuilder.generate.DefaultConfigurableValueGenerator;
+import org.beanbuilder.generator.DefaultConfigurableValueGenerator;
 import org.junit.Test;
 
 public class DefaultConfigurableValueGeneratorTest {

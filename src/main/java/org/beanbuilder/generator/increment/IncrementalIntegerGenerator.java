@@ -1,7 +1,7 @@
 /*
  * (C) 2013 42 bv (www.42.nl). All rights reserved.
  */
-package org.beanbuilder.generate.increment;
+package org.beanbuilder.generator.increment;
 
 /**
  * Generates a larger integer value during each invocation.

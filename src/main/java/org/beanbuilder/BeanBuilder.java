@@ -9,13 +9,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.beanbuilder.generate.ConfigurableValueGenerator;
-import org.beanbuilder.generate.ConstantValueGenerator;
-import org.beanbuilder.generate.DefaultConfigurableValueGenerator;
-import org.beanbuilder.generate.ValueGenerator;
-import org.beanbuilder.generate.constructor.ConstructingBeanGenerator;
-import org.beanbuilder.generate.constructor.ConstructorStrategy;
-import org.beanbuilder.generate.constructor.ShortestConstructorStrategy;
+import org.beanbuilder.generator.ConfigurableValueGenerator;
+import org.beanbuilder.generator.ConstantValueGenerator;
+import org.beanbuilder.generator.DefaultConfigurableValueGenerator;
+import org.beanbuilder.generator.ValueGenerator;
+import org.beanbuilder.generator.constructor.ConstructingBeanGenerator;
+import org.beanbuilder.generator.constructor.ConstructorStrategy;
+import org.beanbuilder.generator.constructor.ShortestConstructorStrategy;
 import org.beanbuilder.save.UnsupportedBeanSaver;
 import org.beanbuilder.save.ValueSaver;
 import org.beanbuilder.support.PropertyReference;
@@ -250,6 +250,15 @@ public class BeanBuilder implements ValueGenerator {
         ConfigurableBeanBuildCommand<T> withGeneratedValue(String propertyName);
         
         /**
+         * Generate a value in our to be generated bean.
+         * 
+         * @param propertyName the property name
+         * @param generator the value generator
+         * @return this instance, for chaining
+         */
+        ConfigurableBeanBuildCommand<T> withGeneratedValue(String propertyName, ValueGenerator generator);
+        
+        /**
          * Declare a value in our to be generated bean.
          * 
          * @param propertyName the property name
@@ -303,6 +312,13 @@ public class BeanBuilder implements ValueGenerator {
             touchedProperties.add(propertyName);
             generatedProperties.remove(propertyName);
             return this;
+        }
+
+        @Override
+        public ConfigurableBeanBuildCommand<T> withGeneratedValue(String propertyName, ValueGenerator generator) {
+            PropertyDescriptor propertyDescriptor = beanWrapper.getPropertyDescriptor(propertyName);
+            Object value = generator.generate(propertyDescriptor.getPropertyType());
+            return this.withValue(propertyName, value);
         }
 
         /**

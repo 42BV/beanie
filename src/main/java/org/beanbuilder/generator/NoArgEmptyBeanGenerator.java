@@ -1,4 +1,4 @@
-package org.beanbuilder.generate;
+package org.beanbuilder.generator;
 
 import org.beanbuilder.support.Classes;
 import org.springframework.beans.BeanUtils;

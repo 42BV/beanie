@@ -3,7 +3,7 @@
  */
 package org.beanbuilder.generator;
 
-import org.beanbuilder.generate.SequentialArrayValueGenerator;
+import org.beanbuilder.generator.SequentialArrayValueGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 

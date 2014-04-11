@@ -1,9 +1,9 @@
 /*
  * (C) 2013 42 bv (www.42.nl). All rights reserved.
  */
-package org.beanbuilder.generate.random;
+package org.beanbuilder.generator.random;
 
-import org.beanbuilder.generate.ValueGenerator;
+import org.beanbuilder.generator.ValueGenerator;
 
 
 /**

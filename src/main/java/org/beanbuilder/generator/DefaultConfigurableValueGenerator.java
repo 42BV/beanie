@@ -1,7 +1,7 @@
 /*
  * (C) 2013 42 bv (www.42.nl). All rights reserved.
  */
-package org.beanbuilder.generate;
+package org.beanbuilder.generator;
 
 import java.math.BigDecimal;
 import java.util.Calendar;

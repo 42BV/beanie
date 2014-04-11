@@ -1,13 +1,13 @@
 /*
  * (C) 2013 42 bv (www.42.nl). All rights reserved.
  */
-package org.beanbuilder.generate.constructor;
+package org.beanbuilder.generator.constructor;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Set;
 
-import org.beanbuilder.generate.ValueGenerator;
+import org.beanbuilder.generator.ValueGenerator;
 import org.beanbuilder.support.Classes;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinition;

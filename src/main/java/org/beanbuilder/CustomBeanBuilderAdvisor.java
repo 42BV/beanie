@@ -10,6 +10,7 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.beanbuilder.BeanBuilder.ConfigurableBeanBuildCommand;
+import org.beanbuilder.generator.ValueGenerator;
 import org.springframework.aop.Advisor;
 
 /**
@@ -57,7 +58,12 @@ public final class CustomBeanBuilderAdvisor implements Advisor {
                 if (arguments.length == 0) {
                     return command.withGeneratedValue(propertyName);
                 } else {
-                    return command.withValue(propertyName, arguments[0]);
+                    Object value = arguments[0];
+                    if (value instanceof ValueGenerator) {
+                        return command.withGeneratedValue(propertyName, (ValueGenerator) value);
+                    } else {
+                        return command.withValue(propertyName, value);
+                    }
                 }
             } else {
                 return invocation.proceed();

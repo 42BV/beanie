@@ -6,6 +6,8 @@ import org.beanbuilder.domain.NestedBeanWithConstructor;
 import org.beanbuilder.domain.SimpleBean;
 import org.beanbuilder.domain.SomeImplementation;
 import org.beanbuilder.domain.SomeInterface;
+import org.beanbuilder.generator.ConstantValueGenerator;
+import org.beanbuilder.generator.ValueGenerator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +64,7 @@ public class BeanBuilderTest {
     public void testBuildWithDefaultBuilder() {
         SimpleBean bean = beanBuilder.newBean(SimpleBean.class)
                                         .withValue("id", 42L)
-                                        .withValue("name", "success")
+                                        .withGeneratedValue("name", new ConstantValueGenerator("success"))
                                             .complete().build();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
@@ -75,7 +77,7 @@ public class BeanBuilderTest {
     public void testBuildWithCustomBuilder() {        
         SimpleBean bean = beanBuilder.newBeanBy(SimpleBeanBuildCommand.class)
                                         .withId(42L)
-                                        .withName("success")
+                                        .withName(new ConstantValueGenerator("success"))
                                         .withNestedBean()
                                             .build();
         
@@ -96,6 +98,8 @@ public class BeanBuilderTest {
 
         SimpleBeanBuildCommand withName(String name);
         
+        SimpleBeanBuildCommand withName(ValueGenerator generator);
+
         SimpleBeanBuildCommand withNestedBean();
 
     }

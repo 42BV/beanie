@@ -1,4 +1,4 @@
-package org.beanbuilder.generate;
+package org.beanbuilder.generator;
 
 import java.lang.reflect.Array;
 
