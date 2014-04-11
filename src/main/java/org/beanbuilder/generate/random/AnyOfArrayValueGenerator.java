@@ -12,11 +12,11 @@ import org.beanbuilder.generate.ValueGenerator;
  * @author Sander Benschip
  * @since Feb 14, 2014
  */
-public class RandomAnyOfGenerator extends RandomSupport implements ValueGenerator {
+public class AnyOfArrayValueGenerator extends RandomSupport implements ValueGenerator {
     
     private final Object[] values;
     
-    public RandomAnyOfGenerator(Object[] values) {
+    public AnyOfArrayValueGenerator(Object... values) {
         this.values = values;
     }
     

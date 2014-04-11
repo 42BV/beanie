@@ -9,12 +9,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.beanbuilder.generate.ConfigurableValueGenerator;
 import org.beanbuilder.generate.ConstantValueGenerator;
-import org.beanbuilder.generate.TypeValueGenerator;
+import org.beanbuilder.generate.DefaultConfigurableValueGenerator;
 import org.beanbuilder.generate.ValueGenerator;
-import org.beanbuilder.generate.construction.ConstructingBeanGenerator;
-import org.beanbuilder.generate.construction.ConstructorStrategy;
-import org.beanbuilder.generate.construction.ShortestConstructorStrategy;
+import org.beanbuilder.generate.constructor.ConstructingBeanGenerator;
+import org.beanbuilder.generate.constructor.ConstructorStrategy;
+import org.beanbuilder.generate.constructor.ShortestConstructorStrategy;
 import org.beanbuilder.save.UnsupportedBeanSaver;
 import org.beanbuilder.save.ValueSaver;
 import org.beanbuilder.support.PropertyReference;
@@ -40,7 +41,7 @@ public class BeanBuilder implements ValueGenerator {
     
     private final Map<String, ValueGenerator> nameValueGenerators = new HashMap<>();
 
-    private final TypeValueGenerator typeValueGenerator;
+    private final ConfigurableValueGenerator typeValueGenerator;
     
     private final ValueGenerator beanGenerator;
     
@@ -55,7 +56,7 @@ public class BeanBuilder implements ValueGenerator {
     }
     
     public BeanBuilder(ConstructorStrategy constructorStrategy, ValueSaver beanSaver) {
-        this.typeValueGenerator = new TypeValueGenerator(this);
+        this.typeValueGenerator = new DefaultConfigurableValueGenerator(this);
         this.beanGenerator = new ConstructingBeanGenerator(constructorStrategy, this);
         this.beanSaver = beanSaver;
     }

@@ -1,7 +1,7 @@
 /*
  * (C) 2013 42 bv (www.42.nl). All rights reserved.
  */
-package org.beanbuilder.generate.construction;
+package org.beanbuilder.generate.constructor;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
