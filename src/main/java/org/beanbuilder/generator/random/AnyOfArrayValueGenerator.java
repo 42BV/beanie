@@ -16,7 +16,7 @@ public class AnyOfArrayValueGenerator extends RandomSupport implements ValueGene
     
     private final Object[] values;
     
-    public AnyOfArrayValueGenerator(Object... values) {
+    public AnyOfArrayValueGenerator(Object[] values) {
         this.values = values;
     }
     

@@ -16,11 +16,11 @@ public class SequentialArrayValueGenerator implements ValueGenerator {
     private boolean resetWhenFinished = false;
 
     private int index = 0;
-
-    public SequentialArrayValueGenerator(Object... values) {
+    
+    public SequentialArrayValueGenerator(Object[] values) {
         this.values = values;
     }
-    
+
     public SequentialArrayValueGenerator resetWhenFinished() {
         resetWhenFinished = true;
         return this;

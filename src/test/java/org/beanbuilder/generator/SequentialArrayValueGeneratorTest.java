@@ -3,7 +3,6 @@
  */
 package org.beanbuilder.generator;
 
-import org.beanbuilder.generator.SequentialArrayValueGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,7 +16,7 @@ public class SequentialArrayValueGeneratorTest {
     
     @Test
     public void testSequence() {
-        SequentialArrayValueGenerator generator = new SequentialArrayValueGenerator(1, 2, 3);
+        SequentialArrayValueGenerator generator = new SequentialArrayValueGenerator(new Integer[] { 1, 2, 3 });
         Assert.assertEquals(1, generator.generate(null));
         Assert.assertEquals(2, generator.generate(null));
         Assert.assertEquals(3, generator.generate(null));
@@ -26,7 +25,7 @@ public class SequentialArrayValueGeneratorTest {
     
     @Test
     public void testSequenceWithReset() {
-        SequentialArrayValueGenerator generator = new SequentialArrayValueGenerator(1, 2, 3).resetWhenFinished();
+        SequentialArrayValueGenerator generator = new SequentialArrayValueGenerator(new Integer[] { 1, 2, 3 }).resetWhenFinished();
         Assert.assertEquals(1, generator.generate(null));
         Assert.assertEquals(2, generator.generate(null));
         Assert.assertEquals(3, generator.generate(null));
