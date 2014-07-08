@@ -9,27 +9,27 @@ package org.beanbuilder.generator;
  * @author Jeroen van Schagen
  * @since Apr 11, 2014
  */
-public class SequentialArrayValueGenerator implements ValueGenerator {
+public class SequentialValueGenerator implements ValueGenerator {
     
     private final Object[] values;
     
-    private boolean resetWhenFinished = false;
+    private boolean repeatable = false;
 
     private int index = 0;
     
-    public SequentialArrayValueGenerator(Object[] values) {
+    public SequentialValueGenerator(Object[] values) {
         this.values = values;
     }
 
-    public SequentialArrayValueGenerator resetWhenFinished() {
-        resetWhenFinished = true;
+    public SequentialValueGenerator repeatable() {
+        repeatable = true;
         return this;
     }
 
     @Override
     public Object generate(Class<?> valueType) {
         if (index >= values.length) {
-            if (resetWhenFinished) {
+            if (repeatable) {
                 reset();
             } else {
                 return null;

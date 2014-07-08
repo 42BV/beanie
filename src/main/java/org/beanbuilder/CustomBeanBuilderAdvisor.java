@@ -51,22 +51,30 @@ public final class CustomBeanBuilderAdvisor implements Advisor {
         public Object invoke(MethodInvocation invocation) throws Throwable {
             final String methodName = invocation.getMethod().getName();
             if (methodName.startsWith(WITH_PREFIX)) {
-                String propertyName = substringAfter(methodName, WITH_PREFIX);
-                propertyName = uncapitalize(propertyName);
-
+                String propertyName = getPropertyName(methodName);
                 Object[] arguments = invocation.getArguments();
+
                 if (arguments.length == 0) {
                     return command.withGeneratedValue(propertyName);
                 } else {
-                    Object value = arguments[0];
-                    if (value instanceof ValueGenerator) {
-                        return command.withGeneratedValue(propertyName, (ValueGenerator) value);
-                    } else {
-                        return command.withValue(propertyName, value);
-                    }
+                    return withArgument(propertyName, arguments);
                 }
             } else {
                 return invocation.proceed();
+            }
+        }
+
+        private String getPropertyName(final String methodName) {
+            String propertyName = substringAfter(methodName, WITH_PREFIX);
+            return uncapitalize(propertyName);
+        }
+
+        private Object withArgument(String propertyName, Object[] arguments) {
+            Object value = arguments[0];
+            if (value instanceof ValueGenerator) {
+                return command.withGeneratedValue(propertyName, (ValueGenerator) value);
+            } else {
+                return command.withValue(propertyName, value);
             }
         }
 

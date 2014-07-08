@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 
+ * Default value generator, registers a generator for all common types.
  *
  * @author Jeroen van Schagen
  * @since Apr 11, 2014

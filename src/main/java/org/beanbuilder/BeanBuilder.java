@@ -17,7 +17,7 @@ import org.beanbuilder.generator.constructor.ConstructingBeanGenerator;
 import org.beanbuilder.generator.constructor.ConstructorStrategy;
 import org.beanbuilder.generator.constructor.ShortestConstructorStrategy;
 import org.beanbuilder.save.UnsupportedBeanSaver;
-import org.beanbuilder.save.ValueSaver;
+import org.beanbuilder.save.BeanSaver;
 import org.beanbuilder.support.PropertyReference;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -45,17 +45,17 @@ public class BeanBuilder implements ValueGenerator {
     
     private final ValueGenerator beanGenerator;
     
-    private final ValueSaver beanSaver;
+    private final BeanSaver beanSaver;
 
     public BeanBuilder() {
         this(new UnsupportedBeanSaver());
     }
     
-    public BeanBuilder(ValueSaver beanSaver) {
+    public BeanBuilder(BeanSaver beanSaver) {
         this(new ShortestConstructorStrategy(), beanSaver);
     }
     
-    public BeanBuilder(ConstructorStrategy constructorStrategy, ValueSaver beanSaver) {
+    public BeanBuilder(ConstructorStrategy constructorStrategy, BeanSaver beanSaver) {
         this.typeValueGenerator = new DefaultConfigurableValueGenerator(this);
         this.beanGenerator = new ConstructingBeanGenerator(constructorStrategy, this);
         this.beanSaver = beanSaver;

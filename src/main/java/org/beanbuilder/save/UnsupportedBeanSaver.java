@@ -9,14 +9,14 @@ package org.beanbuilder.save;
  * @author jeroen
  * @since Feb 14, 2014
  */
-public class UnsupportedBeanSaver implements ValueSaver {
+public class UnsupportedBeanSaver implements BeanSaver {
 
     /**
      * {@inheritDoc}
      */
     @Override
     public <T> T save(T bean) {
-        throw new UnsupportedOperationException("Could not save bean.");
+        throw new UnsupportedOperationException("Saving bean is not supported.");
     }
     
 }

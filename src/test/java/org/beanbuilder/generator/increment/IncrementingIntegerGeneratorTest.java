@@ -3,7 +3,7 @@
  */
 package org.beanbuilder.generator.increment;
 
-import org.beanbuilder.generator.increment.IncrementalIntegerGenerator;
+import org.beanbuilder.generator.increment.IncrementingIntegerGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,11 +13,11 @@ import org.junit.Test;
  * @author Jeroen van Schagen
  * @since Apr 11, 2014
  */
-public class IncrementalIntegerGeneratorTest {
+public class IncrementingIntegerGeneratorTest {
     
     @Test
     public void testSequence() {
-        IncrementalIntegerGenerator generator = new IncrementalIntegerGenerator();
+        IncrementingIntegerGenerator generator = new IncrementingIntegerGenerator();
         Assert.assertEquals(1, generator.generate(null));
         Assert.assertEquals(2, generator.generate(null));
         Assert.assertEquals(3, generator.generate(null));

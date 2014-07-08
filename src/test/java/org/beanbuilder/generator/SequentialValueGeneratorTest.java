@@ -12,11 +12,11 @@ import org.junit.Test;
  * @author Jeroen van Schagen
  * @since Apr 11, 2014
  */
-public class SequentialArrayValueGeneratorTest {
+public class SequentialValueGeneratorTest {
     
     @Test
     public void testSequence() {
-        SequentialArrayValueGenerator generator = new SequentialArrayValueGenerator(new Integer[] { 1, 2, 3 });
+        SequentialValueGenerator generator = new SequentialValueGenerator(new Integer[] { 1, 2, 3 });
         Assert.assertEquals(1, generator.generate(null));
         Assert.assertEquals(2, generator.generate(null));
         Assert.assertEquals(3, generator.generate(null));
@@ -24,8 +24,8 @@ public class SequentialArrayValueGeneratorTest {
     }
     
     @Test
-    public void testSequenceWithReset() {
-        SequentialArrayValueGenerator generator = new SequentialArrayValueGenerator(new Integer[] { 1, 2, 3 }).resetWhenFinished();
+    public void testSequenceRepeat() {
+        SequentialValueGenerator generator = new SequentialValueGenerator(new Integer[] { 1, 2, 3 }).repeatable();
         Assert.assertEquals(1, generator.generate(null));
         Assert.assertEquals(2, generator.generate(null));
         Assert.assertEquals(3, generator.generate(null));

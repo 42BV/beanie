@@ -15,11 +15,11 @@ import org.springframework.core.annotation.AnnotationUtils;
  * @author Jeroen van Schagen
  * @since Mar 10, 2014
  */
-public class JpaEntitySaver implements ValueSaver {
+public class JpaBeanSaver implements BeanSaver {
     
     private final EntityManager entityManager;
     
-    public JpaEntitySaver(EntityManager entityManager) {
+    public JpaBeanSaver(EntityManager entityManager) {
         super();
         this.entityManager = entityManager;
     }

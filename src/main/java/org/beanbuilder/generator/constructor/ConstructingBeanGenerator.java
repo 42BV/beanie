@@ -36,7 +36,7 @@ public class ConstructingBeanGenerator implements ValueGenerator {
 
     @Override
     public Object generate(Class<?> beanClass) {
-        if (Classes.isNotImplementation(beanClass)) {
+        if (Classes.isNotConcrete(beanClass)) {
             beanClass = getSomeImplementationClass(beanClass);
         }
 

@@ -26,9 +26,8 @@ public class ConfigurableValueGenerator implements ValueGenerator {
         if (generator == null) {
             if (fallbackGenerator == null) {
                 throw new IllegalArgumentException("Could not generate value for '" + valueType.getName() + "'.");
-            } else {
-                generator = fallbackGenerator;
             }
+            generator = fallbackGenerator;
         }
         return generator.generate(valueType);
     }

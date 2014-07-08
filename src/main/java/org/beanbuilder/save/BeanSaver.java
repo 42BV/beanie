@@ -9,7 +9,7 @@ package org.beanbuilder.save;
  * @author Jeroen van Schagen
  * @since Feb 14, 2014
  */
-public interface ValueSaver {
+public interface BeanSaver {
     
     <T> T save(T value);
 
