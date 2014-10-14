@@ -51,7 +51,7 @@ public class BeanBuilderTest {
 		NestedBeanWithConstructor nestedBeanWithConstructor = new NestedBeanWithConstructor("bla");
 		builder.registerValue(SimpleBean.class, "nestedBeanWithConstructor", nestedBeanWithConstructor);
 
-		SimpleBean bean = (SimpleBean) builder.generate(SimpleBean.class);
+        SimpleBean bean = builder.generateSafely(SimpleBean.class);
 		Assert.assertEquals(nestedBeanWithConstructor, bean.getNestedBeanWithConstructor());
 	}
 
