@@ -12,10 +12,7 @@ import java.lang.reflect.Constructor;
  * @since Feb 14, 2014
  */
 public class ShortestConstructorStrategy implements ConstructorStrategy {
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public Constructor<?> getConstructor(Class<?> beanClass) {
         Constructor<?> shortest = null;

@@ -3,7 +3,7 @@ package org.beanbuilder.generator;
 import org.beanbuilder.support.Classes;
 import org.springframework.beans.BeanUtils;
 
-public class NoArgEmptyBeanGenerator implements ValueGenerator {
+public class NoArgBeanGenerator implements ValueGenerator {
 	
 	@Override
 	public Object generate(Class<?> valueType) {

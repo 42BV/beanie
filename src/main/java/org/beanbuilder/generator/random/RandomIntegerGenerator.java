@@ -24,7 +24,7 @@ public class RandomIntegerGenerator extends RandomSupport implements ValueGenera
     }
     
     @Override
-    public Integer generate(Class<?> valueType) {
+    public Integer generate(Class<?> type) {
         return minimum + randomInt(maximum - minimum);
     }
 

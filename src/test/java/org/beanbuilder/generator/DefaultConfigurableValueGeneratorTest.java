@@ -3,14 +3,14 @@
  */
 package org.beanbuilder.generator;
 
-import org.beanbuilder.generator.DefaultConfigurableValueGenerator;
+import org.beanbuilder.generator.DefaultValueGenerator;
 import org.junit.Test;
 
 public class DefaultConfigurableValueGeneratorTest {
     
     @Test(expected = IllegalArgumentException.class)
     public void testUnknownType() {
-        new DefaultConfigurableValueGenerator(null).generate(Test.class);
+        new DefaultValueGenerator(null).generate(Test.class);
     }
 
 }

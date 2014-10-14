@@ -9,15 +9,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.beanbuilder.generator.BeanGenerator;
 import org.beanbuilder.generator.ConfigurableValueGenerator;
 import org.beanbuilder.generator.ConstantValueGenerator;
-import org.beanbuilder.generator.DefaultConfigurableValueGenerator;
+import org.beanbuilder.generator.DefaultValueGenerator;
 import org.beanbuilder.generator.ValueGenerator;
-import org.beanbuilder.generator.constructor.ConstructingBeanGenerator;
 import org.beanbuilder.generator.constructor.ConstructorStrategy;
 import org.beanbuilder.generator.constructor.ShortestConstructorStrategy;
-import org.beanbuilder.save.UnsupportedBeanSaver;
 import org.beanbuilder.save.BeanSaver;
+import org.beanbuilder.save.UnsupportedBeanSaver;
 import org.beanbuilder.support.PropertyReference;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -37,15 +37,15 @@ public class BeanBuilder implements ValueGenerator {
     
     private final Set<PropertyReference> skippedProperties = new HashSet<>();
 
-    private final Map<PropertyReference, ValueGenerator> referenceValueGenerators = new HashMap<>();
+    private final Map<PropertyReference, ValueGenerator> referenceGenerators = new HashMap<>();
     
-    private final Map<String, ValueGenerator> nameValueGenerators = new HashMap<>();
+    private final Map<String, ValueGenerator> nameGenerators = new HashMap<>();
 
-    private final ConfigurableValueGenerator typeValueGenerator;
+    private final ConfigurableValueGenerator typeGenerator;
     
-    private final ValueGenerator beanGenerator;
+    private final ValueGenerator generator;
     
-    private final BeanSaver beanSaver;
+    private final BeanSaver saver;
 
     public BeanBuilder() {
         this(new UnsupportedBeanSaver());
@@ -55,10 +55,10 @@ public class BeanBuilder implements ValueGenerator {
         this(new ShortestConstructorStrategy(), beanSaver);
     }
     
-    public BeanBuilder(ConstructorStrategy constructorStrategy, BeanSaver beanSaver) {
-        this.typeValueGenerator = new DefaultConfigurableValueGenerator(this);
-        this.beanGenerator = new ConstructingBeanGenerator(constructorStrategy, this);
-        this.beanSaver = beanSaver;
+    public BeanBuilder(ConstructorStrategy constructorStrategy, BeanSaver saver) {
+        this.typeGenerator = new DefaultValueGenerator(this);
+        this.generator = new BeanGenerator(constructorStrategy, this);
+        this.saver = saver;
     }
 
     /**
@@ -67,21 +67,21 @@ public class BeanBuilder implements ValueGenerator {
      * @param beanClass the type of bean to start building
      * @return the bean build command
      */
-    public <T> ConfigurableBeanBuildCommand<T> newBean(Class<T> beanClass) {
+    public <T> ConfigurableBuildCommand<T> newBean(Class<T> beanClass) {
         return new DefaultBeanBuildCommand<T>(this, beanClass);
     }
     
     /**
      * Start building a new bean, using a custom builder interface.
      * 
-     * @param beanClass the type of bean to start building
+     * @param type the type of bean to start building
      * @param commandType the build command interface
      * @return the builder instance, capable of building beans
      */
     @SuppressWarnings("unchecked")
-    public <T extends BeanBuildCommand<?>> T newBeanBy(Class<T> commandType) {
-        final Class<?> beanClass = GenericTypeResolver.resolveTypeArguments(commandType, BeanBuildCommand.class)[0];
-        final ConfigurableBeanBuildCommand<?> command = newBean(beanClass);
+    public <T extends BuildCommand<?>> T newBeanBy(Class<T> commandType) {
+        final Class<?> beanClass = GenericTypeResolver.resolveTypeArguments(commandType, BuildCommand.class)[0];
+        final ConfigurableBuildCommand<?> command = newBean(beanClass);
 
         ProxyFactory proxyFactory = new ProxyFactory();
         proxyFactory.setTargetSource(new SingletonTargetSource(command));
@@ -95,29 +95,28 @@ public class BeanBuilder implements ValueGenerator {
      */
     @Override
     public Object generate(Class<?> beanClass) {
-        if (typeValueGenerator.contains(beanClass)) {
-            return typeValueGenerator.generate(beanClass);
+        if (typeGenerator.contains(beanClass)) {
+            return typeGenerator.generate(beanClass);
         }
-
         return newBean(beanClass).complete().build();
     }
 
-    private Object generatePropertyValue(Class<?> beanClass, PropertyDescriptor propertyDescriptor) {
-        ValueGenerator generator = getPropertyGenerator(beanClass, propertyDescriptor);
-        return generator.generate(propertyDescriptor.getPropertyType());
+    private Object generateValue(Class<?> beanClass, PropertyDescriptor descriptor) {
+        ValueGenerator generator = getGenerator(beanClass, descriptor);
+        return generator.generate(descriptor.getPropertyType());
     }
 
-    private ValueGenerator getPropertyGenerator(Class<?> beanClass, PropertyDescriptor propertyDescriptor) {
-        ValueGenerator propertyGenerator = this;
-        PropertyReference propertyReference = new PropertyReference(beanClass, propertyDescriptor.getName());
-        if (referenceValueGenerators.containsKey(propertyReference)) {
-            propertyGenerator = referenceValueGenerators.get(propertyReference);
-        } else if (nameValueGenerators.containsKey(propertyDescriptor.getName())) {
-            propertyGenerator = nameValueGenerators.get(propertyDescriptor.getName());
-        } else if (typeValueGenerator.contains(propertyDescriptor.getPropertyType())) {
-            propertyGenerator = typeValueGenerator;
+    private ValueGenerator getGenerator(Class<?> beanClass, PropertyDescriptor descriptor) {
+        ValueGenerator generator = this;
+        PropertyReference reference = new PropertyReference(beanClass, descriptor.getName());
+        if (referenceGenerators.containsKey(reference)) {
+            generator = referenceGenerators.get(reference);
+        } else if (nameGenerators.containsKey(descriptor.getName())) {
+            generator = nameGenerators.get(descriptor.getName());
+        } else if (typeGenerator.contains(descriptor.getPropertyType())) {
+            generator = typeGenerator;
         }
-        return propertyGenerator;
+        return generator;
     }
 
     /**
@@ -141,7 +140,7 @@ public class BeanBuilder implements ValueGenerator {
      * @return this instance
      */
     public BeanBuilder register(Class<?> declaringClass, String propertyName, ValueGenerator generator) {
-        referenceValueGenerators.put(new PropertyReference(declaringClass, propertyName), generator);
+        referenceGenerators.put(new PropertyReference(declaringClass, propertyName), generator);
         return this;
     }
     
@@ -165,7 +164,7 @@ public class BeanBuilder implements ValueGenerator {
      * @return this instance
      */
     public BeanBuilder register(String propertyName, ValueGenerator generator) {
-        nameValueGenerators.put(propertyName, generator);
+        nameGenerators.put(propertyName, generator);
         return this;
     }
     
@@ -188,7 +187,7 @@ public class BeanBuilder implements ValueGenerator {
      * @return this instance
      */
     public BeanBuilder register(Class<?> valueType, ValueGenerator generator) {
-        typeValueGenerator.register(valueType, generator);
+        typeGenerator.register(valueType, generator);
         return this;
     }
     
@@ -208,14 +207,14 @@ public class BeanBuilder implements ValueGenerator {
      * @author Jeroen van Schagen
      * @since Feb 14, 2014
      */
-    public interface BeanBuildCommand<T> {
+    public interface BuildCommand<T> {
         
         /**
          * Generate all untouched, changable, values in our bean.
          * 
          * @return this instance, for chaining
          */
-        BeanBuildCommand<T> complete();
+        BuildCommand<T> complete();
         
         /**
          * Build the new bean.
@@ -239,7 +238,7 @@ public class BeanBuilder implements ValueGenerator {
      * @author Jeroen van Schagen
      * @since Feb 14, 2014
      */
-    public interface ConfigurableBeanBuildCommand<T> extends BeanBuildCommand<T> {
+    public interface ConfigurableBuildCommand<T> extends BuildCommand<T> {
         
         /**
          * Generate a value in our to be generated bean.
@@ -247,7 +246,7 @@ public class BeanBuilder implements ValueGenerator {
          * @param propertyName the property name
          * @return this instance, for chaining
          */
-        ConfigurableBeanBuildCommand<T> withGeneratedValue(String propertyName);
+        ConfigurableBuildCommand<T> withGeneratedValue(String propertyName);
         
         /**
          * Generate a value in our to be generated bean.
@@ -256,7 +255,7 @@ public class BeanBuilder implements ValueGenerator {
          * @param generator the value generator
          * @return this instance, for chaining
          */
-        ConfigurableBeanBuildCommand<T> withGeneratedValue(String propertyName, ValueGenerator generator);
+        ConfigurableBuildCommand<T> withGeneratedValue(String propertyName, ValueGenerator generator);
         
         /**
          * Declare a value in our to be generated bean.
@@ -265,7 +264,7 @@ public class BeanBuilder implements ValueGenerator {
          * @param value the property value
          * @return this instance, for chaining
          */
-        ConfigurableBeanBuildCommand<T> withValue(String propertyName, Object value);
+        ConfigurableBuildCommand<T> withValue(String propertyName, Object value);
 
     }
 
@@ -275,38 +274,38 @@ public class BeanBuilder implements ValueGenerator {
      * @author Jeroen van Schagen
      * @since Feb 14, 2014
      */
-    private static class DefaultBeanBuildCommand<T> implements ConfigurableBeanBuildCommand<T> {
-        
-        private final BeanBuilder beanBuilder;
+    private static class DefaultBeanBuildCommand<T> implements ConfigurableBuildCommand<T> {
 
         private final Set<String> touchedProperties = new HashSet<>();
         
         private final Set<String> generatedProperties = new HashSet<>();
         
-        private final Class<T> beanClass;
+        private final BeanBuilder builder;
 
-        private final BeanWrapper beanWrapper;
+        private final Class<T> type;
 
-        private final DirectFieldAccessor fieldAccessor;
+        private final BeanWrapper wrapper;
 
-        public DefaultBeanBuildCommand(BeanBuilder beanBuilder, Class<T> beanClass) {
-            this.beanBuilder = beanBuilder;
-            this.beanClass = beanClass;
+        private final DirectFieldAccessor fields;
 
-            Object bean = beanBuilder.beanGenerator.generate(beanClass);
-            beanWrapper = new BeanWrapperImpl(bean);
-            fieldAccessor = new DirectFieldAccessor(bean);
+        public DefaultBeanBuildCommand(BeanBuilder builder, Class<T> type) {
+            this.builder = builder;
+            this.type = type;
+
+            Object bean = builder.generator.generate(type);
+            wrapper = new BeanWrapperImpl(bean);
+            fields = new DirectFieldAccessor(bean);
         }
         
         /**
          * {@inheritDoc}
          */
         @Override
-        public ConfigurableBeanBuildCommand<T> withValue(String propertyName, Object value) {
-            if (beanWrapper.isWritableProperty(propertyName)) {
-                beanWrapper.setPropertyValue(propertyName, value);
+        public ConfigurableBuildCommand<T> withValue(String propertyName, Object value) {
+            if (wrapper.isWritableProperty(propertyName)) {
+                wrapper.setPropertyValue(propertyName, value);
             } else {
-                fieldAccessor.setPropertyValue(propertyName, value);
+                fields.setPropertyValue(propertyName, value);
             }
 
             touchedProperties.add(propertyName);
@@ -315,8 +314,8 @@ public class BeanBuilder implements ValueGenerator {
         }
 
         @Override
-        public ConfigurableBeanBuildCommand<T> withGeneratedValue(String propertyName, ValueGenerator generator) {
-            PropertyDescriptor propertyDescriptor = beanWrapper.getPropertyDescriptor(propertyName);
+        public ConfigurableBuildCommand<T> withGeneratedValue(String propertyName, ValueGenerator generator) {
+            PropertyDescriptor propertyDescriptor = wrapper.getPropertyDescriptor(propertyName);
             Object value = generator.generate(propertyDescriptor.getPropertyType());
             return this.withValue(propertyName, value);
         }
@@ -325,7 +324,7 @@ public class BeanBuilder implements ValueGenerator {
          * {@inheritDoc}
          */
         @Override
-        public ConfigurableBeanBuildCommand<T> withGeneratedValue(String propertyName) {
+        public ConfigurableBuildCommand<T> withGeneratedValue(String propertyName) {
             touchedProperties.add(propertyName);
             generatedProperties.add(propertyName);
             return this;
@@ -335,11 +334,11 @@ public class BeanBuilder implements ValueGenerator {
          * {@inheritDoc}
          */
         @Override
-        public ConfigurableBeanBuildCommand<T> complete() {
-            for (PropertyDescriptor propertyDescriptor : beanWrapper.getPropertyDescriptors()) {
+        public ConfigurableBuildCommand<T> complete() {
+            for (PropertyDescriptor propertyDescriptor : wrapper.getPropertyDescriptors()) {
                 String propertyName = propertyDescriptor.getName();
-                if (beanWrapper.isWritableProperty(propertyName) && ! touchedProperties.contains(propertyName)) {
-                    if (! beanBuilder.skippedProperties.contains(new PropertyReference(propertyDescriptor))) {
+                if (wrapper.isWritableProperty(propertyName) && ! touchedProperties.contains(propertyName)) {
+                    if (! builder.skippedProperties.contains(new PropertyReference(propertyDescriptor))) {
                         withGeneratedValue(propertyName);
                     }
                 }
@@ -361,20 +360,20 @@ public class BeanBuilder implements ValueGenerator {
         @Override
         public T buildAndSave() {
             T bean = build(true);
-            return beanBuilder.beanSaver.save(bean);
+            return builder.saver.save(bean);
         }
         
         @SuppressWarnings("unchecked")
         private T build(boolean autoSave) {
-            for (String generatedProperty : new HashSet<>(generatedProperties)) {
-                PropertyDescriptor propertyDescriptor = beanWrapper.getPropertyDescriptor(generatedProperty);
-                Object generatedValue = beanBuilder.generatePropertyValue(beanClass, propertyDescriptor);
+            for (String name : new HashSet<>(generatedProperties)) {
+                PropertyDescriptor descriptor = wrapper.getPropertyDescriptor(name);
+                Object value = builder.generateValue(type, descriptor);
                 if (autoSave) {
-                    generatedValue = beanBuilder.beanSaver.save(generatedValue);
+                    value = builder.saver.save(value);
                 }
-                withValue(generatedProperty, generatedValue);
+                withValue(name, value);
             }
-            return (T) beanWrapper.getWrappedInstance();
+            return (T) wrapper.getWrappedInstance();
         }
 
     }

@@ -3,6 +3,7 @@
  */
 package org.beanbuilder.generator;
 
+
 /**
  * Returns the values in sequence.
  *

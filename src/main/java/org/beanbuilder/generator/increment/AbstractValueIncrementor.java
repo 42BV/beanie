@@ -11,16 +11,16 @@ import org.beanbuilder.generator.ValueGenerator;
  * @author Jeroen van Schagen
  * @since Apr 11, 2014
  */
-public abstract class IncrementingValueGenerator<T> implements ValueGenerator {
+public abstract class AbstractValueIncrementor<T> implements ValueGenerator {
     
     private T current;
     
-    public IncrementingValueGenerator(T initial) {
+    public AbstractValueIncrementor(T initial) {
         this.current = initial;
     }
     
     @Override
-    public Object generate(Class<?> valueType) {
+    public Object generate(Class<?> type) {
         T result = current;
         current = increment(current);
         return result;

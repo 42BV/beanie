@@ -9,13 +9,13 @@ package org.beanbuilder.generator.increment;
  * @author Jeroen van Schagen
  * @since Apr 11, 2014
  */
-public class IncrementingIntegerGenerator extends IncrementingValueGenerator<Integer> {
+public class IntegerValueIncrementor extends AbstractValueIncrementor<Integer> {
 
-    public IncrementingIntegerGenerator() {
+    public IntegerValueIncrementor() {
         this(Integer.valueOf(1));
     }
 
-    public IncrementingIntegerGenerator(Integer initial) {
+    public IntegerValueIncrementor(Integer initial) {
         super(initial);
     }
     

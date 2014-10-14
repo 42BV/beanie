@@ -30,7 +30,7 @@ public class RandomStringGenerator extends RandomSupport implements ValueGenerat
     }
     
     @Override
-    public Object generate(Class<?> valueType) {
+    public Object generate(Class<?> type) {
         int length = lengthGenerator.generate(null);
         return randomString(length);
     }

@@ -10,9 +10,9 @@ public interface ValueGenerator {
     /**
      * Generate a new value of the specified type.
      * 
-     * @param valueType the type of value
+     * @param type the type of value
      * @return the generation value
      */
-    Object generate(Class<?> valueType);
+    Object generate(Class<?> type);
 	
 }

@@ -3,6 +3,7 @@
  */
 package org.beanbuilder.generator.random;
 
+import java.math.BigDecimal;
 import java.util.Random;
 
 /**
@@ -17,6 +18,38 @@ abstract class RandomSupport {
     
     public int randomInt(int n) {
         return RANDOM.nextInt(n);
+    }
+    
+    public Boolean randomBoolean(double d) {
+        return randomDouble() >= d ? Boolean.FALSE : Boolean.TRUE;
+    }
+    
+    public int randomInt(int minimum, int maximum) {
+        return minimum + randomInt(maximum - minimum);
+    }
+    
+    public long randomLong(int maximum) {
+        return randomLong(1, maximum);
+    }
+    
+    public long randomLong(int minimum, int maximum) {
+        return minimum + randomInt(maximum - minimum);
+    }
+    
+    public double randomDouble() {
+        return RANDOM.nextDouble();
+    }
+    
+    public double randomDouble(double maximum) {
+        return maximum * randomDouble();
+    }
+
+    public BigDecimal randomBigDecimal() {
+        return randomBigDecimal(1);
+    }
+    
+    public BigDecimal randomBigDecimal(double maximum) {
+        return BigDecimal.valueOf(randomDouble(maximum));
     }
 
 }

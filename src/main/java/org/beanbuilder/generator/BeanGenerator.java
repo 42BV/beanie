@@ -1,13 +1,13 @@
 /*
  * (C) 2013 42 bv (www.42.nl). All rights reserved.
  */
-package org.beanbuilder.generator.constructor;
+package org.beanbuilder.generator;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Set;
 
-import org.beanbuilder.generator.ValueGenerator;
+import org.beanbuilder.generator.constructor.ConstructorStrategy;
 import org.beanbuilder.support.Classes;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -23,19 +23,23 @@ import org.springframework.core.type.filter.TypeFilter;
  * @author jeroen
  * @since Feb 14, 2014
  */
-public class ConstructingBeanGenerator implements ValueGenerator {
+public class BeanGenerator implements ValueGenerator {
     
     private final ConstructorStrategy constructorStrategy;
 
-    private final ValueGenerator argumentsGenerator;
+    private final ValueGenerator generator;
 
-    public ConstructingBeanGenerator(ConstructorStrategy constructorStrategy, ValueGenerator argumentsGenerator) {
+    public BeanGenerator(ConstructorStrategy constructorStrategy, ValueGenerator generator) {
         this.constructorStrategy = constructorStrategy;
-        this.argumentsGenerator = argumentsGenerator;
+        this.generator = generator;
     }
 
     @Override
     public Object generate(Class<?> beanClass) {
+        return instantiate(beanClass);
+    }
+
+    private Object instantiate(Class<?> beanClass) {
         if (Classes.isNotConcrete(beanClass)) {
             beanClass = getSomeImplementationClass(beanClass);
         }
@@ -45,7 +49,7 @@ public class ConstructingBeanGenerator implements ValueGenerator {
             Class<?>[] parameterTypes = constructor.getParameterTypes();
             Object[] arguments = new Object[parameterTypes.length];
             for (int index = 0; index < parameterTypes.length; index++) {
-                arguments[index] = argumentsGenerator.generate(parameterTypes[index]);
+                arguments[index] = generator.generate(parameterTypes[index]);
             }
             return BeanUtils.instantiateClass(constructor, arguments);
         } else {

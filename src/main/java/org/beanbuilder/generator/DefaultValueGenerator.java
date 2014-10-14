@@ -17,14 +17,14 @@ import java.util.Set;
  * @author Jeroen van Schagen
  * @since Apr 11, 2014
  */
-public class DefaultConfigurableValueGenerator extends ConfigurableValueGenerator {
+public class DefaultValueGenerator extends ConfigurableValueGenerator {
     
-    public DefaultConfigurableValueGenerator() {
-        this(new NoArgEmptyBeanGenerator());
+    public DefaultValueGenerator() {
+        this(new NoArgBeanGenerator());
     }
     
-    public DefaultConfigurableValueGenerator(ValueGenerator fallbackGenerator) {
-        super(fallbackGenerator);
+    public DefaultValueGenerator(ValueGenerator fallback) {
+        super(fallback);
         registerDefaultGenerators();
     }
 
@@ -43,6 +43,8 @@ public class DefaultConfigurableValueGenerator extends ConfigurableValueGenerato
         registerValue(boolean.class, false);
         registerValue(String.class, "value");
         registerValue(BigDecimal.class, new BigDecimal("0.0"));
+        registerValue(java.time.LocalDate.class, java.time.LocalDate.now());
+        registerValue(java.time.LocalDateTime.class, java.time.LocalDateTime.now());
         registerValue(java.util.Date.class, new java.util.Date());
         registerValue(java.sql.Date.class, new java.sql.Date(System.currentTimeMillis()));
         registerValue(Calendar.class, Calendar.getInstance());

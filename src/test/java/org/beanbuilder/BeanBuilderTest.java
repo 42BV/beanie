@@ -1,6 +1,6 @@
 package org.beanbuilder;
 
-import org.beanbuilder.BeanBuilder.BeanBuildCommand;
+import org.beanbuilder.BeanBuilder.BuildCommand;
 import org.beanbuilder.domain.NestedBean;
 import org.beanbuilder.domain.NestedBeanWithConstructor;
 import org.beanbuilder.domain.SimpleBean;
@@ -92,7 +92,7 @@ public class BeanBuilderTest {
         beanBuilder.newBean(SimpleBean.class).buildAndSave();
     }
 
-    public interface SimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
+    public interface SimpleBeanBuildCommand extends BuildCommand<SimpleBean> {
 
         SimpleBeanBuildCommand withId(Long id);
 

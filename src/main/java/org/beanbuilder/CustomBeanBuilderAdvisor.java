@@ -9,7 +9,7 @@ import static org.apache.commons.lang.StringUtils.uncapitalize;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.beanbuilder.BeanBuilder.ConfigurableBeanBuildCommand;
+import org.beanbuilder.BeanBuilder.ConfigurableBuildCommand;
 import org.beanbuilder.generator.ValueGenerator;
 import org.springframework.aop.Advisor;
 
@@ -29,9 +29,9 @@ public final class CustomBeanBuilderAdvisor implements Advisor {
     
     private static final String WITH_PREFIX = "with";
 
-    private final ConfigurableBeanBuildCommand<?> command;
+    private final ConfigurableBuildCommand<?> command;
     
-    CustomBeanBuilderAdvisor(ConfigurableBeanBuildCommand<?> command) {
+    CustomBeanBuilderAdvisor(ConfigurableBuildCommand<?> command) {
         this.command = command;
     }
 

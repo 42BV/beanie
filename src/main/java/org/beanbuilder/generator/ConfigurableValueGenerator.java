@@ -13,37 +13,37 @@ public class ConfigurableValueGenerator implements ValueGenerator {
 
     private final Map<Class<?>, ValueGenerator> generators;
 
-    private final ValueGenerator fallbackGenerator;
+    private final ValueGenerator fallback;
 
-    public ConfigurableValueGenerator(ValueGenerator fallbackGenerator) {
+    public ConfigurableValueGenerator(ValueGenerator fallback) {
     	generators = new LinkedHashMap<Class<?>, ValueGenerator>();
-        this.fallbackGenerator = fallbackGenerator;
+        this.fallback = fallback;
     }
 
 	@Override
-    public Object generate(Class<?> valueType) {
-		ValueGenerator generator = getSupportedGenerator(valueType);
+    public Object generate(Class<?> type) {
+		ValueGenerator generator = getSupportedGenerator(type);
         if (generator == null) {
-            if (fallbackGenerator == null) {
-                throw new IllegalArgumentException("Could not generate value for '" + valueType.getName() + "'.");
+            if (fallback == null) {
+                throw new IllegalArgumentException("Could not generate value for '" + type.getName() + "'.");
             }
-            generator = fallbackGenerator;
+            generator = fallback;
         }
-        return generator.generate(valueType);
+        return generator.generate(type);
     }
 
-    private ValueGenerator getSupportedGenerator(Class<?> valueType) {
-    	ValueGenerator generator = generators.get(valueType);
+    private ValueGenerator getSupportedGenerator(Class<?> type) {
+    	ValueGenerator generator = generators.get(type);
     	if (generator == null) {
-        	generator = findFirstAssignableGenerator(valueType);
+        	generator = findFirstAssignableGenerator(type);
     	}
         return generator;
     }
 
-	private ValueGenerator findFirstAssignableGenerator(Class<?> valueType) {
+	private ValueGenerator findFirstAssignableGenerator(Class<?> type) {
         ValueGenerator generator = null;
 		for (Entry<Class<?>, ValueGenerator> entry : generators.entrySet()) {
-            if (entry.getKey().isAssignableFrom(valueType)) {
+            if (entry.getKey().isAssignableFrom(type)) {
             	generator = entry.getValue();
             	break;
             }
@@ -54,34 +54,34 @@ public class ConfigurableValueGenerator implements ValueGenerator {
     /**
      * Register a value generation strategy for a specific type.
      * 
-     * @param valueType the type of value
+     * @param type the type of value
      * @param generator the generation strategy
      * @return this instance
      */
-    public ConfigurableValueGenerator register(Class<?> valueType, ValueGenerator generator) {
-        generators.put(valueType, generator);
+    public ConfigurableValueGenerator register(Class<?> type, ValueGenerator generator) {
+        generators.put(type, generator);
         return this;
     }
 
     /**
      * Register a constant value for a specific type.
      * 
-     * @param valueType the type of value
+     * @param type the type of value
      * @param value the value to return
      * @return this instance
      */
-    public ConfigurableValueGenerator registerValue(Class<?> valueType, Object value) {
-        return register(valueType, new ConstantValueGenerator(value));
+    public ConfigurableValueGenerator registerValue(Class<?> type, Object value) {
+        return register(type, new ConstantValueGenerator(value));
     }
     
     /**
      * Determine if the value is known in our mapping.
      * 
-     * @param valueType the type of value
+     * @param type the type of value
      * @return if it exists
      */
-    public boolean contains(Class<?> valueType) {
-        return getSupportedGenerator(valueType) != null;
+    public boolean contains(Class<?> type) {
+        return getSupportedGenerator(type) != null;
     }
 
 }
