@@ -3,6 +3,6 @@
  */
 package org.beanbuilder.domain;
 
-public class SomeImplementation extends SomeAbstract {
+public abstract class SomeAbstract implements SomeInterface {
     
 }

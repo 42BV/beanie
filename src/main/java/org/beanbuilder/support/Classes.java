@@ -1,7 +1,6 @@
 package org.beanbuilder.support;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 public class Classes {
@@ -28,9 +27,5 @@ public class Classes {
         }
         return false;
 	}
-    
-    public static boolean isNotConcrete(Class<?> beanClass) {
-        return beanClass.isInterface() || Modifier.isAbstract(beanClass.getModifiers());
-    }
 
 }

@@ -4,6 +4,7 @@ import org.beanbuilder.BeanBuilder.BuildCommand;
 import org.beanbuilder.domain.NestedBean;
 import org.beanbuilder.domain.NestedBeanWithConstructor;
 import org.beanbuilder.domain.SimpleBean;
+import org.beanbuilder.domain.SomeAbstract;
 import org.beanbuilder.domain.SomeImplementation;
 import org.beanbuilder.domain.SomeInterface;
 import org.beanbuilder.generator.ConstantValueGenerator;
@@ -56,9 +57,15 @@ public class BeanBuilderTest {
 	}
 
     @Test
-    public void testGenerateWithSomeImplementation() {
+    public void testGenerateWithProxy() {
         SomeInterface someInterface = builder.generateSafely(SomeInterface.class);
-        Assert.assertEquals(SomeImplementation.class, someInterface.getClass());
+        Assert.assertNotNull(someInterface);
+    }
+    
+    @Test
+    public void testGenerateWithFirstImplementation() {
+        SomeAbstract someAbstract = builder.generateSafely(SomeAbstract.class);
+        Assert.assertEquals(SomeImplementation.class, someAbstract.getClass());
     }
 
     @Test

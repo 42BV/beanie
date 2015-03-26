@@ -3,6 +3,7 @@ package org.beanbuilder.tester;
 import java.beans.PropertyDescriptor;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.beanbuilder.BeanBuilder;
@@ -14,6 +15,8 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 
 /**
@@ -30,19 +33,23 @@ public class BeanTester {
     
     private final ClassPathScanningCandidateComponentProvider provider;
 
-    private final BeanBuilder builder;
+    private final BeanBuilder beanBuilder;
     
     private final ObjectEqualizer equalizer;
 
     private boolean inherit = true;
 
     public BeanTester() {
-        this(new BeanBuilder(), new SimpleObjectEqualizer());
+        this(new BeanBuilder());
+    }
+    
+    public BeanTester(BeanBuilder beanBuilder) {
+        this(beanBuilder, new SimpleObjectEqualizer());
     }
 
-    public BeanTester(BeanBuilder builder, ObjectEqualizer equalizer) {
+    public BeanTester(BeanBuilder beanBuilder, ObjectEqualizer equalizer) {
         this.provider = new ClassPathScanningCandidateComponentProvider(false);
-        this.builder = builder;
+        this.beanBuilder = beanBuilder;
         this.equalizer = equalizer;
         
         // Exclude default property that have unusable getter and setters
@@ -83,8 +90,16 @@ public class BeanTester {
      */
     public void verifyBean(Class<?> beanClass) {
         LOGGER.debug("Verifying bean: " + beanClass.getName());
-        final BeanWrapper beanWrapper = newBeanWrapper(beanClass);
 
+        try {
+            final BeanWrapper beanWrapper = newBeanWrapper(beanClass);
+            verifyAllProperties(beanClass, beanWrapper);
+        } catch (RuntimeException rte) {
+            throw new AssertionError("Could not verify bean: " + beanClass.getSimpleName(), rte);
+        }
+    }
+
+    private void verifyAllProperties(final Class<?> beanClass, final BeanWrapper beanWrapper) {
         for (PropertyDescriptor propertyDescriptor : beanWrapper.getPropertyDescriptors()) {
             if (isPropertyToVerify(beanClass, propertyDescriptor)) {
                 verifyProperty(beanWrapper, propertyDescriptor);
@@ -93,7 +108,7 @@ public class BeanTester {
     }
 
     private BeanWrapper newBeanWrapper(Class<?> beanClass) {
-        Object bean = builder.generate(beanClass);
+        Object bean = beanBuilder.generate(beanClass);
         return new BeanWrapperImpl(bean);
     }
 
@@ -112,7 +127,7 @@ public class BeanTester {
 
     private boolean isNotExcluded(Class<?> declaringClass, String propertyName) {
         PropertyReference propertyReference = new PropertyReference(declaringClass, propertyName);
-		return ! excludedProperties.contains(propertyReference);
+        return !excludedProperties.contains(propertyReference);
     }
 
     /**
@@ -138,7 +153,7 @@ public class BeanTester {
         }
         
         // Check with not-null value
-        Object generatedValue = builder.generate(propertyType);
+        Object generatedValue = beanBuilder.generate(propertyType);
         verifyPropertyWithValue(beanWrapper, propertyName, generatedValue);
     }
     
@@ -155,7 +170,7 @@ public class BeanTester {
             throw new IllegalStateException(message, rte);
         }
         
-        if (! equalizer.isEqual(value, result)) {
+        if (!equalizer.isEqual(value, result)) {
             String message = String.format(
                     "Property '%s' of '%s' returned a different value than initially set (original: %s, actual: %s).",
                     propertyName, beanWrapper.getWrappedClass().getName(), value, result);
@@ -194,6 +209,26 @@ public class BeanTester {
         provider.addExcludeFilter(filter);
         return this;
     }
+    
+    /**
+     * Excludes a pattern from testing.
+     * 
+     * @param pattern the pattern
+     * @return this instance for chaining
+     */
+    public BeanTester exclude(String pattern) {
+        return exclude(new RegexPatternTypeFilter(Pattern.compile(pattern)));
+    }
+    
+    /**
+     * Excludes a class from testing.
+     * 
+     * @param beanClass the bean class
+     * @return this instance for chaining
+     */
+    public BeanTester exclude(Class<?> beanClass) {
+        return exclude(new AssignableTypeFilter(beanClass));
+    }
 
     /**
      * Excludes a property from testing.
@@ -204,7 +239,7 @@ public class BeanTester {
      */
     public BeanTester excludeProperty(Class<?> declaringClass, String propertyName) {
         excludedProperties.add(new PropertyReference(declaringClass, propertyName));
-        builder.skip(declaringClass, propertyName);
+        beanBuilder.skip(declaringClass, propertyName);
         return this;
     }
 

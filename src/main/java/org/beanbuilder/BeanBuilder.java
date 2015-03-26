@@ -4,6 +4,7 @@
 package org.beanbuilder;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -145,7 +146,11 @@ public class BeanBuilder implements ValueGenerator {
 
     private Object generateValue(Class<?> beanClass, PropertyDescriptor descriptor) {
         ValueGenerator generator = getGenerator(beanClass, descriptor);
-        return generator.generate(descriptor.getPropertyType());
+        try {
+            return generator.generate(descriptor.getPropertyType());
+        } catch (RuntimeException rte) {
+            throw new IllegalStateException("Could not generate property '" + descriptor.getName() + "' for: " + beanClass.getName(), rte);
+        }
     }
 
     private ValueGenerator getGenerator(Class<?> beanClass, PropertyDescriptor descriptor) {
@@ -466,10 +471,13 @@ public class BeanBuilder implements ValueGenerator {
         
         @SuppressWarnings("unchecked")
         private T finishBean(boolean autoSave) {
-            for (String propertyName : new HashSet<>(propertiesToGenerate)) {
-                generateAndSetProperty(propertyName, autoSave);
+            T bean = (T) beanWrapper.getWrappedInstance();
+            if (!(bean instanceof Proxy)) {
+                for (String propertyName : new HashSet<>(propertiesToGenerate)) {
+                    generateAndSetProperty(propertyName, autoSave);
+                }
             }
-            return (T) beanWrapper.getWrappedInstance();
+            return bean;
         }
 
         private void generateAndSetProperty(String propertyName, boolean autoSave) {
