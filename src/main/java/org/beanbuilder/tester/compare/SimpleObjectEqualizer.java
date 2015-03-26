@@ -1,7 +1,7 @@
 /*
  * (C) 2013 42 bv (www.42.nl). All rights reserved.
  */
-package org.beanbuilder.tester;
+package org.beanbuilder.tester.compare;
 
 import java.math.BigDecimal;
 
@@ -9,20 +9,17 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.ObjectUtils;
 
 /**
- * Compares two objects with each other.
+ * Simple implementation of {@link ObjectEqualizer}.
  *
  * @author Jeroen van Schagen
  * @since Mar 10, 2014
  */
-public class ObjectEqualizer {
+public class SimpleObjectEqualizer implements ObjectEqualizer {
     
     /**
-     * Determine if two objects are sementically equal.
-     * 
-     * @param left the left object
-     * @param right the right object
-     * @return {@code true} when equal, else {@code false}
+     * {@inheritDoc}
      */
+    @Override
     public boolean isEqual(Object left, Object right) {
         boolean equals = false;
         if (left == right) {

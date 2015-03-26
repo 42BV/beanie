@@ -8,6 +8,8 @@ import org.apache.log4j.Logger;
 import org.beanbuilder.BeanBuilder;
 import org.beanbuilder.support.Classes;
 import org.beanbuilder.support.PropertyReference;
+import org.beanbuilder.tester.compare.ObjectEqualizer;
+import org.beanbuilder.tester.compare.SimpleObjectEqualizer;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -35,7 +37,7 @@ public class BeanTester {
     private boolean inherit = true;
 
     public BeanTester() {
-        this(new BeanBuilder(), new ObjectEqualizer());
+        this(new BeanBuilder(), new SimpleObjectEqualizer());
     }
 
     public BeanTester(BeanBuilder builder, ObjectEqualizer equalizer) {
