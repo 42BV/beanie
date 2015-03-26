@@ -19,4 +19,12 @@ public class UnsupportedBeanSaver implements BeanSaver {
         throw new UnsupportedOperationException("Saving bean is not supported.");
     }
     
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void delete(Object bean) {
+        throw new UnsupportedOperationException("Deleting bean is not supported.");
+    }
+
 }

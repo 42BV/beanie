@@ -20,6 +20,10 @@ public class RandomStringGenerator extends RandomSupport implements ValueGenerat
     
     private final String letters;
     
+    public RandomStringGenerator(int maximum) {
+        this(Math.min(maximum, 1), maximum);
+    }
+
     public RandomStringGenerator(int minimum, int maximum) {
         this(minimum, maximum, LETTERS);
     }

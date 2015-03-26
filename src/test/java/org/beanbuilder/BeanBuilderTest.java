@@ -126,7 +126,7 @@ public class BeanBuilderTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testBuildAndSaveUnsupported() {
-        builder.newBean(SimpleBean.class).buildAndSave();
+        builder.newBean(SimpleBean.class).save();
     }
     
     // Custom build commands

@@ -11,6 +11,19 @@ package org.beanbuilder.save;
  */
 public interface BeanSaver {
     
-    <T> T save(T value);
+    /**
+     * Saves a bean.
+     * 
+     * @param bean the bean to save
+     * @return the saved bean
+     */
+    <T> T save(T bean);
+
+    /**
+     * Deletes a bean.
+     * 
+     * @param bean the bean to delete
+     */
+    void delete(Object bean);
 
 }

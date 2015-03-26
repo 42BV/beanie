@@ -210,12 +210,43 @@ public class BeanBuilder implements ValueGenerator {
     
     /**
      * Register a constant value for a specific type.
+     * 
      * @param valueType the type of value
      * @param value the value to return
      * @return this instance
      */
     public BeanBuilder registerValue(Class<?> valueType, Object value) {
         return register(valueType, new ConstantValueGenerator(value));
+    }
+
+    /**
+     * Saves the bean.
+     * 
+     * @param bean the bean to save
+     * @return the saved bean
+     */
+    public <R> R save(R bean) {
+        return beanSaver.save(bean);
+    }
+
+    /**
+     * Deletes the bean.
+     * 
+     * @param bean the bean to delete
+     */
+    public void delete(Object bean) {
+        beanSaver.delete(bean);
+    }
+    
+    /**
+     * Deletes multiple beans.
+     * 
+     * @param beans the beans to delete
+     */
+    public void deleteAll(Iterable<? extends Object> beans) {
+        for (Object bean : beans) {
+            beanSaver.delete(bean);
+        }
     }
 
     /**
@@ -245,7 +276,7 @@ public class BeanBuilder implements ValueGenerator {
          * 
          * @return the saved bean
          */
-        T buildAndSave();
+        T save();
 
     }
     
@@ -428,9 +459,9 @@ public class BeanBuilder implements ValueGenerator {
          * {@inheritDoc}
          */
         @Override
-        public T buildAndSave() {
+        public T save() {
             T bean = finishBean(true);
-            return doSave(bean);
+            return beanBuilder.save(bean);
         }
         
         @SuppressWarnings("unchecked")
@@ -445,13 +476,9 @@ public class BeanBuilder implements ValueGenerator {
             PropertyDescriptor descriptor = beanWrapper.getPropertyDescriptor(propertyName);
             Object value = beanBuilder.generateValue(beanWrapper.getWrappedClass(), descriptor);
             if (autoSave) {
-                value = doSave(value);
+                value = beanBuilder.save(value);
             }
             withValue(propertyName, value);
-        }
-
-        private <R> R doSave(R value) {
-            return beanBuilder.beanSaver.save(value);
         }
 
     }

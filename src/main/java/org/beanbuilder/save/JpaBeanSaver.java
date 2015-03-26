@@ -24,12 +24,29 @@ public class JpaBeanSaver implements BeanSaver {
         this.entityManager = entityManager;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public <T> T save(T value) {
-        if (value != null && isEntity(value)) {
-            entityManager.persist(value);
+    public <T> T save(T bean) {
+        if (isSaveable(bean)) {
+            entityManager.persist(bean);
         }
-        return value;
+        return bean;
+    }
+    
+    private <T> boolean isSaveable(T value) {
+        return value != null && isEntity(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void delete(Object bean) {
+        if (isSaveable(bean)) {
+            entityManager.remove(bean);
+        }
     }
 
     protected boolean isEntity(Object value) {
