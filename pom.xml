@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>bean-builder</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0-SNAPSHOT</version>
 
 	<scm>
 		<connection>scm:git:https://github.com/42BV/bean-builder.git</connection>
