@@ -64,15 +64,41 @@ public class BeanBuilderTest {
     @Test
     public void testBuildWithDefaultBuilder() {
         SimpleBean bean = builder.newBean(SimpleBean.class)
-                                        .withValue("id", 42L)
-                                        .withGeneratedValue("name", new ConstantValueGenerator("success"))
-                                            .fill()
-                                            .build();
+                                    .withValue("id", 42L)
+                                    .withGeneratedValue("name", new ConstantValueGenerator("success"))
+                                        .fill().build();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertEquals("success", bean.getName());
         Assert.assertNotNull(bean.getNestedBean());
         Assert.assertNotNull(bean.getNestedBeanWithConstructor());
+    }
+    
+    @Test
+    public void testBuildWithCopy() {
+        builder.skip(SimpleBean.class, "id");
+        
+        SimpleBean bean = builder.newBean(SimpleBean.class)
+                                    .withValue("id", 42L)
+                                    .withValue("name", "Jan")
+                                        .fill().build();
+                    
+        Assert.assertEquals("Jan", bean.getName());
+
+        SimpleBean clone = builder.newBean(SimpleBean.class)
+                                    .withAllValuesOf(bean, "shortName")
+                                        .build();
+        
+        // Copied from the simple bean
+        Assert.assertEquals("Jan", clone.getName());
+        Assert.assertEquals(bean.getNestedBean(), clone.getNestedBean());
+        Assert.assertEquals(bean.getNestedBeanWithConstructor(), clone.getNestedBeanWithConstructor());
+        
+        // Bean builder has skipped id, thus is not copied either
+        Assert.assertNull(clone.getId());
+        
+        // Marked as exclusion
+        Assert.assertNull(clone.getShortName());
     }
     
     @Test
@@ -102,15 +128,46 @@ public class BeanBuilderTest {
     public void testBuildAndSaveUnsupported() {
         builder.newBean(SimpleBean.class).buildAndSave();
     }
+    
+    // Custom build commands
 
+    /**
+     * Build command for simple beans.
+     *
+     * @author Jeroen van Schagen
+     * @since Mar 26, 2015
+     */
     public interface SimpleBeanBuildCommand extends BuildCommand<SimpleBean> {
 
+        /**
+         * Changes the identifier.
+         * 
+         * @param id the identifier
+         * @return this instance, for chaining
+         */
         SimpleBeanBuildCommand withId(Long id);
 
+        /**
+         * Changes the name with a value.
+         * 
+         * @param name the name
+         * @return this instance, for chaining
+         */
         SimpleBeanBuildCommand withName(String name);
         
+        /**
+         * Changes the name with a generator.
+         * 
+         * @param generator the generator
+         * @return this instance, for chaining
+         */
         SimpleBeanBuildCommand withName(ValueGenerator generator);
 
+        /**
+         * Changes the name with a registered generator.
+         * 
+         * @return this instance, for chaining
+         */
         SimpleBeanBuildCommand withNestedBean();
 
     }

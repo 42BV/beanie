@@ -4,6 +4,8 @@
 package org.beanbuilder;
 
 import java.beans.PropertyDescriptor;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -254,7 +256,7 @@ public class BeanBuilder implements ValueGenerator {
      * @since Feb 14, 2014
      */
     public interface EditableBuildCommand<T> extends BuildCommand<T> {
-        
+
         /**
          * Generate a value in our to be generated bean.
          * 
@@ -280,6 +282,16 @@ public class BeanBuilder implements ValueGenerator {
          * @return this instance, for chaining
          */
         EditableBuildCommand<T> withValue(String propertyName, Object value);
+        
+        /**
+         * Copies all usable property values from a bean
+         * into our result.
+         * 
+         * @param bean the bean to copy properties from
+         * @param exclusions the property names to exclude from copy
+         * @return this instance, for chaining
+         */
+        EditableBuildCommand<T> withAllValuesOf(Object bean, String... exclusions);
 
     }
 
@@ -344,6 +356,28 @@ public class BeanBuilder implements ValueGenerator {
             } else {
                 fieldAccessor.setPropertyValue(propertyName, value);
             }
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public EditableBuildCommand<T> withAllValuesOf(Object source, String... exclusionArgs) {
+            final Collection<String> exclusions = Arrays.asList(exclusionArgs);
+
+            BeanWrapper sourceWrapper = new BeanWrapperImpl(source);
+            for (PropertyDescriptor descriptor : sourceWrapper.getPropertyDescriptors()) {
+                final String propertyName = descriptor.getName();
+                if (sourceWrapper.isReadableProperty(propertyName) && beanWrapper.isWritableProperty(propertyName) && !isSkipped(propertyName, exclusions)) {
+                    withValue(propertyName, sourceWrapper.getPropertyValue(propertyName));
+                }
+            }
+            return this;
+        }
+
+        private boolean isSkipped(final String propertyName, final Collection<String> exclusions) {
+            PropertyDescriptor descriptor = beanWrapper.getPropertyDescriptor(propertyName);
+            return exclusions.contains(propertyName) || beanBuilder.skippedProperties.contains(new PropertyReference(descriptor));
         }
 
         /**
