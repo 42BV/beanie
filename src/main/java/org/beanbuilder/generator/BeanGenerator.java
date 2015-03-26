@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
 import org.beanbuilder.generator.constructor.ConstructorStrategy;
+import org.beanbuilder.generator.constructor.ShortestConstructorStrategy;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -17,19 +18,38 @@ import org.springframework.beans.BeanUtils;
  */
 public class BeanGenerator implements ValueGenerator {
     
-    private final ConstructorStrategy constructorStrategy;
-
+    /**
+     * Generates argument value instances.
+     */
     private final ValueGenerator constructorArgGenerator;
 
-    private final ValueGenerator abstractGenerator = new FirstImplBeanGenerator(this);
+    /**
+     * Selects the most desired constructor.
+     */
+    private ConstructorStrategy constructorStrategy = new ShortestConstructorStrategy();
+
+    /**
+     * Generates abstract class instances.
+     */
+    private ValueGenerator abstractGenerator = new FirstImplBeanGenerator(this);
     
-    private final ValueGenerator interfaceGenerator = new InterfaceProxyBeanGenerator();
+    /**
+     * Generates interface instances.
+     */
+    private ValueGenerator interfaceGenerator = new InterfaceProxyBeanGenerator();
     
-    public BeanGenerator(ConstructorStrategy constructorStrategy, ValueGenerator constructorArgGenerator) {
-        this.constructorStrategy = constructorStrategy;
+    /**
+     * Construct a new {@link BeanGenerator}.
+     * 
+     * @param constructorArgGenerator generator used to generate constructor arguments
+     */
+    public BeanGenerator(ValueGenerator constructorArgGenerator) {
         this.constructorArgGenerator = constructorArgGenerator;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object generate(Class<?> beanClass) {
         if (beanClass.isInterface()) {
@@ -37,11 +57,12 @@ public class BeanGenerator implements ValueGenerator {
         } else if (Modifier.isAbstract(beanClass.getModifiers())) {
             return abstractGenerator.generate(beanClass);
         } else {
-            return instantiate(beanClass);
+            return instantiateConcrete(beanClass);
         }
     }
 
-    private Object instantiate(Class<?> beanClass) {
+    // Instantiate the concrete class.
+    private Object instantiateConcrete(Class<?> beanClass) {
         Constructor<?> constructor = constructorStrategy.getConstructor(beanClass);
         if (constructor != null) {
             Class<?>[] parameterTypes = constructor.getParameterTypes();
@@ -53,6 +74,33 @@ public class BeanGenerator implements ValueGenerator {
         } else {
             return BeanUtils.instantiateClass(beanClass);
         }
+    }
+
+    /**
+     * Change the generator used to generate abstract class instances.
+     * 
+     * @param abstractGenerator the abstract generator
+     */
+    public void setAbstractGenerator(ValueGenerator abstractGenerator) {
+        this.abstractGenerator = abstractGenerator;
+    }
+
+    /**
+     * Change the generator used to generate interface instances.
+     * 
+     * @param interfaceGenerator the interface generator
+     */
+    public void setInterfaceGenerator(ValueGenerator interfaceGenerator) {
+        this.interfaceGenerator = interfaceGenerator;
+    }
+
+    /**
+     * Change the strategory for selecting the most desired constructor.
+     * 
+     * @param constructorStrategy the constructor strategy
+     */
+    public void setConstructorStrategy(ConstructorStrategy constructorStrategy) {
+        this.constructorStrategy = constructorStrategy;
     }
 
 }

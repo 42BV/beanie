@@ -17,8 +17,6 @@ import org.beanbuilder.generator.ConfigurableValueGenerator;
 import org.beanbuilder.generator.ConstantValueGenerator;
 import org.beanbuilder.generator.DefaultValueGenerator;
 import org.beanbuilder.generator.ValueGenerator;
-import org.beanbuilder.generator.constructor.ConstructorStrategy;
-import org.beanbuilder.generator.constructor.ShortestConstructorStrategy;
 import org.beanbuilder.save.BeanSaver;
 import org.beanbuilder.save.UnsupportedBeanSaver;
 import org.beanbuilder.support.PropertyReference;
@@ -71,25 +69,15 @@ public class BeanBuilder implements ValueGenerator {
     public BeanBuilder() {
         this(new UnsupportedBeanSaver());
     }
-    
+
     /**
      * Construct a new {@link BeanBuilder}.
      * 
      * @param beanSaver responsible for saving the bean after creation
      */
     public BeanBuilder(BeanSaver beanSaver) {
-        this(new ShortestConstructorStrategy(), beanSaver);
-    }
-    
-    /**
-     * Construct a new {@link BeanBuilder}.
-     * 
-     * @param constructorStrategy selects the most desired constructor
-     * @param beanSaver responsible for saving the bean after creation
-     */
-    public BeanBuilder(ConstructorStrategy constructorStrategy, BeanSaver beanSaver) {
         this.typeGenerator = new DefaultValueGenerator(this);
-        this.beanGenerator = new BeanGenerator(constructorStrategy, this);
+        this.beanGenerator = new BeanGenerator(this);
         this.beanSaver = beanSaver;
     }
 
@@ -252,6 +240,15 @@ public class BeanBuilder implements ValueGenerator {
         for (Object bean : beans) {
             beanSaver.delete(bean);
         }
+    }
+    
+    /**
+     * Retrieves the underlying bean generator.
+     * 
+     * @return the bean generator
+     */
+    public final BeanGenerator getBeanGenerator() {
+        return beanGenerator;
     }
 
     /**
