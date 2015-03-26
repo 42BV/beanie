@@ -4,7 +4,6 @@
 package org.beanbuilder;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,6 +20,7 @@ import org.beanbuilder.save.BeanSaver;
 import org.beanbuilder.save.UnsupportedBeanSaver;
 import org.beanbuilder.support.PropertyReference;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -469,7 +469,7 @@ public class BeanBuilder implements ValueGenerator {
         @SuppressWarnings("unchecked")
         private T finishBean(boolean autoSave) {
             T bean = (T) beanWrapper.getWrappedInstance();
-            if (!(bean instanceof Proxy)) {
+            if (!AopUtils.isAopProxy(bean)) {
                 for (String propertyName : new HashSet<>(propertiesToGenerate)) {
                     generateAndSetProperty(propertyName, autoSave);
                 }

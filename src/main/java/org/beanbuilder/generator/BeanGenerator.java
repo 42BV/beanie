@@ -31,12 +31,12 @@ public class BeanGenerator implements ValueGenerator {
     /**
      * Generates abstract class instances.
      */
-    private ValueGenerator abstractGenerator = new FirstImplBeanGenerator(this);
+    private ValueGenerator abstractGenerator = new ProxyBeanGenerator();
     
     /**
      * Generates interface instances.
      */
-    private ValueGenerator interfaceGenerator = new InterfaceProxyBeanGenerator();
+    private ValueGenerator interfaceGenerator = new ProxyBeanGenerator();
     
     /**
      * Construct a new {@link BeanGenerator}.

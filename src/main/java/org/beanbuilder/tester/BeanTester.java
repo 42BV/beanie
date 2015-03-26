@@ -198,6 +198,16 @@ public class BeanTester {
         include(new HasNullaryConstructorFilter());
         return this;
     }
+    
+    /**
+     * Include all beans.
+     * 
+     * @return this instance for chaining
+     */
+    public BeanTester includeAll() {
+        include(new AssignableTypeFilter(Object.class));
+        return this;
+    }
 
     /**
      * Add an exclusion filter.

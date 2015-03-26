@@ -12,13 +12,17 @@ import org.springframework.aop.target.SingletonTargetSource;
  * @author Jeroen van Schagen
  * @since Mar 26, 2015
  */
-public class InterfaceProxyBeanGenerator implements ValueGenerator {
+public class ProxyBeanGenerator implements ValueGenerator {
     
     @Override
-    public Object generate(Class<?> interfaceClass) {
+    public Object generate(Class<?> beanClass) {
         ProxyFactory proxyFactory = new ProxyFactory();
         proxyFactory.setTargetSource(new SingletonTargetSource(new EmptyTargetSource()));
-        proxyFactory.addInterface(interfaceClass);
+        if (beanClass.isInterface()) {
+            proxyFactory.addInterface(beanClass);
+        } else {
+            proxyFactory.setTargetClass(beanClass);
+        }
         return proxyFactory.getProxy();
     }
 
