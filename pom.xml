@@ -17,6 +17,16 @@
 		<url>https://github.com/42BV/bean-builder</url>
 		<tag>HEAD</tag>
 	</scm>
+	
+	<build>
+	   <plugins>
+	       <plugin>
+               <groupId>external.atlassian.jgitflow</groupId>
+               <artifactId>jgitflow-maven-plugin</artifactId>
+               <version>1.0-m4.3</version>
+           </plugin>
+	   </plugins>
+	</build>
 
     <dependencies>
         <dependency>
