@@ -8,7 +8,7 @@
         <version>1.6</version>
     </parent>
 
-    <artifactId>bean-builder</artifactId>
+    <artifactId>beanie</artifactId>
     <version>1.6.0-SNAPSHOT</version>
 
 	<scm>
