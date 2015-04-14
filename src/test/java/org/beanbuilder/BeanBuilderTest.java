@@ -1,6 +1,5 @@
 package org.beanbuilder;
 
-import org.beanbuilder.BeanBuilder.BuildCommand;
 import org.beanbuilder.domain.NestedBean;
 import org.beanbuilder.domain.NestedBeanWithConstructor;
 import org.beanbuilder.domain.SimpleBean;
@@ -155,7 +154,7 @@ public class BeanBuilderTest {
      * @author Jeroen van Schagen
      * @since Mar 26, 2015
      */
-    public interface SimpleBeanBuildCommand extends BuildCommand<SimpleBean> {
+    public interface SimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
 
         /**
          * Changes the identifier.

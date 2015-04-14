@@ -6,7 +6,6 @@ package org.beanbuilder;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.beanbuilder.BeanBuilder.EditableBuildCommand;
 import org.beanbuilder.generator.ValueGenerator;
 import org.springframework.aop.Advisor;
 
@@ -22,21 +21,27 @@ import org.springframework.aop.Advisor;
  * @author Jeroen van Schagen
  * @since Feb 14, 2014
  */
-public final class CustomBeanBuilderAdvisor implements Advisor {
+public final class BeanBuildCommandAdvisor implements Advisor {
     
     private static final String WITH_PREFIX = "with";
 
-    private final EditableBuildCommand<?> command;
+    private final EditableBeanBuildCommand<?> command;
     
-    CustomBeanBuilderAdvisor(EditableBuildCommand<?> command) {
+    public BeanBuildCommandAdvisor(EditableBeanBuildCommand<?> command) {
         this.command = command;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isPerInstance() {
         return true;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Advice getAdvice() {
         return new CustomBeanBuilderAdvice();

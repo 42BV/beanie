@@ -28,7 +28,9 @@ public class JpaBeanSaver implements BeanSaver {
      */
     @Override
     public <T> T save(final T bean) {
-        entityManager.persist(bean);
+        if (isSaveable(bean)) {
+            entityManager.persist(bean);
+        }
         return bean;
     }
 
