@@ -20,7 +20,6 @@ public class JpaBeanSaver implements BeanSaver {
     private final EntityManager entityManager;
     
     public JpaBeanSaver(EntityManager entityManager) {
-        super();
         this.entityManager = entityManager;
     }
 
@@ -28,15 +27,9 @@ public class JpaBeanSaver implements BeanSaver {
      * {@inheritDoc}
      */
     @Override
-    public <T> T save(T bean) {
-        if (isSaveable(bean)) {
-            entityManager.persist(bean);
-        }
+    public <T> T save(final T bean) {
+        entityManager.persist(bean);
         return bean;
-    }
-    
-    private <T> boolean isSaveable(T value) {
-        return value != null && isEntity(value);
     }
 
     /**
@@ -48,8 +41,12 @@ public class JpaBeanSaver implements BeanSaver {
             entityManager.remove(bean);
         }
     }
+    
+    private <T> boolean isSaveable(T value) {
+        return value != null && hasEntityAnnotation(value);
+    }
 
-    protected boolean isEntity(Object value) {
+    private boolean hasEntityAnnotation(Object value) {
         return AnnotationUtils.findAnnotation(value.getClass(), Entity.class) != null;
     }
     

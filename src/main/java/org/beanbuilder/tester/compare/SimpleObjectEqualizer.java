@@ -5,8 +5,7 @@ package org.beanbuilder.tester.compare;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.ObjectUtils;
+import org.beanbuilder.support.Objects;
 
 /**
  * Simple implementation of {@link ObjectEqualizer}.
@@ -20,17 +19,18 @@ public class SimpleObjectEqualizer implements ObjectEqualizer {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("deprecation")
     public boolean isEqual(Object left, Object right) {
         boolean equals = false;
         if (left == right) {
             equals = true;
         } else if (left != null && right != null && left.getClass().equals(right.getClass())) {
             if (left.getClass().isArray()) {
-                equals = ArrayUtils.isEquals(left, right);
+                equals = org.apache.commons.lang3.ArrayUtils.isEquals(left, right);
             } else if (left instanceof BigDecimal) {
                 equals = ((BigDecimal) left).compareTo((BigDecimal) right) == 0;
             } else {
-                equals = ObjectUtils.equals(left, right);
+                equals = Objects.equals(left, right);
             }
         }
         return equals;
