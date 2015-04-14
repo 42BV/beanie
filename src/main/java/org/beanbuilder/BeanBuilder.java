@@ -296,7 +296,7 @@ public class BeanBuilder implements ValueGenerator {
          * @param propertyName the property name
          * @return this instance, for chaining
          */
-        EditableBuildCommand<T> withGeneratedValue(String propertyName);
+        EditableBuildCommand<T> generateValue(String propertyName);
         
         /**
          * Generate a value in our to be generated bean.
@@ -305,7 +305,7 @@ public class BeanBuilder implements ValueGenerator {
          * @param generator the value generator
          * @return this instance, for chaining
          */
-        EditableBuildCommand<T> withGeneratedValue(String propertyName, ValueGenerator generator);
+        EditableBuildCommand<T> generateValue(String propertyName, ValueGenerator generator);
         
         /**
          * Declare a value in our to be generated bean.
@@ -314,7 +314,7 @@ public class BeanBuilder implements ValueGenerator {
          * @param value the property value
          * @return this instance, for chaining
          */
-        EditableBuildCommand<T> withValue(String propertyName, Object value);
+        EditableBuildCommand<T> setValue(String propertyName, Object value);
         
         /**
          * Copies all usable property values from a bean
@@ -324,7 +324,7 @@ public class BeanBuilder implements ValueGenerator {
          * @param exclusions the property names to exclude from copy
          * @return this instance, for chaining
          */
-        EditableBuildCommand<T> withAllValuesOf(Object bean, String... exclusions);
+        EditableBuildCommand<T> copyAllValuesFrom(Object bean, String... exclusions);
 
     }
 
@@ -376,7 +376,7 @@ public class BeanBuilder implements ValueGenerator {
          * {@inheritDoc}
          */
         @Override
-        public EditableBuildCommand<T> withValue(String propertyName, Object value) {
+        public EditableBuildCommand<T> setValue(String propertyName, Object value) {
             setPropertyValue(propertyName, value);
             touchedProperties.add(propertyName);
             propertiesToGenerate.remove(propertyName);
@@ -395,14 +395,14 @@ public class BeanBuilder implements ValueGenerator {
          * {@inheritDoc}
          */
         @Override
-        public EditableBuildCommand<T> withAllValuesOf(Object source, String... exclusionArgs) {
+        public EditableBuildCommand<T> copyAllValuesFrom(Object source, String... exclusionArgs) {
             final Collection<String> exclusions = Arrays.asList(exclusionArgs);
 
             BeanWrapper sourceWrapper = new BeanWrapperImpl(source);
             for (PropertyDescriptor descriptor : sourceWrapper.getPropertyDescriptors()) {
                 final String propertyName = descriptor.getName();
                 if (sourceWrapper.isReadableProperty(propertyName) && beanWrapper.isWritableProperty(propertyName) && !isSkipped(propertyName, exclusions)) {
-                    withValue(propertyName, sourceWrapper.getPropertyValue(propertyName));
+                    setValue(propertyName, sourceWrapper.getPropertyValue(propertyName));
                 }
             }
             return this;
@@ -417,17 +417,17 @@ public class BeanBuilder implements ValueGenerator {
          * {@inheritDoc}
          */
         @Override
-        public EditableBuildCommand<T> withGeneratedValue(String propertyName, ValueGenerator generator) {
+        public EditableBuildCommand<T> generateValue(String propertyName, ValueGenerator generator) {
             PropertyDescriptor descriptor = beanWrapper.getPropertyDescriptor(propertyName);
             Object value = generator.generate(descriptor.getPropertyType());
-            return this.withValue(propertyName, value);
+            return this.setValue(propertyName, value);
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public EditableBuildCommand<T> withGeneratedValue(String propertyName) {
+        public EditableBuildCommand<T> generateValue(String propertyName) {
             touchedProperties.add(propertyName);
             propertiesToGenerate.add(propertyName);
             return this;
@@ -442,7 +442,7 @@ public class BeanBuilder implements ValueGenerator {
                 String propertyName = descriptor.getName();
                 if (beanWrapper.isWritableProperty(propertyName) && !touchedProperties.contains(propertyName)) {
                     if (!beanBuilder.skippedProperties.contains(new PropertyReference(descriptor))) {
-                        withGeneratedValue(propertyName);
+                        generateValue(propertyName);
                     }
                 }
             }
@@ -483,7 +483,7 @@ public class BeanBuilder implements ValueGenerator {
             if (autoSave) {
                 value = beanBuilder.save(value);
             }
-            withValue(propertyName, value);
+            setValue(propertyName, value);
         }
 
     }

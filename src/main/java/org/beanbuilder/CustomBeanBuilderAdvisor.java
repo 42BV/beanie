@@ -3,9 +3,6 @@
  */
 package org.beanbuilder;
 
-import static org.apache.commons.lang.StringUtils.substringAfter;
-import static org.apache.commons.lang.StringUtils.uncapitalize;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -53,9 +50,8 @@ public final class CustomBeanBuilderAdvisor implements Advisor {
             if (methodName.startsWith(WITH_PREFIX)) {
                 String propertyName = getPropertyName(methodName);
                 Object[] arguments = invocation.getArguments();
-
                 if (arguments.length == 0) {
-                    return command.withGeneratedValue(propertyName);
+                    return command.generateValue(propertyName);
                 } else {
                     return withArgument(propertyName, arguments);
                 }
@@ -65,16 +61,20 @@ public final class CustomBeanBuilderAdvisor implements Advisor {
         }
 
         private String getPropertyName(final String methodName) {
-            String propertyName = substringAfter(methodName, WITH_PREFIX);
+            String propertyName = methodName.substring(WITH_PREFIX.length());
             return uncapitalize(propertyName);
+        }
+
+        private String uncapitalize(String propertyName) {
+            return propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
         }
 
         private Object withArgument(String propertyName, Object[] arguments) {
             Object value = arguments[0];
             if (value instanceof ValueGenerator) {
-                return command.withGeneratedValue(propertyName, (ValueGenerator) value);
+                return command.generateValue(propertyName, (ValueGenerator) value);
             } else {
-                return command.withValue(propertyName, value);
+                return command.setValue(propertyName, value);
             }
         }
 

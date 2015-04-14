@@ -2,8 +2,6 @@ package org.beanbuilder.support;
 
 import java.beans.PropertyDescriptor;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-
 public class PropertyReference {
 
 	private final Class<?> declaringClass;
@@ -39,7 +37,12 @@ public class PropertyReference {
 	
 	@Override
 	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj);
+        if (obj instanceof PropertyReference) {
+            PropertyReference other = (PropertyReference) obj;
+            return Objects.equals(declaringClass, other.declaringClass) && Objects.equals(propertyName, other.propertyName);
+        } else {
+            return false;
+        }
 	}
 	
 	@Override

@@ -82,9 +82,9 @@ public class BeanBuilderTest {
     @Test
     public void testBuildWithDefaultBuilder() {
         SimpleBean bean = beanBuilder.newBean(SimpleBean.class)
-                                    .withValue("id", 42L)
-                                    .withGeneratedValue("name", new ConstantValueGenerator("success"))
-                                        .fill().build();
+                                        .setValue("id", 42L)
+                                        .generateValue("name", new ConstantValueGenerator("success"))
+                                            .fill().build();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertEquals("success", bean.getName());
@@ -97,15 +97,15 @@ public class BeanBuilderTest {
         beanBuilder.skip(SimpleBean.class, "id");
         
         SimpleBean bean = beanBuilder.newBean(SimpleBean.class)
-                                    .withValue("id", 42L)
-                                    .withValue("name", "Jan")
-                                        .fill().build();
+                                        .setValue("id", 42L)
+                                        .setValue("name", "Jan")
+                                            .fill().build();
                     
         Assert.assertEquals("Jan", bean.getName());
 
         SimpleBean clone = beanBuilder.newBean(SimpleBean.class)
-                                    .withAllValuesOf(bean, "shortName")
-                                        .build();
+                                        .copyAllValuesFrom(bean, "shortName")
+                                            .build();
         
         // Copied from the simple bean
         Assert.assertEquals("Jan", clone.getName());
@@ -137,7 +137,7 @@ public class BeanBuilderTest {
     public void testBuildWithDefinedGenerators() {
         beanBuilder.register(SimpleBean.class, "name", new RandomStringGenerator(2, 4));
         
-        SimpleBean bean = beanBuilder.newBean(SimpleBean.class).withValue("id", 42L).fill().build();
+        SimpleBean bean = beanBuilder.newBean(SimpleBean.class).setValue("id", 42L).fill().build();
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertNotNull(bean.getName());
     }
