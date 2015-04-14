@@ -115,9 +115,11 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
-    public EditableBeanBuildCommand<T> generateValue(String propertyName) {
-        touchedProperties.add(propertyName);
-        propertiesToGenerate.add(propertyName);
+    public EditableBeanBuildCommand<T> generateValues(String... propertyNames) {
+        for (String propertyName : propertyNames) {
+            touchedProperties.add(propertyName);
+            propertiesToGenerate.add(propertyName);
+        }
         return this;
     }
 
@@ -130,7 +132,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
             String propertyName = descriptor.getName();
             if (beanWrapper.isWritableProperty(propertyName) && !touchedProperties.contains(propertyName)) {
                 if (!beanBuilder.getSkippedProperties().contains(new PropertyReference(descriptor))) {
-                    generateValue(propertyName);
+                    generateValues(propertyName);
                 }
             }
         }

@@ -53,7 +53,7 @@ public class BeanBuilderTest {
 		NestedBeanWithConstructor nestedBeanWithConstructor = new NestedBeanWithConstructor("bla");
         beanBuilder.registerValue(SimpleBean.class, "nestedBeanWithConstructor", nestedBeanWithConstructor);
 
-        SimpleBean bean = beanBuilder.generateSafely(SimpleBean.class);
+        SimpleBean bean = beanBuilder.start(SimpleBean.class).generateValues("nestedBeanWithConstructor").build();
 		Assert.assertEquals(nestedBeanWithConstructor, bean.getNestedBeanWithConstructor());
 	}
 
@@ -80,7 +80,7 @@ public class BeanBuilderTest {
 
     @Test
     public void testBuildWithDefaultBuilder() {
-        SimpleBean bean = beanBuilder.newBean(SimpleBean.class)
+        SimpleBean bean = beanBuilder.start(SimpleBean.class)
                                         .setValue("id", 42L)
                                         .generateValue("name", new ConstantValueGenerator("success"))
                                             .fill().build();
@@ -95,14 +95,14 @@ public class BeanBuilderTest {
     public void testBuildWithCopy() {
         beanBuilder.skip(SimpleBean.class, "id");
         
-        SimpleBean bean = beanBuilder.newBean(SimpleBean.class)
+        SimpleBean bean = beanBuilder.start(SimpleBean.class)
                                         .setValue("id", 42L)
                                         .setValue("name", "Jan")
                                             .fill().build();
                     
         Assert.assertEquals("Jan", bean.getName());
 
-        SimpleBean clone = beanBuilder.newBean(SimpleBean.class)
+        SimpleBean clone = beanBuilder.start(SimpleBean.class)
                                         .copyAllValuesFrom(bean, "shortName")
                                             .build();
         
@@ -120,7 +120,7 @@ public class BeanBuilderTest {
     
     @Test
     public void testBuildWithCustomBuilder() {        
-        SimpleBean bean = beanBuilder.newBeanBy(SimpleBeanBuildCommand.class)
+        SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
                                         .withId(42L)
                                         .withName(new ConstantValueGenerator("success"))
                                         .withNestedBean()
@@ -136,14 +136,14 @@ public class BeanBuilderTest {
     public void testBuildWithDefinedGenerators() {
         beanBuilder.register(SimpleBean.class, "name", new RandomStringGenerator(2, 4));
         
-        SimpleBean bean = beanBuilder.newBean(SimpleBean.class).setValue("id", 42L).fill().build();
+        SimpleBean bean = beanBuilder.start(SimpleBean.class).setValue("id", 42L).fill().build();
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertNotNull(bean.getName());
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testBuildAndSaveUnsupported() {
-        beanBuilder.newBean(SimpleBean.class).save();
+        beanBuilder.start(SimpleBean.class).save();
     }
     
     // Custom build commands

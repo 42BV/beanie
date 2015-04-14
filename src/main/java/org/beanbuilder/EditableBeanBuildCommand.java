@@ -14,23 +14,6 @@ import org.beanbuilder.generator.ValueGenerator;
 public interface EditableBeanBuildCommand<T> extends BeanBuildCommand<T> {
 
     /**
-     * Generate a value in our to be generated bean.
-     * 
-     * @param propertyName the property name
-     * @return this instance, for chaining
-     */
-    EditableBeanBuildCommand<T> generateValue(String propertyName);
-    
-    /**
-     * Generate a value in our to be generated bean.
-     * 
-     * @param propertyName the property name
-     * @param generator the value generator
-     * @return this instance, for chaining
-     */
-    EditableBeanBuildCommand<T> generateValue(String propertyName, ValueGenerator generator);
-    
-    /**
      * Declare a value in our to be generated bean.
      * 
      * @param propertyName the property name
@@ -48,5 +31,22 @@ public interface EditableBeanBuildCommand<T> extends BeanBuildCommand<T> {
      * @return this instance, for chaining
      */
     EditableBeanBuildCommand<T> copyAllValuesFrom(Object bean, String... exclusions);
+
+    /**
+     * Generate a value in our to be generated bean.
+     * 
+     * @param propertyName the property name
+     * @param generator the value generator
+     * @return this instance, for chaining
+     */
+    EditableBeanBuildCommand<T> generateValue(String propertyName, ValueGenerator generator);
+    
+    /**
+     * Generate a value in our to be generated bean.
+     * 
+     * @param propertyNames the property names
+     * @return this instance, for chaining
+     */
+    EditableBeanBuildCommand<T> generateValues(String... propertyNames);
 
 }

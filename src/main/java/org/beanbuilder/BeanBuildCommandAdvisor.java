@@ -56,7 +56,7 @@ public final class BeanBuildCommandAdvisor implements Advisor {
                 String propertyName = getPropertyName(methodName);
                 Object[] arguments = invocation.getArguments();
                 if (arguments.length == 0) {
-                    return command.generateValue(propertyName);
+                    return command.generateValues(propertyName);
                 } else {
                     return withArgument(propertyName, arguments);
                 }

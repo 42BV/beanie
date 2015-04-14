@@ -80,7 +80,7 @@ public class BeanBuilder implements ValueGenerator {
      * @param beanClass the type of bean to start building
      * @return the bean build command
      */
-    public <T> EditableBeanBuildCommand<T> newBean(Class<T> beanClass) {
+    public <T> EditableBeanBuildCommand<T> start(Class<T> beanClass) {
         return new DefaultBeanBuildCommand<T>(this, beanClass);
     }
     
@@ -91,10 +91,10 @@ public class BeanBuilder implements ValueGenerator {
      * @return the builder instance, capable of building beans
      */
     @SuppressWarnings("unchecked")
-    public <T extends BeanBuildCommand<?>> T newBeanBy(Class<T> interfaceType) {
+    public <T extends BeanBuildCommand<?>> T startAs(Class<T> interfaceType) {
         Class<?> beanClass = GenericTypeResolver.resolveTypeArguments(interfaceType, BeanBuildCommand.class)[0];
-        EditableBeanBuildCommand<?> instance = newBean(beanClass);
-        return newBeanBy(interfaceType, instance);
+        EditableBeanBuildCommand<?> instance = start(beanClass);
+        return startAs(interfaceType, instance);
     }
     
     /**
@@ -105,7 +105,7 @@ public class BeanBuilder implements ValueGenerator {
      * @return the builder instance, capable of building beans
      */
     @SuppressWarnings("unchecked")
-    public <T extends BeanBuildCommand<?>> T newBeanBy(Class<T> interfaceType, EditableBeanBuildCommand<?> instance) {
+    public <T extends BeanBuildCommand<?>> T startAs(Class<T> interfaceType, EditableBeanBuildCommand<?> instance) {
         ProxyFactory proxyFactory = new ProxyFactory();
         proxyFactory.setTargetSource(new SingletonTargetSource(instance));
         proxyFactory.addInterface(interfaceType);
@@ -121,7 +121,7 @@ public class BeanBuilder implements ValueGenerator {
         if (typeGenerator.contains(beanClass)) {
             return typeGenerator.generate(beanClass);
         }
-        return newBean(beanClass).fill().build();
+        return start(beanClass).fill().build();
     }
 
     /**
