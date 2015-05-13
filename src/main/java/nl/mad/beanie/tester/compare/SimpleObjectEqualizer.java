@@ -5,7 +5,7 @@ package nl.mad.beanie.tester.compare;
 
 import java.math.BigDecimal;
 
-import nl.mad.beanie.support.Objects;
+import nl.mad.beanie.util.Objects;
 
 /**
  * Simple implementation of {@link ObjectEqualizer}.

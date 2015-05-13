@@ -14,6 +14,9 @@ import org.springframework.aop.target.SingletonTargetSource;
  */
 public class ProxyBeanGenerator implements ValueGenerator {
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object generate(Class<?> beanClass) {
         ProxyFactory proxyFactory = new ProxyFactory();

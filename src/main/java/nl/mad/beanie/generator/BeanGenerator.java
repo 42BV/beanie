@@ -58,13 +58,12 @@ public class BeanGenerator implements ValueGenerator {
         } else if (Modifier.isAbstract(beanClass.getModifiers())) {
             return abstractGenerator.generate(beanClass);
         } else {
-            return instantiateConcrete(beanClass);
+            return instantiate(beanClass);
         }
     }
 
-    // Instantiate the concrete class.
-    private Object instantiateConcrete(Class<?> beanClass) {
-        Constructor<?> constructor = constructorStrategy.getConstructor(beanClass);
+    private Object instantiate(Class<?> beanClass) {
+        Constructor<?> constructor = constructorStrategy.findConstructor(beanClass);
         if (constructor != null) {
             Class<?>[] parameterTypes = constructor.getParameterTypes();
             Object[] arguments = new Object[parameterTypes.length];
@@ -81,27 +80,33 @@ public class BeanGenerator implements ValueGenerator {
      * Change the generator used to generate abstract class instances.
      * 
      * @param abstractGenerator the abstract generator
+     * @return this instance for chaining
      */
-    public void setAbstractGenerator(ValueGenerator abstractGenerator) {
+    public BeanGenerator setAbstractGenerator(ValueGenerator abstractGenerator) {
         this.abstractGenerator = abstractGenerator;
+        return this;
     }
 
     /**
      * Change the generator used to generate interface instances.
      * 
      * @param interfaceGenerator the interface generator
+     * @return this instance for chaining
      */
-    public void setInterfaceGenerator(ValueGenerator interfaceGenerator) {
+    public BeanGenerator setInterfaceGenerator(ValueGenerator interfaceGenerator) {
         this.interfaceGenerator = interfaceGenerator;
+        return this;
     }
 
     /**
      * Change the strategory for selecting the most desired constructor.
      * 
      * @param constructorStrategy the constructor strategy
+     * @return this instance for chaining
      */
-    public void setConstructorStrategy(ConstructorStrategy constructorStrategy) {
+    public BeanGenerator setConstructorStrategy(ConstructorStrategy constructorStrategy) {
         this.constructorStrategy = constructorStrategy;
+        return this;
     }
 
 }

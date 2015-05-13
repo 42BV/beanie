@@ -6,10 +6,10 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import nl.mad.beanie.BeanBuilder;
-import nl.mad.beanie.support.Classes;
-import nl.mad.beanie.support.PropertyReference;
 import nl.mad.beanie.tester.compare.ObjectEqualizer;
 import nl.mad.beanie.tester.compare.SimpleObjectEqualizer;
+import nl.mad.beanie.util.Classes;
+import nl.mad.beanie.util.PropertyReference;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeanWrapper;

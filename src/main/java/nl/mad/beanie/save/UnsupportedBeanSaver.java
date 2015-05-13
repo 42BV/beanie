@@ -6,7 +6,7 @@ package nl.mad.beanie.save;
 /**
  * Throws an exception when trying to save beans.
  *
- * @author jeroen
+ * @author Jeroen van Schagen
  * @since Feb 14, 2014
  */
 public class UnsupportedBeanSaver implements BeanSaver {

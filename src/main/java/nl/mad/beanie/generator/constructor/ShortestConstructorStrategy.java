@@ -13,8 +13,11 @@ import java.lang.reflect.Constructor;
  */
 public class ShortestConstructorStrategy implements ConstructorStrategy {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Constructor<?> getConstructor(Class<?> beanClass) {
+    public Constructor<?> findConstructor(Class<?> beanClass) {
         Constructor<?> shortest = null;
         for (Constructor<?> constructor : beanClass.getDeclaredConstructors()) {
             if (shortest == null || shortest.getParameterTypes().length > constructor.getParameterTypes().length) {

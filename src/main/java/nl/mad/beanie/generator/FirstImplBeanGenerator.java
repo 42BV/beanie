@@ -6,7 +6,7 @@ package nl.mad.beanie.generator;
 import java.io.IOException;
 import java.util.Set;
 
-import nl.mad.beanie.support.Classes;
+import nl.mad.beanie.util.Classes;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -30,6 +30,9 @@ public class FirstImplBeanGenerator implements ValueGenerator {
         this.beanGenerator = beanGenerator;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object generate(Class<?> abstractBeanClass) {
         Class<?> implementationClass = getFirstImplementationClass(abstractBeanClass);

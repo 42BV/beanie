@@ -16,7 +16,7 @@ import nl.mad.beanie.generator.DefaultValueGenerator;
 import nl.mad.beanie.generator.ValueGenerator;
 import nl.mad.beanie.save.BeanSaver;
 import nl.mad.beanie.save.UnsupportedBeanSaver;
-import nl.mad.beanie.support.PropertyReference;
+import nl.mad.beanie.util.PropertyReference;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -48,7 +48,7 @@ public class BeanBuilder implements ValueGenerator {
     /**
      * Generator used to generate the result beans.
      */
-    final BeanGenerator beanGenerator;
+    private final BeanGenerator beanGenerator;
     
     /**
      * Saves the generated beans.
@@ -122,7 +122,7 @@ public class BeanBuilder implements ValueGenerator {
         if (typeGenerator.contains(beanClass)) {
             return typeGenerator.generate(beanClass);
         }
-        return start(beanClass).fill().build();
+        return start(beanClass).fill().construct();
     }
 
     /**
@@ -137,7 +137,7 @@ public class BeanBuilder implements ValueGenerator {
     }
 
     Object generateValue(Class<?> beanClass, PropertyDescriptor descriptor) {
-        ValueGenerator generator = getGenerator(beanClass, descriptor);
+        ValueGenerator generator = findGenerator(beanClass, descriptor);
         try {
             return generator.generate(descriptor.getPropertyType());
         } catch (RuntimeException rte) {
@@ -145,7 +145,7 @@ public class BeanBuilder implements ValueGenerator {
         }
     }
 
-    private ValueGenerator getGenerator(Class<?> beanClass, PropertyDescriptor descriptor) {
+    private ValueGenerator findGenerator(Class<?> beanClass, PropertyDescriptor descriptor) {
         ValueGenerator generator = this;
         PropertyReference reference = new PropertyReference(beanClass, descriptor.getName());
         if (propertyGenerators.containsKey(reference)) {

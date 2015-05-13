@@ -1,6 +1,6 @@
 package nl.mad.beanie.support;
 
-import nl.mad.beanie.support.Classes;
+import nl.mad.beanie.util.Classes;
 
 import org.junit.Assert;
 import org.junit.Test;

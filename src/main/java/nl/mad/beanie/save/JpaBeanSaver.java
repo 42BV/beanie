@@ -45,10 +45,10 @@ public class JpaBeanSaver implements BeanSaver {
     }
     
     private <T> boolean isSaveable(T value) {
-        return value != null && hasEntityAnnotation(value);
+        return value != null && isEntity(value);
     }
 
-    private boolean hasEntityAnnotation(Object value) {
+    private boolean isEntity(Object value) {
         return AnnotationUtils.findAnnotation(value.getClass(), Entity.class) != null;
     }
     

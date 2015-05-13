@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import nl.mad.beanie.generator.ValueGenerator;
-import nl.mad.beanie.support.PropertyReference;
+import nl.mad.beanie.util.PropertyReference;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanWrapper;
@@ -56,7 +56,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
     public DefaultBeanBuildCommand(BeanBuilder beanBuilder, Class<T> type) {
         this.beanBuilder = beanBuilder;
 
-        Object bean = beanBuilder.beanGenerator.generate(type);
+        Object bean = beanBuilder.getBeanGenerator().generate(type);
         beanWrapper = new BeanWrapperImpl(bean);
         fieldAccessor = new DirectFieldAccessor(bean);
     }
@@ -84,7 +84,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
-    public EditableBeanBuildCommand<T> copyAllValuesFrom(Object source, String... exclusionArgs) {
+    public EditableBeanBuildCommand<T> load(Object source, String... exclusionArgs) {
         final Collection<String> exclusions = Arrays.asList(exclusionArgs);
 
         BeanWrapper sourceWrapper = new BeanWrapperImpl(source);
@@ -144,7 +144,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
-    public T build() {
+    public T construct() {
         return finishBean(false);
     }
     

@@ -1,6 +1,6 @@
 package nl.mad.beanie.generator;
 
-import nl.mad.beanie.support.Classes;
+import nl.mad.beanie.util.Classes;
 
 import org.springframework.beans.BeanUtils;
 

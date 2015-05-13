@@ -1,4 +1,4 @@
-package nl.mad.beanie.support;
+package nl.mad.beanie.util;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;

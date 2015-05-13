@@ -30,7 +30,7 @@ public interface EditableBeanBuildCommand<T> extends BeanBuildCommand<T> {
      * @param exclusions the property names to exclude from copy
      * @return this instance, for chaining
      */
-    EditableBeanBuildCommand<T> copyAllValuesFrom(Object bean, String... exclusions);
+    EditableBeanBuildCommand<T> load(Object bean, String... exclusions);
 
     /**
      * Generate a value in our to be generated bean.

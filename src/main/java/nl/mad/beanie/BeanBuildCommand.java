@@ -19,14 +19,14 @@ public interface BeanBuildCommand<T> {
     BeanBuildCommand<T> fill();
     
     /**
-     * Build the new bean.
+     * Construct the new bean.
      * 
-     * @return the created bean
+     * @return the constructed bean
      */
-    T build();
+    T construct();
     
     /**
-     * Build and save new bean.
+     * Construct and save new bean.
      * 
      * @return the saved bean
      */

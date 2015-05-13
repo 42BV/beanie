@@ -1,7 +1,7 @@
 /*
  * (C) 2014 42 bv (www.42.nl). All rights reserved.
  */
-package nl.mad.beanie.support;
+package nl.mad.beanie.util;
 
 /**
  * Temporary class until everybody moves to Java8.

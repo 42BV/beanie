@@ -12,11 +12,11 @@ import org.springframework.aop.Advisor;
 
 /**
  * Appends bean building logic to builders, allowing custom builder interfaces.
- * Whenever a custom method is invoked, such as <code>withId(1)</code> we will
- * automatically decorate the bean with an "id" property value of 1.
+ * Whenever a custom method is invoked, such as <code>setName("henk")</code> we will
+ * automatically decorate the bean with an "name" property value of "henk".
  * <p>
- * Providing no argument, such as <code>withId()</code>, we decorate the bean
- * with a generated "id" property value. The property value is generated using
+ * Providing no argument, such as <code>setName()</code>, we decorate the bean
+ * with a generated "name" property value. The property value is generated using
  * the same bean builder.
  *
  * @author Jeroen van Schagen
@@ -24,7 +24,7 @@ import org.springframework.aop.Advisor;
  */
 public final class BeanBuildCommandAdvisor implements Advisor {
     
-    private static final String WITH_PREFIX = "with";
+    private static final String SET_PREFIX = "set";
 
     private final EditableBeanBuildCommand<?> command;
     
@@ -53,7 +53,7 @@ public final class BeanBuildCommandAdvisor implements Advisor {
         @Override
         public Object invoke(MethodInvocation invocation) throws Throwable {
             final String methodName = invocation.getMethod().getName();
-            if (methodName.startsWith(WITH_PREFIX)) {
+            if (methodName.startsWith(SET_PREFIX)) {
                 String propertyName = getPropertyName(methodName);
                 Object[] arguments = invocation.getArguments();
                 if (arguments.length == 0) {
@@ -67,7 +67,7 @@ public final class BeanBuildCommandAdvisor implements Advisor {
         }
 
         private String getPropertyName(final String methodName) {
-            String propertyName = methodName.substring(WITH_PREFIX.length());
+            String propertyName = methodName.substring(SET_PREFIX.length());
             return uncapitalize(propertyName);
         }
 

@@ -19,6 +19,6 @@ public interface ConstructorStrategy {
      * @param beanClass the bean class
      * @return the found constructor
      */
-    Constructor<?> getConstructor(Class<?> beanClass);
+    Constructor<?> findConstructor(Class<?> beanClass);
 
 }

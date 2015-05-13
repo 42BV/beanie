@@ -56,7 +56,7 @@ public class BeanBuilderTest {
 		NestedBeanWithConstructor nestedBeanWithConstructor = new NestedBeanWithConstructor("bla");
         beanBuilder.registerValue(SimpleBean.class, "nestedBeanWithConstructor", nestedBeanWithConstructor);
 
-        SimpleBean bean = beanBuilder.start(SimpleBean.class).generateValues("nestedBeanWithConstructor").build();
+        SimpleBean bean = beanBuilder.start(SimpleBean.class).generateValues("nestedBeanWithConstructor").construct();
 		Assert.assertEquals(nestedBeanWithConstructor, bean.getNestedBeanWithConstructor());
 	}
 
@@ -86,7 +86,7 @@ public class BeanBuilderTest {
         SimpleBean bean = beanBuilder.start(SimpleBean.class)
                                         .setValue("id", 42L)
                                         .generateValue("name", new ConstantValueGenerator("success"))
-                                            .fill().build();
+                                            .fill().construct();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertEquals("success", bean.getName());
@@ -101,13 +101,13 @@ public class BeanBuilderTest {
         SimpleBean bean = beanBuilder.start(SimpleBean.class)
                                         .setValue("id", 42L)
                                         .setValue("name", "Jan")
-                                            .fill().build();
+                                            .fill().construct();
                     
         Assert.assertEquals("Jan", bean.getName());
 
         SimpleBean clone = beanBuilder.start(SimpleBean.class)
-                                        .copyAllValuesFrom(bean, "shortName")
-                                            .build();
+                                        .load(bean, "shortName")
+                                            .construct();
         
         // Copied from the simple bean
         Assert.assertEquals("Jan", clone.getName());
@@ -124,10 +124,10 @@ public class BeanBuilderTest {
     @Test
     public void testBuildWithCustomBuilder() {        
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
-                                        .withId(42L)
-                                        .withName(new ConstantValueGenerator("success"))
-                                        .withNestedBean()
-                                            .build();
+                                        .setId(42L)
+                                        .setName(new ConstantValueGenerator("success"))
+                                        .setNestedBean()
+                                            .construct();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertNull(bean.getShortName());
@@ -139,7 +139,10 @@ public class BeanBuilderTest {
     public void testBuildWithDefinedGenerators() {
         beanBuilder.register(SimpleBean.class, "name", new RandomStringGenerator(2, 4));
         
-        SimpleBean bean = beanBuilder.start(SimpleBean.class).setValue("id", 42L).fill().build();
+        SimpleBean bean = beanBuilder.start(SimpleBean.class)
+                                        .setValue("id", 42L)
+                                            .fill().construct();
+        
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertNotNull(bean.getName());
     }
@@ -165,7 +168,7 @@ public class BeanBuilderTest {
          * @param id the identifier
          * @return this instance, for chaining
          */
-        SimpleBeanBuildCommand withId(Long id);
+        SimpleBeanBuildCommand setId(Long id);
 
         /**
          * Changes the name with a value.
@@ -173,7 +176,7 @@ public class BeanBuilderTest {
          * @param name the name
          * @return this instance, for chaining
          */
-        SimpleBeanBuildCommand withName(String name);
+        SimpleBeanBuildCommand setName(String name);
         
         /**
          * Changes the name with a generator.
@@ -181,14 +184,14 @@ public class BeanBuilderTest {
          * @param generator the generator
          * @return this instance, for chaining
          */
-        SimpleBeanBuildCommand withName(ValueGenerator generator);
+        SimpleBeanBuildCommand setName(ValueGenerator generator);
 
         /**
          * Changes the name with a registered generator.
          * 
          * @return this instance, for chaining
          */
-        SimpleBeanBuildCommand withNestedBean();
+        SimpleBeanBuildCommand setNestedBean();
 
     }
 
