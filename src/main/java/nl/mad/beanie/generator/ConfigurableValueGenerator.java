@@ -19,7 +19,21 @@ public class ConfigurableValueGenerator implements ValueGenerator {
     	generators = new LinkedHashMap<Class<?>, ValueGenerator>();
         this.fallback = fallback;
     }
+    
+    /**
+     * Creates a direct clone of this value generator.
+     * 
+     * @return the cloned instance
+     */
+    public ConfigurableValueGenerator clone() {
+        ConfigurableValueGenerator result = new ConfigurableValueGenerator(fallback);
+        result.generators.putAll(generators);
+        return result;
+    }
 
+    /**
+     * {@inheritDoc}
+     */
 	@Override
     public Object generate(Class<?> type) {
 		ValueGenerator generator = getSupportedGenerator(type);

@@ -74,6 +74,20 @@ public class BeanBuilder implements ValueGenerator {
         this.beanGenerator = new BeanGenerator(this);
         this.beanSaver = beanSaver;
     }
+    
+    /**
+     * Construct a new {@link BeanBuilder} cloning the settings
+     * of an existing builder.
+     * 
+     * @param beanBuilder the builder instance to clone from
+     */
+    public BeanBuilder(BeanBuilder beanBuilder) {
+        this.skippedProperties.addAll(beanBuilder.skippedProperties);
+        this.propertyGenerators.putAll(beanBuilder.propertyGenerators);
+        this.typeGenerator = beanBuilder.typeGenerator.clone();
+        this.beanGenerator = beanBuilder.beanGenerator;
+        this.beanSaver = beanBuilder.beanSaver;
+    }
 
     /**
      * Start building a new bean.

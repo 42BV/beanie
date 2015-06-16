@@ -47,6 +47,14 @@ public class BeanBuilderTest {
         SimpleBean bean = (SimpleBean) beanBuilder.generate(SimpleBean.class);
         Assert.assertEquals("success", bean.getName());
     }
+    
+    @Test
+    public void testGenerateFromClone() {
+        beanBuilder.registerValue(String.class, "success");
+        
+        SimpleBean bean = (SimpleBean) new BeanBuilder(beanBuilder).generate(SimpleBean.class);
+        Assert.assertEquals("success", bean.getName());
+    }
 
 	@Test
     public void testGenerateWithCustomProperty() {
