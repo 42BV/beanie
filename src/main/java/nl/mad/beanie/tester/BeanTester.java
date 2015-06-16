@@ -54,7 +54,7 @@ public class BeanTester {
         this.equalizer = equalizer;
         
         // Exclude default property that have unusable getter and setters
-        excludeProperty(Throwable.class, "stackTrace");
+        exclude(Throwable.class, "stackTrace");
     }
 
     /**
@@ -248,7 +248,7 @@ public class BeanTester {
      * @param propertyName name of the property
      * @return this instance for chaining
      */
-    public BeanTester excludeProperty(Class<?> declaringClass, String propertyName) {
+    public BeanTester exclude(Class<?> declaringClass, String propertyName) {
         excludedProperties.add(new PropertyReference(declaringClass, propertyName));
         beanBuilder.skip(declaringClass, propertyName);
         return this;

@@ -15,9 +15,9 @@ public class BeanTesterTest {
 	@Before
 	public void setUp() {
 		beanTester = new BeanTester();
-		beanTester.excludeProperty(FullBean.class, "unsupportedValue");
-		beanTester.excludeProperty(FullBean.class, "differentValue");
-		beanTester.excludeProperty(FullBean.class, "differentTypeValue");
+		beanTester.exclude(FullBean.class, "unsupportedValue");
+		beanTester.exclude(FullBean.class, "differentValue");
+		beanTester.exclude(FullBean.class, "differentTypeValue");
         beanTester.includeAllWithNullaryConstructor();
 	}
 	

@@ -1,7 +1,5 @@
 package nl.mad.beanie;
 
-import nl.mad.beanie.BeanBuildCommand;
-import nl.mad.beanie.BeanBuilder;
 import nl.mad.beanie.domain.NestedBean;
 import nl.mad.beanie.domain.NestedBeanWithConstructor;
 import nl.mad.beanie.domain.SimpleBean;
@@ -11,7 +9,6 @@ import nl.mad.beanie.domain.SomeInterface;
 import nl.mad.beanie.generator.BeanGenerator;
 import nl.mad.beanie.generator.ConstantValueGenerator;
 import nl.mad.beanie.generator.FirstImplBeanGenerator;
-import nl.mad.beanie.generator.ValueGenerator;
 import nl.mad.beanie.generator.random.RandomStringGenerator;
 
 import org.junit.Assert;
@@ -86,7 +83,8 @@ public class BeanBuilderTest {
         SimpleBean bean = beanBuilder.start(SimpleBean.class)
                                         .setValue("id", 42L)
                                         .generateValue("name", new ConstantValueGenerator("success"))
-                                            .fill().construct();
+                                        .fill()
+                                            .construct();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertEquals("success", bean.getName());
@@ -101,7 +99,8 @@ public class BeanBuilderTest {
         SimpleBean bean = beanBuilder.start(SimpleBean.class)
                                         .setValue("id", 42L)
                                         .setValue("name", "Jan")
-                                            .fill().construct();
+                                        .fill()
+                                            .construct();
                     
         Assert.assertEquals("Jan", bean.getName());
 
@@ -141,7 +140,8 @@ public class BeanBuilderTest {
         
         SimpleBean bean = beanBuilder.start(SimpleBean.class)
                                         .setValue("id", 42L)
-                                            .fill().construct();
+                                        .fill()
+                                            .construct();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertNotNull(bean.getName());
@@ -150,49 +150,6 @@ public class BeanBuilderTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testBuildAndSaveUnsupported() {
         beanBuilder.start(SimpleBean.class).save();
-    }
-    
-    // Custom build commands
-
-    /**
-     * Build command for simple beans.
-     *
-     * @author Jeroen van Schagen
-     * @since Mar 26, 2015
-     */
-    public interface SimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
-
-        /**
-         * Changes the identifier.
-         * 
-         * @param id the identifier
-         * @return this instance, for chaining
-         */
-        SimpleBeanBuildCommand setId(Long id);
-
-        /**
-         * Changes the name with a value.
-         * 
-         * @param name the name
-         * @return this instance, for chaining
-         */
-        SimpleBeanBuildCommand setName(String name);
-        
-        /**
-         * Changes the name with a generator.
-         * 
-         * @param generator the generator
-         * @return this instance, for chaining
-         */
-        SimpleBeanBuildCommand setName(ValueGenerator generator);
-
-        /**
-         * Changes the name with a registered generator.
-         * 
-         * @return this instance, for chaining
-         */
-        SimpleBeanBuildCommand setNestedBean();
-
     }
 
 }
