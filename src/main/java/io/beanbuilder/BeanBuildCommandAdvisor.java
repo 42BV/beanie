@@ -5,6 +5,8 @@ package io.beanbuilder;
 
 import io.beanbuilder.generator.ValueGenerator;
 
+import java.lang.reflect.Method;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -50,38 +52,50 @@ public final class BeanBuildCommandAdvisor implements Advisor {
     
     private class CustomBeanBuilderAdvice implements MethodInterceptor {
         
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public Object invoke(MethodInvocation invocation) throws Throwable {
-            final String methodName = invocation.getMethod().getName();
-            if (methodName.startsWith(SET_PREFIX)) {
-                String propertyName = getPropertyName(methodName);
-                Object[] arguments = invocation.getArguments();
-                if (arguments.length == 0) {
-                    return command.generateValues(propertyName);
-                } else {
-                    return withArgument(propertyName, arguments);
-                }
+            final Method method = invocation.getMethod();
+            final Object[] arguments = invocation.getArguments();
+            if (isAdvicedMethod(method, arguments)) {
+                return setPropertyValue(method, arguments);
             } else {
                 return invocation.proceed();
             }
         }
 
-        private String getPropertyName(final String methodName) {
-            String propertyName = methodName.substring(SET_PREFIX.length());
-            return uncapitalize(propertyName);
+        private boolean isAdvicedMethod(final Method method, final Object[] arguments) {
+            return arguments.length <= 1 && (method.getAnnotation(SetProperty.class) != null || method.getName().startsWith(SET_PREFIX));
         }
-
-        private String uncapitalize(String propertyName) {
-            return propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
-        }
-
-        private Object withArgument(String propertyName, Object[] arguments) {
-            Object value = arguments[0];
-            if (value instanceof ValueGenerator) {
-                return command.generateValue(propertyName, (ValueGenerator) value);
+        
+        private Object setPropertyValue(final Method method, final Object[] arguments) {
+            String propertyName = getPropertyName(method);
+            if (arguments.length == 1) {
+                Object argument = arguments[0];
+                if (argument instanceof ValueGenerator) {
+                    return command.generateValue(propertyName, (ValueGenerator) argument);
+                } else {
+                    return command.setValue(propertyName, argument);
+                }
             } else {
-                return command.setValue(propertyName, value);
+                return command.generateValue(propertyName);
             }
+        }
+
+        private String getPropertyName(final Method method) {
+            SetProperty annotation = method.getAnnotation(SetProperty.class);
+            if (annotation != null) {
+                return annotation.value();
+            } else {
+                String propertyName = method.getName().substring(SET_PREFIX.length());
+                return uncapitalize(propertyName);
+            }
+        }
+
+        private String uncapitalize(final String propertyName) {
+            return propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
         }
 
     }

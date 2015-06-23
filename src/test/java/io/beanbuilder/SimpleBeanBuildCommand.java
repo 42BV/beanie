@@ -3,7 +3,6 @@
  */
 package io.beanbuilder;
 
-import io.beanbuilder.BeanBuildCommand;
 import io.beanbuilder.domain.SimpleBean;
 import io.beanbuilder.generator.ValueGenerator;
 
@@ -13,15 +12,7 @@ import io.beanbuilder.generator.ValueGenerator;
  * @author Jeroen van Schagen
  * @since Mar 26, 2015
  */
-public interface SimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
-
-    /**
-     * Changes the identifier.
-     * 
-     * @param id the identifier
-     * @return this instance, for chaining
-     */
-    SimpleBeanBuildCommand setId(Long id);
+public interface SimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleBean> {
 
     /**
      * Changes the name with a value.
@@ -44,6 +35,7 @@ public interface SimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
      * 
      * @return this instance, for chaining
      */
-    SimpleBeanBuildCommand setNestedBean();
+    @SetProperty("nestedBean")
+    SimpleBeanBuildCommand withNestedBean();
 
 }

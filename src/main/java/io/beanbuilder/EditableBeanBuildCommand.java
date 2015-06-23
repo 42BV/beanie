@@ -47,6 +47,6 @@ public interface EditableBeanBuildCommand<T> extends BeanBuildCommand<T> {
      * @param propertyNames the property names
      * @return this instance, for chaining
      */
-    EditableBeanBuildCommand<T> generateValues(String... propertyNames);
+    EditableBeanBuildCommand<T> generateValue(String... propertyNames);
 
 }

@@ -62,7 +62,7 @@ public class BeanBuilderTest {
 		NestedBeanWithConstructor nestedBeanWithConstructor = new NestedBeanWithConstructor("bla");
         beanBuilder.registerValue(SimpleBean.class, "nestedBeanWithConstructor", nestedBeanWithConstructor);
 
-        SimpleBean bean = beanBuilder.start(SimpleBean.class).generateValues("nestedBeanWithConstructor").construct();
+        SimpleBean bean = beanBuilder.start(SimpleBean.class).generateValue("nestedBeanWithConstructor").construct();
 		Assert.assertEquals(nestedBeanWithConstructor, bean.getNestedBeanWithConstructor());
 	}
 
@@ -132,9 +132,9 @@ public class BeanBuilderTest {
     @Test
     public void testBuildWithCustomBuilder() {        
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
-                                        .setId(42L)
                                         .setName(new ConstantValueGenerator("success"))
-                                        .setNestedBean()
+                                        .withNestedBean()
+                                        .setValue("id", 42L)
                                             .construct();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());

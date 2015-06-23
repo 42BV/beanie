@@ -20,8 +20,8 @@ abstract class RandomSupport {
         return RANDOM.nextInt(n);
     }
     
-    public Boolean randomBoolean(double d) {
-        return randomDouble() >= d ? Boolean.FALSE : Boolean.TRUE;
+    public boolean randomBoolean(double d) {
+        return randomDouble() < d;
     }
     
     public int randomInt(int minimum, int maximum) {
