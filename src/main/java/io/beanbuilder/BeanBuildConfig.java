@@ -11,17 +11,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 
+ * Configurations on a bean build command.
  *
  * @author Jeroen van Schagen
  * @since Jun 23, 2015
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 @Documented
 @Inherited
-public @interface SetProperty {
+public @interface BeanBuildConfig {
     
-    String value();
+    String preffix() default "set";
 
 }

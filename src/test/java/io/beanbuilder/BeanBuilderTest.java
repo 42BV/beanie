@@ -1,6 +1,5 @@
 package io.beanbuilder;
 
-import io.beanbuilder.BeanBuilder;
 import io.beanbuilder.domain.NestedBean;
 import io.beanbuilder.domain.NestedBeanWithConstructor;
 import io.beanbuilder.domain.SimpleBean;
@@ -102,7 +101,20 @@ public class BeanBuilderTest {
     }
     
     @Test
-    public void testBuildWithCopy() {
+    public void testBuildWithDefinedGenerators() {
+        beanBuilder.register(SimpleBean.class, "name", new RandomStringGenerator(2, 4));
+        
+        SimpleBean bean = beanBuilder.start(SimpleBean.class)
+                                        .setValue("id", 42L)
+                                        .fill()
+                                            .construct();
+        
+        Assert.assertEquals(Long.valueOf(42), bean.getId());
+        Assert.assertNotNull(bean.getName());
+    }
+
+    @Test
+    public void testBuildWithLoadFromOther() {
         beanBuilder.skip(SimpleBean.class, "id");
         
         SimpleBean bean = beanBuilder.start(SimpleBean.class)
@@ -133,7 +145,7 @@ public class BeanBuilderTest {
     public void testBuildWithCustomBuilder() {        
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
                                         .setName(new ConstantValueGenerator("success"))
-                                        .withNestedBean()
+                                        .setNestedBean()
                                         .setValue("id", 42L)
                                             .construct();
         
@@ -144,16 +156,14 @@ public class BeanBuilderTest {
     }
     
     @Test
-    public void testBuildWithDefinedGenerators() {
-        beanBuilder.register(SimpleBean.class, "name", new RandomStringGenerator(2, 4));
-        
-        SimpleBean bean = beanBuilder.start(SimpleBean.class)
+    public void testBuildWithCustomBuilderAndOtherConvention() {        
+        SimpleBean bean = beanBuilder.startAs(WithSimpleBeanBuildCommand.class)
+                                        .withName("success")
                                         .setValue("id", 42L)
-                                        .fill()
                                             .construct();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
-        Assert.assertNotNull(bean.getName());
+        Assert.assertEquals("success", bean.getName());
     }
 
     @Test(expected = UnsupportedOperationException.class)

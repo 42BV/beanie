@@ -35,7 +35,6 @@ public interface SimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleB
      * 
      * @return this instance, for chaining
      */
-    @SetProperty("nestedBean")
-    SimpleBeanBuildCommand withNestedBean();
+    SimpleBeanBuildCommand setNestedBean();
 
 }

@@ -59,19 +59,26 @@ public final class BeanBuildCommandAdvisor implements Advisor {
         public Object invoke(MethodInvocation invocation) throws Throwable {
             final Method method = invocation.getMethod();
             final Object[] arguments = invocation.getArguments();
-            if (isAdvicedMethod(method, arguments)) {
-                return setPropertyValue(method, arguments);
+            final String preffix = getPreffix(method);
+
+            if (isAdvicedMethod(method, arguments, preffix)) {
+                return setPropertyValue(method, arguments, preffix);
             } else {
                 return invocation.proceed();
             }
         }
 
-        private boolean isAdvicedMethod(final Method method, final Object[] arguments) {
-            return arguments.length <= 1 && (method.getAnnotation(SetProperty.class) != null || method.getName().startsWith(SET_PREFIX));
+        private String getPreffix(final Method method) {
+            BeanBuildConfig config = method.getDeclaringClass().getAnnotation(BeanBuildConfig.class);
+            return config != null ? config.preffix() : SET_PREFIX;
+        }
+
+        private boolean isAdvicedMethod(final Method method, final Object[] arguments, final String preffix) {
+            return method.getName().startsWith(preffix) && arguments.length <= 1;
         }
         
-        private Object setPropertyValue(final Method method, final Object[] arguments) {
-            String propertyName = getPropertyName(method);
+        private Object setPropertyValue(final Method method, final Object[] arguments, final String preffix) {
+            String propertyName = getPropertyName(method, preffix);
             if (arguments.length == 1) {
                 Object argument = arguments[0];
                 if (argument instanceof ValueGenerator) {
@@ -84,14 +91,9 @@ public final class BeanBuildCommandAdvisor implements Advisor {
             }
         }
 
-        private String getPropertyName(final Method method) {
-            SetProperty annotation = method.getAnnotation(SetProperty.class);
-            if (annotation != null) {
-                return annotation.value();
-            } else {
-                String propertyName = method.getName().substring(SET_PREFIX.length());
-                return uncapitalize(propertyName);
-            }
+        private String getPropertyName(final Method method, final String preffix) {
+            String propertyName = method.getName().substring(preffix.length());
+            return uncapitalize(propertyName);
         }
 
         private String uncapitalize(final String propertyName) {
