@@ -65,7 +65,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
-    public EditableBeanBuildCommand<T> setValue(String propertyName, Object value) {
+    public EditableBeanBuildCommand<T> withValue(String propertyName, Object value) {
         setPropertyValue(propertyName, value);
         touchedProperties.add(propertyName);
         propertiesToGenerate.remove(propertyName);
@@ -91,7 +91,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
         for (PropertyDescriptor descriptor : sourceWrapper.getPropertyDescriptors()) {
             final String propertyName = descriptor.getName();
             if (sourceWrapper.isReadableProperty(propertyName) && beanWrapper.isWritableProperty(propertyName) && !isSkipped(propertyName, exclusions)) {
-                setValue(propertyName, sourceWrapper.getPropertyValue(propertyName));
+                withValue(propertyName, sourceWrapper.getPropertyValue(propertyName));
             }
         }
         return this;
@@ -109,7 +109,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
     public EditableBeanBuildCommand<T> generateValue(String propertyName, ValueGenerator generator) {
         PropertyDescriptor descriptor = beanWrapper.getPropertyDescriptor(propertyName);
         Object value = generator.generate(descriptor.getPropertyType());
-        return this.setValue(propertyName, value);
+        return this.withValue(propertyName, value);
     }
 
     /**
@@ -174,7 +174,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
         if (autoSave) {
             value = beanBuilder.save(value);
         }
-        setValue(propertyName, value);
+        withValue(propertyName, value);
     }
 
 }

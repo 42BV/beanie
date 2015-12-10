@@ -11,8 +11,8 @@ import io.beanbuilder.domain.SimpleBean;
  * @author Jeroen van Schagen
  * @since Mar 26, 2015
  */
-@BeanBuildConfig(preffix = "with")
-public interface WithSimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleBean> {
+@BeanBuildConfig(preffix = "set")
+public interface SetSimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleBean> {
 
     /**
      * Changes the name with a value.
@@ -20,6 +20,6 @@ public interface WithSimpleBeanBuildCommand extends EditableBeanBuildCommand<Sim
      * @param name the name
      * @return this instance, for chaining
      */
-    WithSimpleBeanBuildCommand withName(String name);
+    SetSimpleBeanBuildCommand setName(String name);
 
 }

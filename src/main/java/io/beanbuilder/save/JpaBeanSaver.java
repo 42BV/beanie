@@ -5,6 +5,7 @@ package io.beanbuilder.save;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import org.springframework.core.annotation.AnnotationUtils;
 
@@ -17,11 +18,8 @@ import org.springframework.core.annotation.AnnotationUtils;
  */
 public class JpaBeanSaver implements BeanSaver {
     
-    private final EntityManager entityManager;
-    
-    public JpaBeanSaver(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /**
      * {@inheritDoc}

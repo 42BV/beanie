@@ -84,7 +84,7 @@ public final class BeanBuildCommandAdvisor implements Advisor {
                 if (argument instanceof ValueGenerator) {
                     return command.generateValue(propertyName, (ValueGenerator) argument);
                 } else {
-                    return command.setValue(propertyName, argument);
+                    return command.withValue(propertyName, argument);
                 }
             } else {
                 return command.generateValue(propertyName);

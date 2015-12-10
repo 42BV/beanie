@@ -22,6 +22,6 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface BeanBuildConfig {
     
-    String preffix() default "set";
+    String preffix() default "with";
 
 }

@@ -89,7 +89,7 @@ public class BeanBuilderTest {
     @Test
     public void testBuildWithDefaultBuilder() {
         SimpleBean bean = beanBuilder.start(SimpleBean.class)
-                                        .setValue("id", 42L)
+                                        .withValue("id", 42L)
                                         .generateValue("name", new ConstantValueGenerator("success"))
                                         .fill()
                                             .construct();
@@ -105,7 +105,7 @@ public class BeanBuilderTest {
         beanBuilder.register(SimpleBean.class, "name", new RandomStringGenerator(2, 4));
         
         SimpleBean bean = beanBuilder.start(SimpleBean.class)
-                                        .setValue("id", 42L)
+                                        .withValue("id", 42L)
                                         .fill()
                                             .construct();
         
@@ -118,8 +118,8 @@ public class BeanBuilderTest {
         beanBuilder.skip(SimpleBean.class, "id");
         
         SimpleBean bean = beanBuilder.start(SimpleBean.class)
-                                        .setValue("id", 42L)
-                                        .setValue("name", "Jan")
+                                        .withValue("id", 42L)
+                                        .withValue("name", "Jan")
                                         .fill()
                                             .construct();
                     
@@ -146,7 +146,7 @@ public class BeanBuilderTest {
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
                                         .setName(new ConstantValueGenerator("success"))
                                         .setNestedBean()
-                                        .setValue("id", 42L)
+                                        .withValue("id", 42L)
                                             .construct();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
@@ -157,9 +157,9 @@ public class BeanBuilderTest {
     
     @Test
     public void testBuildWithCustomBuilderAndOtherConvention() {        
-        SimpleBean bean = beanBuilder.startAs(WithSimpleBeanBuildCommand.class)
-                                        .withName("success")
-                                        .setValue("id", 42L)
+        SimpleBean bean = beanBuilder.startAs(SetSimpleBeanBuildCommand.class)
+                                        .setName("success")
+                                        .withValue("id", 42L)
                                             .construct();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());

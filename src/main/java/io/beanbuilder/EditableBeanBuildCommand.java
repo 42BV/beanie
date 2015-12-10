@@ -20,7 +20,7 @@ public interface EditableBeanBuildCommand<T> extends BeanBuildCommand<T> {
      * @param value the property value
      * @return this instance, for chaining
      */
-    EditableBeanBuildCommand<T> setValue(String propertyName, Object value);
+    EditableBeanBuildCommand<T> withValue(String propertyName, Object value);
     
     /**
      * Copies all usable property values from a bean
