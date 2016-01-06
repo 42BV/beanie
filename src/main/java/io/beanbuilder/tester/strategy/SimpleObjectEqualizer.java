@@ -1,7 +1,7 @@
 /*
  * (C) 2013 42 bv (www.42.nl). All rights reserved.
  */
-package io.beanbuilder.tester.compare;
+package io.beanbuilder.tester.strategy;
 
 import io.beanbuilder.util.Objects;
 

@@ -20,7 +20,7 @@ public interface SimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleB
      * @param name the name
      * @return this instance, for chaining
      */
-    SimpleBeanBuildCommand setName(String name);
+    SimpleBeanBuildCommand withName(String name);
     
     /**
      * Changes the name with a generator.
@@ -28,13 +28,13 @@ public interface SimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleB
      * @param generator the generator
      * @return this instance, for chaining
      */
-    SimpleBeanBuildCommand setName(ValueGenerator generator);
+    SimpleBeanBuildCommand withName(ValueGenerator generator);
 
     /**
      * Changes the name with a registered generator.
      * 
      * @return this instance, for chaining
      */
-    SimpleBeanBuildCommand setNestedBean();
+    SimpleBeanBuildCommand withNestedBean();
 
 }

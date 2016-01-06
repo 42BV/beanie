@@ -1,8 +1,8 @@
 package io.beanbuilder.tester;
 
 import io.beanbuilder.BeanBuilder;
-import io.beanbuilder.tester.compare.ObjectEqualizer;
-import io.beanbuilder.tester.compare.SimpleObjectEqualizer;
+import io.beanbuilder.tester.strategy.ObjectEqualizer;
+import io.beanbuilder.tester.strategy.SimpleObjectEqualizer;
 import io.beanbuilder.util.Classes;
 import io.beanbuilder.util.PropertyReference;
 

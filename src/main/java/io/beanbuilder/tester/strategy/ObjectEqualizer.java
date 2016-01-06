@@ -1,7 +1,7 @@
 /*
  * (C) 2014 42 bv (www.42.nl). All rights reserved.
  */
-package io.beanbuilder.tester.compare;
+package io.beanbuilder.tester.strategy;
 
 /**
  * Compares two objects with each other.

@@ -144,8 +144,8 @@ public class BeanBuilderTest {
     @Test
     public void testBuildWithCustomBuilder() {        
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
-                                        .setName(new ConstantValueGenerator("success"))
-                                        .setNestedBean()
+                                        .withName(new ConstantValueGenerator("success"))
+                                        .withNestedBean()
                                         .withValue("id", 42L)
                                             .construct();
         

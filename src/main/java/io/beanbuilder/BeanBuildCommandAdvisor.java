@@ -14,10 +14,10 @@ import org.springframework.aop.Advisor;
 
 /**
  * Appends bean building logic to builders, allowing custom builder interfaces.
- * Whenever a custom method is invoked, such as <code>setName("henk")</code> we will
+ * Whenever a custom method is invoked, such as <code>withName("henk")</code> we will
  * automatically decorate the bean with an "name" property value of "henk".
  * <p>
- * Providing no argument, such as <code>setName()</code>, we decorate the bean
+ * Providing no argument, such as <code>withName()</code>, we decorate the bean
  * with a generated "name" property value. The property value is generated using
  * the same bean builder.
  *
@@ -26,7 +26,7 @@ import org.springframework.aop.Advisor;
  */
 public final class BeanBuildCommandAdvisor implements Advisor {
     
-    private static final String SET_PREFIX = "set";
+    private static final String WITH_PREFIX = "with";
 
     private final EditableBeanBuildCommand<?> command;
     
@@ -70,7 +70,7 @@ public final class BeanBuildCommandAdvisor implements Advisor {
 
         private String getPreffix(final Method method) {
             BeanBuildConfig config = method.getDeclaringClass().getAnnotation(BeanBuildConfig.class);
-            return config != null ? config.preffix() : SET_PREFIX;
+            return config != null ? config.preffix() : WITH_PREFIX;
         }
 
         private boolean isAdvicedMethod(final Method method, final Object[] arguments, final String preffix) {
