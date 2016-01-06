@@ -3,7 +3,6 @@
  */
 package io.dynamo;
 
-import io.dynamo.EditableBeanBuildCommand;
 import io.dynamo.domain.SimpleBean;
 import io.dynamo.generator.ValueGenerator;
 
@@ -37,5 +36,14 @@ public interface SimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleB
      * @return this instance, for chaining
      */
     SimpleBeanBuildCommand withNestedBean();
+    
+    /**
+     * Default implementation, changes the name to a constant value.
+     * 
+     * @return this instance, for chaining
+     */
+    public default SimpleBeanBuildCommand withDefaultName() {
+        return this.withName("Default");
+    }
 
 }

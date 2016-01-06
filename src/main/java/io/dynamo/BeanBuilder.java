@@ -8,15 +8,17 @@ import io.dynamo.generator.ValueGenerator;
 import io.dynamo.save.BeanSaver;
 import io.dynamo.save.UnsupportedBeanSaver;
 import io.dynamo.util.PropertyReference;
+import io.dynamo.util.Proxies;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.core.GenericTypeResolver;
 
 /**
@@ -27,6 +29,8 @@ import org.springframework.core.GenericTypeResolver;
  */
 public class BeanBuilder implements ValueGenerator {
     
+    private static final String WITH_PREFIX = "with";
+
     /**
      * Collection of properties that should be skipped.
      */
@@ -104,18 +108,38 @@ public class BeanBuilder implements ValueGenerator {
      */
     @SuppressWarnings("unchecked")
     public <T extends BeanBuildCommand<?>> T startAs(Class<T> interfaceType) {
-        Class<?> beanClass = GenericTypeResolver.resolveTypeArguments(interfaceType, BeanBuildCommand.class)[0];
+        final Class<?> beanClass = GenericTypeResolver.resolveTypeArguments(interfaceType, BeanBuildCommand.class)[0];
+        final BeanBuildConfig config = interfaceType.getAnnotation(BeanBuildConfig.class);
+
         EditableBeanBuildCommand<?> instance = start(beanClass);
-        EditableBeanBuildCommand<?> proxy = wrapAsProxy(interfaceType, instance);
-        return (T) proxy;
+        DefaultPointcutAdvisor advisor = buildAdvisor(config, instance);
+        return (T) Proxies.wrapAsProxy(interfaceType, instance, advisor);
     }
 
-    private EditableBeanBuildCommand<?> wrapAsProxy(Class<?> interfaceType, EditableBeanBuildCommand<?> instance) {
-        ProxyFactory proxyFactory = new ProxyFactory();
-        proxyFactory.setTargetSource(new SingletonTargetSource(instance));
-        proxyFactory.addInterface(interfaceType);
-        proxyFactory.addAdvisor(new BeanBuildCommandAdvisor(instance));
-        return (EditableBeanBuildCommand<?>) proxyFactory.getProxy();
+    private DefaultPointcutAdvisor buildAdvisor(BeanBuildConfig config, EditableBeanBuildCommand<?> instance) {
+        final String preffix = config != null ? config.preffix() : WITH_PREFIX;
+
+        BeanBuilderPointcut pointcut = new BeanBuilderPointcut(preffix);
+        BeanBuildCommandAdvice advice = new BeanBuildCommandAdvice(instance, preffix);
+        return new DefaultPointcutAdvisor(pointcut, advice);
+    }
+
+    private static class BeanBuilderPointcut extends StaticMethodMatcherPointcut {
+        
+        private final String preffix;
+
+        public BeanBuilderPointcut(String preffix) {
+            this.preffix = preffix;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean matches(Method method, Class<?> targetClass) {
+            return method.getName().startsWith(preffix) && method.getParameterCount() <= 1;
+        }
+
     }
 
     /**

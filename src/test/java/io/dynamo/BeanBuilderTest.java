@@ -1,6 +1,5 @@
 package io.dynamo;
 
-import io.dynamo.BeanBuilder;
 import io.dynamo.domain.NestedBean;
 import io.dynamo.domain.NestedBeanWithConstructor;
 import io.dynamo.domain.SimpleBean;
@@ -14,6 +13,7 @@ import io.dynamo.generator.random.RandomStringGenerator;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BeanBuilderTest {
@@ -154,6 +154,18 @@ public class BeanBuilderTest {
         Assert.assertNull(bean.getShortName());
         Assert.assertEquals("success", bean.getName());
         Assert.assertNotNull(bean.getNestedBean());
+    }
+    
+    @Test
+    @Ignore
+    // Cannot get this to work: no private access for invokespecial
+    // URL: https://rmannibucau.wordpress.com/2014/03/27/java-8-default-interface-methods-and-jdk-dynamic-proxies
+    public void testBuildWithCustomBuilderAndDefaultMethod() {        
+        SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
+                                        .withDefaultName()
+                                            .construct();
+        
+        Assert.assertEquals("Default", bean.getName());
     }
     
     @Test
