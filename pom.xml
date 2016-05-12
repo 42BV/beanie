@@ -2,24 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>nl.mad</groupId>
-        <artifactId>root-pom</artifactId>
-        <version>1.6</version>
-    </parent>
+    <groupId>io.dynamo</groupId>
+    <artifactId>dynamo</artifactId>
+    <version>2.2.0</version>
 
-    <artifactId>beanie</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
-
-	<scm>
-		<connection>scm:git:https://github.com/42BV/beanie.git</connection>
-		<developerConnection>scm:git:https://github.com/42BV/beanie.git</developerConnection>
-		<url>https://github.com/42BV/beanie</url>
-		<tag>HEAD</tag>
-	</scm>
-	
 	<properties>
-	   <spring.version>4.1.6.RELEASE</spring.version>
+        <timestamp>${maven.build.timestamp}</timestamp>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.8</java.version>
+	
+	   <spring.version>4.2.4.RELEASE</spring.version>
 	</properties>
 	
 	<build>
@@ -29,6 +22,20 @@
                <artifactId>jgitflow-maven-plugin</artifactId>
                <version>1.0-m4.3</version>
            </plugin>
+           <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
 	   </plugins>
 	</build>
 
