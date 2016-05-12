@@ -5,6 +5,9 @@ package io.dynamo;
 
 import io.dynamo.generator.ValueGenerator;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 /**
  * Bean build command that allows users to declare custom property values.
  *
@@ -31,6 +34,21 @@ public interface EditableBeanBuildCommand<T> extends BeanBuildCommand<T> {
      * @return this instance, for chaining
      */
     EditableBeanBuildCommand<T> load(Object bean, String... exclusions);
+    
+    /**
+     * Perform a mapping on the intermediate object, changing it
+     * into the result object of our function.
+     * @param function the function that should be performed
+     * @return this instance, for chaining
+     */
+    EditableBeanBuildCommand<T> map(Function<T, T> function);
+    
+    /**
+     * Perform an operation on the intermediate object.
+     * @param consumer the consumer that should take our object
+     * @return this instance, for chaining
+     */
+    EditableBeanBuildCommand<T> doWith(Consumer<T> consumer);
 
     /**
      * Generate a value in our to be generated bean.

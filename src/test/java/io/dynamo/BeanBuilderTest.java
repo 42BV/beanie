@@ -147,6 +147,8 @@ public class BeanBuilderTest {
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
                                         .withName(new ConstantValueGenerator("success"))
                                         .withNestedBean()
+                                        .doWith(x -> x.getNestedBean().setValue("abc"))
+                                        .map(x -> x)
                                         .withValue("id", 42L)
                                             .construct();
         
@@ -158,7 +160,7 @@ public class BeanBuilderTest {
     
     @Test
     @Ignore
-    // Cannot get this to work: no private access for invokespecial
+    // TODO: Cannot get this to work: no private access for invokespecial
     // URL: https://rmannibucau.wordpress.com/2014/03/27/java-8-default-interface-methods-and-jdk-dynamic-proxies
     public void testBuildWithCustomBuilderAndDefaultMethod() {        
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)

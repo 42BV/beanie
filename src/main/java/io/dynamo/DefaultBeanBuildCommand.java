@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanWrapper;
@@ -44,23 +46,25 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
     /**
      * Bean wrapper that holds a reference to the result bean.
      */
-    private final BeanWrapper beanWrapper;
+    private BeanWrapper beanWrapper;
 
     /**
      * Field accessor that holds a reference to the same result bean.
      * We need both a field accessor and bean wrapper to modify property
      * values that have no getter and setter.
      */
-    private final DirectFieldAccessor fieldAccessor;
+    private DirectFieldAccessor fieldAccessor;
 
     public DefaultBeanBuildCommand(BeanBuilder beanBuilder, Class<T> type) {
         this.beanBuilder = beanBuilder;
-
-        Object bean = beanBuilder.getBeanGenerator().generate(type);
-        beanWrapper = new BeanWrapperImpl(bean);
-        fieldAccessor = new DirectFieldAccessor(bean);
+        setBean(beanBuilder.getBeanGenerator().generate(type));
     }
     
+    private final void setBean(Object bean) {
+        this.beanWrapper = new BeanWrapperImpl(bean);
+        this.fieldAccessor = new DirectFieldAccessor(bean);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -100,6 +104,27 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
     private boolean isSkipped(final String propertyName, final Collection<String> exclusions) {
         PropertyDescriptor descriptor = beanWrapper.getPropertyDescriptor(propertyName);
         return exclusions.contains(propertyName) || beanBuilder.getSkippedProperties().contains(new PropertyReference(descriptor));
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public EditableBeanBuildCommand<T> map(Function<T, T> function) {
+        T result = function.apply(construct());
+        setBean(result);
+        return this;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public EditableBeanBuildCommand<T> doWith(Consumer<T> consumer) {
+        T bean = construct();
+        consumer.accept(bean);
+        setBean(bean);
+        return this;
     }
 
     /**
