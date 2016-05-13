@@ -13,7 +13,6 @@ import io.dynamo.generator.random.RandomStringGenerator;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class BeanBuilderTest {
@@ -158,10 +157,9 @@ public class BeanBuilderTest {
         Assert.assertNotNull(bean.getNestedBean());
     }
     
-    @Test
-    @Ignore
     // TODO: Cannot get this to work: no private access for invokespecial
     // URL: https://rmannibucau.wordpress.com/2014/03/27/java-8-default-interface-methods-and-jdk-dynamic-proxies
+    @Test(expected = UnsupportedOperationException.class)
     public void testBuildWithCustomBuilderAndDefaultMethod() {        
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
                                         .useDefaultName()

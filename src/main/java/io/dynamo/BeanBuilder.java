@@ -147,7 +147,7 @@ public class BeanBuilder implements ValueGenerator {
          */
         @Override
         public boolean matches(Method method, Class<?> targetClass) {
-            return method.getName().startsWith(preffix) && method.getParameterCount() <= 1;
+            return (method.getName().startsWith(preffix) && method.getParameterCount() <= 1) || method.isDefault();
         }
 
     }
