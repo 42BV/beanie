@@ -164,7 +164,7 @@ public class BeanBuilderTest {
     // URL: https://rmannibucau.wordpress.com/2014/03/27/java-8-default-interface-methods-and-jdk-dynamic-proxies
     public void testBuildWithCustomBuilderAndDefaultMethod() {        
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
-                                        .withDefaultName()
+                                        .useDefaultName()
                                             .construct();
         
         Assert.assertEquals("Default", bean.getName());
@@ -184,6 +184,11 @@ public class BeanBuilderTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testBuildAndSaveUnsupported() {
         beanBuilder.start(SimpleBean.class).save();
+    }
+    
+    @Test(expected = UnsupportedOperationException.class)
+    public void testInvalidMethods() {
+        beanBuilder.startAs(InvalidSimpleBeanBuildCommand.class);
     }
 
 }

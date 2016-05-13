@@ -109,16 +109,26 @@ public class BeanBuilder implements ValueGenerator {
     @SuppressWarnings("unchecked")
     public <T extends BeanBuildCommand<?>> T startAs(Class<T> interfaceType) {
         final Class<?> beanClass = GenericTypeResolver.resolveTypeArguments(interfaceType, BeanBuildCommand.class)[0];
-        final BeanBuildConfig config = interfaceType.getAnnotation(BeanBuildConfig.class);
+        final BeanBuildConfig annotation = interfaceType.getAnnotation(BeanBuildConfig.class);
+        final String preffix = annotation != null ? annotation.preffix() : WITH_PREFIX;
+
+        validate(preffix, interfaceType);
 
         EditableBeanBuildCommand<?> instance = start(beanClass);
-        DefaultPointcutAdvisor advisor = buildAdvisor(config, instance);
+        DefaultPointcutAdvisor advisor = buildAdvisor(preffix, instance);
         return (T) Proxies.wrapAsProxy(interfaceType, instance, advisor);
     }
+    
+    private void validate(String preffix, Class<?> interfaceType) {
+        Method[] methods = interfaceType.getDeclaredMethods();
+        for (Method method : methods) {
+            if (!((method.getName().startsWith(preffix)) || method.isDefault())) {
+                throw new UnsupportedOperationException("Interface methods should start with '" + preffix + "' or be default.");
+            }
+        }
+    }
 
-    private DefaultPointcutAdvisor buildAdvisor(BeanBuildConfig config, EditableBeanBuildCommand<?> instance) {
-        final String preffix = config != null ? config.preffix() : WITH_PREFIX;
-
+    private DefaultPointcutAdvisor buildAdvisor(String preffix, EditableBeanBuildCommand<?> instance) {
         BeanBuilderPointcut pointcut = new BeanBuilderPointcut(preffix);
         BeanBuildCommandAdvice advice = new BeanBuildCommandAdvice(instance, preffix);
         return new DefaultPointcutAdvisor(pointcut, advice);
