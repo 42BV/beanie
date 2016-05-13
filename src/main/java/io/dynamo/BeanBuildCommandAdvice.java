@@ -39,18 +39,22 @@ public final class BeanBuildCommandAdvice implements MethodInterceptor {
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         final Method method = invocation.getMethod();
-        final Object[] arguments = invocation.getArguments();
-
-        String propertyName = getPropertyName(method, preffix);
-        if (arguments.length == 1) {
-            Object argument = arguments[0];
-            if (argument instanceof ValueGenerator) {
-                return command.generateValue(propertyName, (ValueGenerator) argument);
-            } else {
-                return command.withValue(propertyName, argument);
-            }
+        final Object[] args = invocation.getArguments();
+        
+        if (method.isDefault()) {
+            throw new UnsupportedOperationException("Not capable of handling default interface methods yet.");
         } else {
-            return command.generateValue(propertyName);
+            String propertyName = getPropertyName(method, preffix);
+            if (args.length == 1) {
+                Object argument = args[0];
+                if (argument instanceof ValueGenerator) {
+                    return command.generateValue(propertyName, (ValueGenerator) argument);
+                } else {
+                    return command.withValue(propertyName, argument);
+                }
+            } else {
+                return command.generateValue(propertyName);
+            }
         }
     }
 

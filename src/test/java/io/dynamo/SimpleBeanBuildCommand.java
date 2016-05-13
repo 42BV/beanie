@@ -42,7 +42,7 @@ public interface SimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleB
      * 
      * @return this instance, for chaining
      */
-    default SimpleBeanBuildCommand withDefaultName() {
+    default SimpleBeanBuildCommand useDefaultName() {
         return this.withName("Default");
     }
 
