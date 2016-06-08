@@ -1,25 +1,33 @@
 package io.dynamo;
 
 import io.dynamo.generator.BeanGenerator;
-import io.dynamo.generator.ConfigurableValueGenerator;
 import io.dynamo.generator.ConstantValueGenerator;
 import io.dynamo.generator.DefaultValueGenerator;
+import io.dynamo.generator.TypeBasedValueGenerator;
 import io.dynamo.generator.ValueGenerator;
+import io.dynamo.generator.supported.PredicateSupportable;
+import io.dynamo.generator.supported.Supportable;
 import io.dynamo.save.BeanSaver;
 import io.dynamo.save.UnsupportedBeanSaver;
 import io.dynamo.util.PropertyReference;
 import io.dynamo.util.Proxies;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Builds new bean instances.
@@ -42,9 +50,14 @@ public class BeanBuilder implements ValueGenerator {
     private final Map<PropertyReference, ValueGenerator> propertyGenerators = new HashMap<>();
     
     /**
+     * Supported predicate specific value generators.
+     */
+    private final List<SupportableValueGenerators> supportedGenerators = new ArrayList<>();
+
+    /**
      * Type specific value generators.
      */
-    private final ConfigurableValueGenerator typeGenerator;
+    private final TypeBasedValueGenerator typeGenerator;
     
     /**
      * Generator used to generate the result beans.
@@ -211,10 +224,27 @@ public class BeanBuilder implements ValueGenerator {
         PropertyReference reference = new PropertyReference(beanClass, descriptor.getName());
         if (propertyGenerators.containsKey(reference)) {
             generator = propertyGenerators.get(reference);
-        } else if (typeGenerator.contains(descriptor.getPropertyType())) {
-            generator = typeGenerator;
+        } else {
+            ValueGenerator supportedGenerator = findSupportedGenerator(reference);
+            if (supportedGenerator != null) {
+                generator = supportedGenerator;
+            } else if (typeGenerator.contains(descriptor.getPropertyType())) {
+                generator = typeGenerator;
+            }
         }
         return generator;
+    }
+    
+    private ValueGenerator findSupportedGenerator(PropertyReference property) {
+        Field field = ReflectionUtils.findField(property.getDeclaringClass(), property.getPropertyName());
+        if (field != null) {
+            for (SupportableValueGenerators supportedGenerator : supportedGenerators) {
+                if (supportedGenerator.supportable.supports(field)) {
+                    return supportedGenerator.generator;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -264,6 +294,29 @@ public class BeanBuilder implements ValueGenerator {
     public BeanBuilder register(Class<?> valueType, ValueGenerator generator) {
         typeGenerator.register(valueType, generator);
         return this;
+    }
+    
+    /**
+     * Register a value generation strategy for a specific type.
+     * 
+     * @param predicate the support predicate
+     * @param generator the generation strategy
+     * @return this instance
+     */
+    public BeanBuilder register(Supportable predicate, ValueGenerator generator) {
+        supportedGenerators.add(new SupportableValueGenerators(generator, predicate));
+        return this;
+    }
+    
+    /**
+     * Register a value generation strategy for a specific type.
+     * 
+     * @param predicate the support predicate
+     * @param generator the generation strategy
+     * @return this instance
+     */
+    public BeanBuilder registerIf(Predicate<AccessibleObject> predicate, ValueGenerator generator) {
+        return register(new PredicateSupportable(predicate), generator);
     }
     
     /**
@@ -323,6 +376,19 @@ public class BeanBuilder implements ValueGenerator {
      */
     public Set<PropertyReference> getSkippedProperties() {
         return skippedProperties;
+    }
+    
+    private static class SupportableValueGenerators {
+        
+        private final ValueGenerator generator;
+        
+        private final Supportable supportable;
+        
+        public SupportableValueGenerators(ValueGenerator generator, Supportable supportable) {
+            this.generator = generator;
+            this.supportable = supportable;
+        }
+        
     }
 
 }

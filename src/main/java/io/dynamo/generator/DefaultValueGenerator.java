@@ -17,7 +17,7 @@ import java.util.Set;
  * @author Jeroen van Schagen
  * @since Apr 11, 2014
  */
-public class DefaultValueGenerator extends ConfigurableValueGenerator {
+public class DefaultValueGenerator extends TypeBasedValueGenerator {
     
     public DefaultValueGenerator() {
         this(new NoArgBeanGenerator());

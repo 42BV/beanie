@@ -1,5 +1,7 @@
 package io.dynamo.domain;
 
+import io.dynamo.MyCustomAnnotation;
+
 import java.util.Set;
 
 public class SimpleBean {
@@ -16,6 +18,9 @@ public class SimpleBean {
     
     private Set<String> hobbies;
     
+    @MyCustomAnnotation
+    private String annotated;
+
     public Long getId() {
         return id;
     }
@@ -54,6 +59,14 @@ public class SimpleBean {
     
     public Set<String> getHobbies() {
         return hobbies;
+    }
+    
+    public String getAnnotated() {
+        return annotated;
+    }
+    
+    public void setAnnotated(String annotated) {
+        this.annotated = annotated;
     }
 	
 }

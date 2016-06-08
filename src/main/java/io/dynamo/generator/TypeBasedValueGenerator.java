@@ -9,13 +9,13 @@ import java.util.Map.Entry;
  * 
  * @author Jeroen van Schagen
  */
-public class ConfigurableValueGenerator implements ValueGenerator {
+public class TypeBasedValueGenerator implements ValueGenerator {
 
     private final Map<Class<?>, ValueGenerator> generators;
 
     private final ValueGenerator fallback;
 
-    public ConfigurableValueGenerator(ValueGenerator fallback) {
+    public TypeBasedValueGenerator(ValueGenerator fallback) {
     	generators = new LinkedHashMap<Class<?>, ValueGenerator>();
         this.fallback = fallback;
     }
@@ -25,8 +25,8 @@ public class ConfigurableValueGenerator implements ValueGenerator {
      * 
      * @return the cloned instance
      */
-    public ConfigurableValueGenerator clone() {
-        ConfigurableValueGenerator result = new ConfigurableValueGenerator(fallback);
+    public TypeBasedValueGenerator clone() {
+        TypeBasedValueGenerator result = new TypeBasedValueGenerator(fallback);
         result.generators.putAll(generators);
         return result;
     }
@@ -72,7 +72,7 @@ public class ConfigurableValueGenerator implements ValueGenerator {
      * @param generator the generation strategy
      * @return this instance
      */
-    public ConfigurableValueGenerator register(Class<?> type, ValueGenerator generator) {
+    public TypeBasedValueGenerator register(Class<?> type, ValueGenerator generator) {
         generators.put(type, generator);
         return this;
     }
@@ -84,7 +84,7 @@ public class ConfigurableValueGenerator implements ValueGenerator {
      * @param value the value to return
      * @return this instance
      */
-    public ConfigurableValueGenerator registerValue(Class<?> type, Object value) {
+    public TypeBasedValueGenerator registerValue(Class<?> type, Object value) {
         return register(type, new ConstantValueGenerator(value));
     }
     

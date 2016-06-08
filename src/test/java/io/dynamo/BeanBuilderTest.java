@@ -10,6 +10,7 @@ import io.dynamo.generator.BeanGenerator;
 import io.dynamo.generator.ConstantValueGenerator;
 import io.dynamo.generator.FirstImplBeanGenerator;
 import io.dynamo.generator.random.RandomStringGenerator;
+import io.dynamo.generator.supported.AnnotationSupportable;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,6 +24,7 @@ public class BeanBuilderTest {
 	@Before
 	public void setUp() {
         beanBuilder = new BeanBuilder();
+        beanBuilder.register(new AnnotationSupportable(MyCustomAnnotation.class), new ConstantValueGenerator("another"));
 	}
 	
 	@Test
@@ -31,6 +33,7 @@ public class BeanBuilderTest {
 		Assert.assertNotNull(bean);
         
         Assert.assertNotNull(bean.getName());
+        Assert.assertEquals("another", bean.getAnnotated());
 		
 		NestedBean nestedBean = bean.getNestedBean();
 		Assert.assertNotNull(nestedBean);
@@ -38,7 +41,7 @@ public class BeanBuilderTest {
 		
 		NestedBeanWithConstructor nestedBeanWithConstructor = bean.getNestedBeanWithConstructor();
 		Assert.assertNotNull(nestedBeanWithConstructor);
-		Assert.assertNotNull(nestedBeanWithConstructor.getValue());
+        Assert.assertNotNull(nestedBeanWithConstructor.getValue());
 	}
     
     @Test
