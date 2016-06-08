@@ -1,25 +1,34 @@
 package io.dynamo;
 
 import io.dynamo.generator.BeanGenerator;
-import io.dynamo.generator.ConfigurableValueGenerator;
 import io.dynamo.generator.ConstantValueGenerator;
 import io.dynamo.generator.DefaultValueGenerator;
+import io.dynamo.generator.PropertyValueGenerator;
+import io.dynamo.generator.TypeBasedValueGenerator;
 import io.dynamo.generator.ValueGenerator;
+import io.dynamo.generator.supported.PredicateSupportable;
+import io.dynamo.generator.supported.Supportable;
 import io.dynamo.save.BeanSaver;
 import io.dynamo.save.UnsupportedBeanSaver;
 import io.dynamo.util.PropertyReference;
 import io.dynamo.util.Proxies;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Builds new bean instances.
@@ -42,9 +51,14 @@ public class BeanBuilder implements ValueGenerator {
     private final Map<PropertyReference, ValueGenerator> propertyGenerators = new HashMap<>();
     
     /**
+     * Supported predicate specific value generators.
+     */
+    private final List<SupportableValueGenerators> supportedGenerators = new ArrayList<>();
+
+    /**
      * Type specific value generators.
      */
-    private final ConfigurableValueGenerator typeGenerator;
+    private final TypeBasedValueGenerator typeGenerator;
     
     /**
      * Generator used to generate the result beans.
@@ -101,20 +115,43 @@ public class BeanBuilder implements ValueGenerator {
     }
 
     /**
+     * Start building a new bean.
+     * 
+     * @param bean the initial bean
+     * @return the bean build command
+     */
+    public <T> EditableBeanBuildCommand<T> start(T bean) {
+        return new DefaultBeanBuildCommand<T>(this, bean);
+    }
+    
+    /**
      * Start building a new bean, using a custom builder interface.
      * 
      * @param interfaceType the build command interface
      * @return the builder instance, capable of building beans
      */
-    @SuppressWarnings("unchecked")
     public <T extends BeanBuildCommand<?>> T startAs(Class<T> interfaceType) {
         final Class<?> beanClass = GenericTypeResolver.resolveTypeArguments(interfaceType, BeanBuildCommand.class)[0];
+        return wrapToInterface(interfaceType, start(beanClass));
+    }
+    
+    /**
+     * Start building a new bean, using a custom builder interface.
+     * 
+     * @param interfaceType the build command interface
+     * @return the builder instance, capable of building beans
+     */
+    public <T extends BeanBuildCommand<B>, B> T startAs(Class<T> interfaceType, B bean) {
+        return wrapToInterface(interfaceType, start(bean));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends BeanBuildCommand<?>> T wrapToInterface(Class<T> interfaceType, EditableBeanBuildCommand<?> instance) {
         final BeanBuildConfig annotation = interfaceType.getAnnotation(BeanBuildConfig.class);
         final String preffix = annotation != null ? annotation.preffix() : WITH_PREFIX;
 
         validate(preffix, interfaceType);
 
-        EditableBeanBuildCommand<?> instance = start(beanClass);
         DefaultPointcutAdvisor advisor = buildAdvisor(preffix, instance);
         return (T) Proxies.wrapAsProxy(interfaceType, instance, advisor);
     }
@@ -175,23 +212,46 @@ public class BeanBuilder implements ValueGenerator {
     }
 
     Object generateValue(Class<?> beanClass, PropertyDescriptor descriptor) {
-        ValueGenerator generator = findGenerator(beanClass, descriptor);
+        PropertyReference reference = new PropertyReference(beanClass, descriptor.getName());
+        Class<?> propertyType = descriptor.getPropertyType();
+        ValueGenerator generator = findGenerator(reference, propertyType);
+        
         try {
+            // Provides the property reference during generation
+            if (generator instanceof PropertyValueGenerator) {
+                return ((PropertyValueGenerator) generator).generate(reference, propertyType);
+            }
             return generator.generate(descriptor.getPropertyType());
         } catch (RuntimeException rte) {
             throw new IllegalStateException("Could not generate property '" + descriptor.getName() + "' for: " + beanClass.getName(), rte);
         }
     }
 
-    private ValueGenerator findGenerator(Class<?> beanClass, PropertyDescriptor descriptor) {
+    private ValueGenerator findGenerator(PropertyReference reference, Class<?> propertyType) {
         ValueGenerator generator = this;
-        PropertyReference reference = new PropertyReference(beanClass, descriptor.getName());
         if (propertyGenerators.containsKey(reference)) {
             generator = propertyGenerators.get(reference);
-        } else if (typeGenerator.contains(descriptor.getPropertyType())) {
-            generator = typeGenerator;
+        } else {
+            ValueGenerator supportedGenerator = findSupportedGenerator(reference);
+            if (supportedGenerator != null) {
+                generator = supportedGenerator;
+            } else if (typeGenerator.contains(propertyType)) {
+                generator = typeGenerator;
+            }
         }
         return generator;
+    }
+    
+    private ValueGenerator findSupportedGenerator(PropertyReference property) {
+        Field field = ReflectionUtils.findField(property.getDeclaringClass(), property.getPropertyName());
+        if (field != null) {
+            for (SupportableValueGenerators wrapper : supportedGenerators) {
+                if (wrapper.supportable.supports(field)) {
+                    return wrapper.generator;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -241,6 +301,29 @@ public class BeanBuilder implements ValueGenerator {
     public BeanBuilder register(Class<?> valueType, ValueGenerator generator) {
         typeGenerator.register(valueType, generator);
         return this;
+    }
+    
+    /**
+     * Register a value generation strategy for a specific type.
+     * 
+     * @param predicate the support predicate
+     * @param generator the generation strategy
+     * @return this instance
+     */
+    public BeanBuilder register(Supportable predicate, ValueGenerator generator) {
+        supportedGenerators.add(new SupportableValueGenerators(generator, predicate));
+        return this;
+    }
+    
+    /**
+     * Register a value generation strategy for a specific type.
+     * 
+     * @param predicate the support predicate
+     * @param generator the generation strategy
+     * @return this instance
+     */
+    public BeanBuilder registerIf(Predicate<AccessibleObject> predicate, ValueGenerator generator) {
+        return register(new PredicateSupportable(predicate), generator);
     }
     
     /**
@@ -300,6 +383,19 @@ public class BeanBuilder implements ValueGenerator {
      */
     public Set<PropertyReference> getSkippedProperties() {
         return skippedProperties;
+    }
+    
+    private static class SupportableValueGenerators {
+        
+        private final ValueGenerator generator;
+        
+        private final Supportable supportable;
+        
+        public SupportableValueGenerators(ValueGenerator generator, Supportable supportable) {
+            this.generator = generator;
+            this.supportable = supportable;
+        }
+        
     }
 
 }

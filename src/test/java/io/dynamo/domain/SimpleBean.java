@@ -1,5 +1,9 @@
 package io.dynamo.domain;
 
+import io.dynamo.SimpleAnnotation;
+
+import java.util.Set;
+
 public class SimpleBean {
     
     private Long id;
@@ -12,6 +16,11 @@ public class SimpleBean {
 	
 	private NestedBeanWithConstructor nestedBeanWithConstructor;
     
+    private Set<String> hobbies;
+    
+    @SimpleAnnotation
+    private String annotated;
+
     public Long getId() {
         return id;
     }
@@ -47,5 +56,17 @@ public class SimpleBean {
 	public void setNestedBeanWithConstructor(NestedBeanWithConstructor nestedBeanWithConstructor) {
 		this.nestedBeanWithConstructor = nestedBeanWithConstructor;
 	}
+    
+    public Set<String> getHobbies() {
+        return hobbies;
+    }
+    
+    public String getAnnotated() {
+        return annotated;
+    }
+    
+    public void setAnnotated(String annotated) {
+        this.annotated = annotated;
+    }
 	
 }
