@@ -6,6 +6,8 @@ package io.dynamo;
 import io.dynamo.domain.SimpleBean;
 import io.dynamo.generator.ValueGenerator;
 
+import java.util.Set;
+
 /**
  * Build command for simple beans.
  *
@@ -36,6 +38,22 @@ public interface SimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleB
      * @return this instance, for chaining
      */
     SimpleBeanBuildCommand withNestedBean();
+    
+    /**
+     * Adds a hobby to the hobbies.
+     * 
+     * @param hobby the hobby
+     * @return this instance, for chaining
+     */
+    SimpleBeanBuildCommand withHobbies(String hobby);
+    
+    /**
+     * Adds a hobby to the hobbies.
+     * 
+     * @param hobies the hobies
+     * @return this instance, for chaining
+     */
+    SimpleBeanBuildCommand withHobbies(Set<String> hobies);
     
     /**
      * Default implementation, changes the name to a constant value.

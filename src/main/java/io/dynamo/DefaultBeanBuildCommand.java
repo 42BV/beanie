@@ -18,6 +18,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.beans.PropertyAccessor;
 
 /**
  * Default implementation of the bean build command.
@@ -97,12 +98,41 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
     
     private void setPropertyValue(String propertyName, Object value) {
         if (beanWrapper.isWritableProperty(propertyName)) {
-            beanWrapper.setPropertyValue(propertyName, value);
+            setPropertyValue(beanWrapper, propertyName, value);
         } else {
-            fieldAccessor.setPropertyValue(propertyName, value);
+            setPropertyValue(fieldAccessor, propertyName, value);
         }
     }
     
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void setPropertyValue(PropertyAccessor propertyAccessor, String propertyName, Object value) {
+        if (shouldBeAddedToCollection(propertyAccessor, propertyName, value)) {
+            addValueToCollection(propertyAccessor, propertyName, value);
+        } else {
+            propertyAccessor.setPropertyValue(propertyName, value);
+        }
+    }
+    
+    private boolean shouldBeAddedToCollection(PropertyAccessor propertyAccessor, String propertyName, Object value) {
+        boolean result = false;
+        if (value != null) {
+            Class<?> propertyType = propertyAccessor.getPropertyType(propertyName);
+            result = propertyType.isAssignableFrom(Collection.class) && !(value instanceof Collection);
+        }
+        return result;
+    }
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void addValueToCollection(PropertyAccessor propertyAccessor, String propertyName, Object value) {
+        Collection collection = (Collection) propertyAccessor.getPropertyValue(propertyName);
+        if (collection == null) {
+            Class<?> propertyType = propertyAccessor.getPropertyType(propertyName);
+            collection = (Collection) beanBuilder.generate(propertyType);
+        }
+        collection.add(value);
+        propertyAccessor.setPropertyValue(propertyName, collection);
+    }
+
     /**
      * {@inheritDoc}
      */

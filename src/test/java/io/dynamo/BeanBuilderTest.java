@@ -14,6 +14,7 @@ import io.dynamo.generator.random.RandomStringGenerator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.internal.util.collections.Sets;
 
 public class BeanBuilderTest {
 
@@ -90,12 +91,14 @@ public class BeanBuilderTest {
     public void testBuildWithDefaultBuilder() {
         SimpleBean bean = beanBuilder.start(SimpleBean.class)
                                         .withValue("id", 42L)
+                                        .withValue("hobbies", "coding")
                                         .generateValue("name", new ConstantValueGenerator("success"))
                                         .fill()
                                             .construct();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertEquals("success", bean.getName());
+        Assert.assertEquals(Sets.newSet("coding"), bean.getHobbies());
         Assert.assertNotNull(bean.getNestedBean());
         Assert.assertNotNull(bean.getNestedBeanWithConstructor());
     }
@@ -112,6 +115,24 @@ public class BeanBuilderTest {
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertEquals("bla", bean.getName());
+        Assert.assertNotNull(bean.getNestedBean());
+        Assert.assertNotNull(bean.getNestedBeanWithConstructor());
+    }
+
+    @Test
+    public void testBuildWithDefaultBuilderSkipEmptyValueToCollection() {
+        SimpleBean base = new SimpleBean();
+        base.setName("bla");
+        
+        SimpleBean bean = beanBuilder.start(base)
+                                        .withValue("id", 42L)
+                                        .withValue("hobbies", null)
+                                        .fill()
+                                            .construct();
+        
+        Assert.assertEquals(Long.valueOf(42), bean.getId());
+        Assert.assertEquals("bla", bean.getName());
+        Assert.assertNull(bean.getHobbies());
         Assert.assertNotNull(bean.getNestedBean());
         Assert.assertNotNull(bean.getNestedBeanWithConstructor());
     }
@@ -162,6 +183,7 @@ public class BeanBuilderTest {
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
                                         .withName(new ConstantValueGenerator("success"))
                                         .withNestedBean()
+                                        .withHobbies("coding")
                                         .doWith(x -> x.getNestedBean().setValue("abc"))
                                         .map(x -> x)
                                         .withValue("id", 42L)
@@ -170,6 +192,7 @@ public class BeanBuilderTest {
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertNull(bean.getShortName());
         Assert.assertEquals("success", bean.getName());
+        Assert.assertEquals(Sets.newSet("coding"), bean.getHobbies());
         Assert.assertNotNull(bean.getNestedBean());
     }
     
