@@ -101,20 +101,43 @@ public class BeanBuilder implements ValueGenerator {
     }
 
     /**
+     * Start building a new bean.
+     * 
+     * @param bean the initial bean
+     * @return the bean build command
+     */
+    public <T> EditableBeanBuildCommand<T> start(T bean) {
+        return new DefaultBeanBuildCommand<T>(this, bean);
+    }
+    
+    /**
      * Start building a new bean, using a custom builder interface.
      * 
      * @param interfaceType the build command interface
      * @return the builder instance, capable of building beans
      */
-    @SuppressWarnings("unchecked")
     public <T extends BeanBuildCommand<?>> T startAs(Class<T> interfaceType) {
         final Class<?> beanClass = GenericTypeResolver.resolveTypeArguments(interfaceType, BeanBuildCommand.class)[0];
+        return wrapToInterface(interfaceType, start(beanClass));
+    }
+    
+    /**
+     * Start building a new bean, using a custom builder interface.
+     * 
+     * @param interfaceType the build command interface
+     * @return the builder instance, capable of building beans
+     */
+    public <T extends BeanBuildCommand<B>, B> T startAs(Class<T> interfaceType, B bean) {
+        return wrapToInterface(interfaceType, start(bean));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends BeanBuildCommand<?>> T wrapToInterface(Class<T> interfaceType, EditableBeanBuildCommand<?> instance) {
         final BeanBuildConfig annotation = interfaceType.getAnnotation(BeanBuildConfig.class);
         final String preffix = annotation != null ? annotation.preffix() : WITH_PREFIX;
 
         validate(preffix, interfaceType);
 
-        EditableBeanBuildCommand<?> instance = start(beanClass);
         DefaultPointcutAdvisor advisor = buildAdvisor(preffix, instance);
         return (T) Proxies.wrapAsProxy(interfaceType, instance, advisor);
     }

@@ -60,6 +60,21 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
         setBean(beanBuilder.getBeanGenerator().generate(type));
     }
     
+    public DefaultBeanBuildCommand(BeanBuilder beanBuilder, Object bean) {
+        this.beanBuilder = beanBuilder;
+        setBean(bean);
+        markNotNullAsTouched();
+    }
+
+    private void markNotNullAsTouched() {
+        for (PropertyDescriptor descriptor : beanWrapper.getPropertyDescriptors()) {
+            final String propertyName = descriptor.getName();
+            if (beanWrapper.isReadableProperty(propertyName) && beanWrapper.getPropertyValue(propertyName) != null) {
+                markAsTouched(propertyName);
+            }
+        }
+    }
+    
     private final void setBean(Object bean) {
         this.beanWrapper = new BeanWrapperImpl(bean);
         this.fieldAccessor = new DirectFieldAccessor(bean);
@@ -71,9 +86,13 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
     @Override
     public EditableBeanBuildCommand<T> withValue(String propertyName, Object value) {
         setPropertyValue(propertyName, value);
+        markAsTouched(propertyName);
+        return this;
+    }
+
+    private void markAsTouched(String propertyName) {
         touchedProperties.add(propertyName);
         propertiesToGenerate.remove(propertyName);
-        return this;
     }
     
     private void setPropertyValue(String propertyName, Object value) {

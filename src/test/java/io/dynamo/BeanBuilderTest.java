@@ -99,6 +99,22 @@ public class BeanBuilderTest {
         Assert.assertNotNull(bean.getNestedBean());
         Assert.assertNotNull(bean.getNestedBeanWithConstructor());
     }
+
+    @Test
+    public void testBuildWithDefaultBuilderAndExistingBean() {
+        SimpleBean base = new SimpleBean();
+        base.setName("bla");
+        
+        SimpleBean bean = beanBuilder.start(base)
+                                        .withValue("id", 42L)
+                                        .fill()
+                                            .construct();
+        
+        Assert.assertEquals(Long.valueOf(42), bean.getId());
+        Assert.assertEquals("bla", bean.getName());
+        Assert.assertNotNull(bean.getNestedBean());
+        Assert.assertNotNull(bean.getNestedBeanWithConstructor());
+    }
     
     @Test
     public void testBuildWithDefinedGenerators() {
@@ -142,7 +158,7 @@ public class BeanBuilderTest {
     }
     
     @Test
-    public void testBuildWithCustomBuilder() {        
+    public void testBuildWithCustomBuilder() {  
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
                                         .withName(new ConstantValueGenerator("success"))
                                         .withNestedBean()
@@ -154,6 +170,24 @@ public class BeanBuilderTest {
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertNull(bean.getShortName());
         Assert.assertEquals("success", bean.getName());
+        Assert.assertNotNull(bean.getNestedBean());
+    }
+    
+    @Test
+    public void testBuildWithCustomBuilderAndExistingBean() {
+        SimpleBean base = new SimpleBean();
+        base.setName("bla");
+        
+        SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class, base)
+                                        .withNestedBean()
+                                        .doWith(x -> x.getNestedBean().setValue("abc"))
+                                        .map(x -> x)
+                                        .withValue("id", 42L)
+                                            .construct();
+        
+        Assert.assertEquals(Long.valueOf(42), bean.getId());
+        Assert.assertNull(bean.getShortName());
+        Assert.assertEquals("bla", bean.getName());
         Assert.assertNotNull(bean.getNestedBean());
     }
     
