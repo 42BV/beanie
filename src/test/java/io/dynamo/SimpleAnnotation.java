@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
 @Inherited
 @Target(FIELD)
 @Retention(RUNTIME)
-public @interface MyCustomAnnotation {
+public @interface SimpleAnnotation {
     
 }

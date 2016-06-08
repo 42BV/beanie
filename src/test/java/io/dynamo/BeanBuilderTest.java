@@ -24,7 +24,7 @@ public class BeanBuilderTest {
 	@Before
 	public void setUp() {
         beanBuilder = new BeanBuilder();
-        beanBuilder.register(new AnnotationSupportable(MyCustomAnnotation.class), new ConstantValueGenerator("another"));
+        beanBuilder.register(new AnnotationSupportable(SimpleAnnotation.class), new SimplePropertyValueGenerator());
 	}
 	
 	@Test
@@ -33,7 +33,7 @@ public class BeanBuilderTest {
 		Assert.assertNotNull(bean);
         
         Assert.assertNotNull(bean.getName());
-        Assert.assertEquals("another", bean.getAnnotated());
+        Assert.assertEquals("another 'annotated'", bean.getAnnotated());
 		
 		NestedBean nestedBean = bean.getNestedBean();
 		Assert.assertNotNull(nestedBean);

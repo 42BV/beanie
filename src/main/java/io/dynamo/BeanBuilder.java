@@ -211,24 +211,30 @@ public class BeanBuilder implements ValueGenerator {
     }
 
     Object generateValue(Class<?> beanClass, PropertyDescriptor descriptor) {
-        ValueGenerator generator = findGenerator(beanClass, descriptor);
+        PropertyReference reference = new PropertyReference(beanClass, descriptor.getName());
+        Class<?> propertyType = descriptor.getPropertyType();
+        ValueGenerator generator = findGenerator(reference, propertyType);
+        
         try {
+            // Provides the property reference during generation
+            if (generator instanceof PropertyValueGenerator) {
+                return ((PropertyValueGenerator) generator).generate(reference, propertyType);
+            }
             return generator.generate(descriptor.getPropertyType());
         } catch (RuntimeException rte) {
             throw new IllegalStateException("Could not generate property '" + descriptor.getName() + "' for: " + beanClass.getName(), rte);
         }
     }
 
-    private ValueGenerator findGenerator(Class<?> beanClass, PropertyDescriptor descriptor) {
+    private ValueGenerator findGenerator(PropertyReference reference, Class<?> propertyType) {
         ValueGenerator generator = this;
-        PropertyReference reference = new PropertyReference(beanClass, descriptor.getName());
         if (propertyGenerators.containsKey(reference)) {
             generator = propertyGenerators.get(reference);
         } else {
             ValueGenerator supportedGenerator = findSupportedGenerator(reference);
             if (supportedGenerator != null) {
                 generator = supportedGenerator;
-            } else if (typeGenerator.contains(descriptor.getPropertyType())) {
+            } else if (typeGenerator.contains(propertyType)) {
                 generator = typeGenerator;
             }
         }
@@ -238,9 +244,9 @@ public class BeanBuilder implements ValueGenerator {
     private ValueGenerator findSupportedGenerator(PropertyReference property) {
         Field field = ReflectionUtils.findField(property.getDeclaringClass(), property.getPropertyName());
         if (field != null) {
-            for (SupportableValueGenerators supportedGenerator : supportedGenerators) {
-                if (supportedGenerator.supportable.supports(field)) {
-                    return supportedGenerator.generator;
+            for (SupportableValueGenerators wrapper : supportedGenerators) {
+                if (wrapper.supportable.supports(field)) {
+                    return wrapper.generator;
                 }
             }
         }

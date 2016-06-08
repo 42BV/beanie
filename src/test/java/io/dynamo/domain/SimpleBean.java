@@ -1,6 +1,6 @@
 package io.dynamo.domain;
 
-import io.dynamo.MyCustomAnnotation;
+import io.dynamo.SimpleAnnotation;
 
 import java.util.Set;
 
@@ -18,7 +18,7 @@ public class SimpleBean {
     
     private Set<String> hobbies;
     
-    @MyCustomAnnotation
+    @SimpleAnnotation
     private String annotated;
 
     public Long getId() {
