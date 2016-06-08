@@ -1,5 +1,6 @@
 package io.dynamo;
 
+import io.dynamo.generator.PropertyValueGenerator;
 import io.dynamo.util.PropertyReference;
 
 /**

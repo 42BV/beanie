@@ -3,6 +3,7 @@ package io.dynamo;
 import io.dynamo.generator.BeanGenerator;
 import io.dynamo.generator.ConstantValueGenerator;
 import io.dynamo.generator.DefaultValueGenerator;
+import io.dynamo.generator.PropertyValueGenerator;
 import io.dynamo.generator.TypeBasedValueGenerator;
 import io.dynamo.generator.ValueGenerator;
 import io.dynamo.generator.supported.PredicateSupportable;
