@@ -1,0 +1,2 @@
+mvn jgitflow:release-start
+mvn jgitflow:release-finish -Dmaven.javadoc.skip=true -DaltDeploymentRepository=repository.42.nl::default::https://repository.42.nl/content/repositories/thirdparty
