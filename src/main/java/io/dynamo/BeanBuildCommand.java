@@ -26,6 +26,14 @@ public interface BeanBuildCommand<T> {
     T construct();
     
     /**
+     * Construct the new bean.
+     * 
+     * @param autoSave whether to auto save
+     * @return the constructed instance
+     */
+    T construct(boolean autoSave);
+    
+    /**
      * Construct and save new bean.
      * 
      * @return the saved bean

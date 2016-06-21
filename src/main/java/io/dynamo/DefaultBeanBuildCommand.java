@@ -219,20 +219,15 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      */
     @Override
     public T construct() {
-        return finishBean(false);
+        return construct(false);
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public T save() {
-        T bean = finishBean(true);
-        return beanBuilder.save(bean);
-    }
-    
     @SuppressWarnings("unchecked")
-    private T finishBean(boolean autoSave) {
+    public T construct(boolean autoSave) {
         T bean = (T) beanWrapper.getWrappedInstance();
         if (!AopUtils.isAopProxy(bean)) {
             for (String propertyName : new HashSet<>(propertiesToGenerate)) {
@@ -240,6 +235,15 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
             }
         }
         return bean;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public T save() {
+        T bean = construct(true);
+        return beanBuilder.save(bean);
     }
 
     private void generateAndSetProperty(String propertyName, boolean autoSave) {

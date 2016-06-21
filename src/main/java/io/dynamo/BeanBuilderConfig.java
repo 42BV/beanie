@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Documented
 @Inherited
-public @interface BeanBuildConfig {
+public @interface BeanBuilderConfig {
     
     String preffix() default "with";
 
