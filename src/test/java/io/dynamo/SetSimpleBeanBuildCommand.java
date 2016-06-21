@@ -3,7 +3,7 @@
  */
 package io.dynamo;
 
-import io.dynamo.BeanBuildConfig;
+import io.dynamo.BeanBuilderConfig;
 import io.dynamo.EditableBeanBuildCommand;
 import io.dynamo.domain.SimpleBean;
 
@@ -13,7 +13,7 @@ import io.dynamo.domain.SimpleBean;
  * @author Jeroen van Schagen
  * @since Mar 26, 2015
  */
-@BeanBuildConfig(preffix = "set")
+@BeanBuilderConfig(preffix = "set")
 public interface SetSimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleBean> {
 
     /**

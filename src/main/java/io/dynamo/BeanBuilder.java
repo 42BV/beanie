@@ -8,6 +8,7 @@ import io.dynamo.generator.TypeBasedValueGenerator;
 import io.dynamo.generator.ValueGenerator;
 import io.dynamo.generator.supported.PredicateSupportable;
 import io.dynamo.generator.supported.Supportable;
+import io.dynamo.generator.supported.SupportableValueGenerators;
 import io.dynamo.save.BeanSaver;
 import io.dynamo.save.UnsupportedBeanSaver;
 import io.dynamo.util.PropertyReference;
@@ -89,7 +90,7 @@ public class BeanBuilder implements ValueGenerator {
         this.beanGenerator = new BeanGenerator(this);
         this.beanSaver = beanSaver;
     }
-    
+
     /**
      * Construct a new {@link BeanBuilder} cloning the settings
      * of an existing builder.
@@ -147,7 +148,7 @@ public class BeanBuilder implements ValueGenerator {
 
     @SuppressWarnings("unchecked")
     private <T extends BeanBuildCommand<?>> T wrapToInterface(Class<T> interfaceType, EditableBeanBuildCommand<?> instance) {
-        final BeanBuildConfig annotation = interfaceType.getAnnotation(BeanBuildConfig.class);
+        final BeanBuilderConfig annotation = interfaceType.getAnnotation(BeanBuilderConfig.class);
         final String preffix = annotation != null ? annotation.preffix() : WITH_PREFIX;
 
         validate(preffix, interfaceType);
@@ -246,8 +247,8 @@ public class BeanBuilder implements ValueGenerator {
         Field field = ReflectionUtils.findField(property.getDeclaringClass(), property.getPropertyName());
         if (field != null) {
             for (SupportableValueGenerators wrapper : supportedGenerators) {
-                if (wrapper.supportable.supports(field)) {
-                    return wrapper.generator;
+                if (wrapper.getSupportable().supports(field)) {
+                    return wrapper.getGenerator();
                 }
             }
         }
@@ -383,19 +384,6 @@ public class BeanBuilder implements ValueGenerator {
      */
     public Set<PropertyReference> getSkippedProperties() {
         return skippedProperties;
-    }
-    
-    private static class SupportableValueGenerators {
-        
-        private final ValueGenerator generator;
-        
-        private final Supportable supportable;
-        
-        public SupportableValueGenerators(ValueGenerator generator, Supportable supportable) {
-            this.generator = generator;
-            this.supportable = supportable;
-        }
-        
     }
 
 }
