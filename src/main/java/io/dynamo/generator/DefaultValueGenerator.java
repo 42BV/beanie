@@ -4,9 +4,11 @@
 package io.dynamo.generator;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,10 +58,10 @@ public class DefaultValueGenerator extends TypeBasedValueGenerator {
         registerValue(float[].class, new float[0]);
         registerValue(boolean[].class, new boolean[0]);
         registerValue(char[].class, new char[0]);
-        registerValue(List.class, Collections.emptyList());
-        registerValue(Set.class, Collections.emptySet());
-        registerValue(Collection.class, Collections.emptyList());
-        registerValue(Map.class, Collections.emptyMap());
+        registerValue(List.class, new ArrayList<>());
+        registerValue(Set.class, new HashSet<>());
+        registerValue(Collection.class, new ArrayList<>());
+        registerValue(Map.class, new HashMap<>());
         registerValue(Class.class, Object.class);
         register(Object[].class, new EmptyArrayValueGenerator());
         register(Enum.class, new FirstEnumValueGenerator());

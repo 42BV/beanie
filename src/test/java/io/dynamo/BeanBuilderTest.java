@@ -95,13 +95,14 @@ public class BeanBuilderTest {
         SimpleBean bean = beanBuilder.start(SimpleBean.class)
                                         .withValue("id", 42L)
                                         .withValue("hobbies", "coding")
+                                        .withValue("hobbies", "gaming")
                                         .generateValue("name", new ConstantValueGenerator("success"))
                                         .fill()
                                             .construct();
         
         Assert.assertEquals(Long.valueOf(42), bean.getId());
         Assert.assertEquals("success", bean.getName());
-        Assert.assertEquals(Sets.newSet("coding"), bean.getHobbies());
+        Assert.assertEquals(Sets.newSet("coding", "gaming"), bean.getHobbies());
         Assert.assertNotNull(bean.getNestedBean());
         Assert.assertNotNull(bean.getNestedBeanWithConstructor());
     }
@@ -138,6 +139,12 @@ public class BeanBuilderTest {
         Assert.assertNull(bean.getHobbies());
         Assert.assertNotNull(bean.getNestedBean());
         Assert.assertNotNull(bean.getNestedBeanWithConstructor());
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuildWithDefaultBuilderAndUnknownProperty() {
+        SimpleBean base = new SimpleBean();
+        beanBuilder.start(base).withValue("unknown", "crash");
     }
     
     @Test
