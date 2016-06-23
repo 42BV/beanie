@@ -128,9 +128,9 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
         if (collection == null) {
             Class<?> propertyType = propertyAccessor.getPropertyType(propertyName);
             collection = (Collection) beanBuilder.generate(propertyType);
+            propertyAccessor.setPropertyValue(propertyName, collection);
         }
         collection.add(value);
-        propertyAccessor.setPropertyValue(propertyName, collection);
     }
 
     /**
