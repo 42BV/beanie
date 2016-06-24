@@ -10,7 +10,7 @@ import io.dynamo.generator.supported.PredicateSupportable;
 import io.dynamo.generator.supported.Supportable;
 import io.dynamo.generator.supported.SupportableValueGenerators;
 import io.dynamo.save.BeanSaver;
-import io.dynamo.save.UnsupportedBeanSaver;
+import io.dynamo.save.NoOperationBeanSaver;
 import io.dynamo.util.PropertyReference;
 import io.dynamo.util.Proxies;
 
@@ -69,7 +69,7 @@ public class BeanBuilder implements ValueGenerator {
     /**
      * Saves the generated beans.
      */
-    private final BeanSaver beanSaver;
+    private BeanSaver beanSaver;
 
     /**
      * Construct a new {@link BeanBuilder}.
@@ -77,7 +77,7 @@ public class BeanBuilder implements ValueGenerator {
      * <b>Note that using this constructor means the beans cannot be saved</b>
      */
     public BeanBuilder() {
-        this(new UnsupportedBeanSaver());
+        this(new NoOperationBeanSaver());
     }
 
     /**
@@ -198,7 +198,7 @@ public class BeanBuilder implements ValueGenerator {
         if (typeGenerator.contains(beanClass)) {
             return typeGenerator.generate(beanClass);
         }
-        return start(beanClass).fill().construct();
+        return start(beanClass).fill().construct(true);
     }
 
     /**
@@ -212,17 +212,17 @@ public class BeanBuilder implements ValueGenerator {
         return (T) generate(beanClass);
     }
 
-    Object generateValue(Class<?> beanClass, PropertyDescriptor descriptor) {
+    protected Object generateValue(Class<?> beanClass, PropertyDescriptor descriptor) {
         PropertyReference reference = new PropertyReference(beanClass, descriptor.getName());
         Class<?> propertyType = descriptor.getPropertyType();
         ValueGenerator generator = findGenerator(reference, propertyType);
         
         try {
-            // Provides the property reference during generation
             if (generator instanceof PropertyValueGenerator) {
                 return ((PropertyValueGenerator) generator).generate(reference, propertyType);
+            } else {
+                return generator.generate(descriptor.getPropertyType());
             }
-            return generator.generate(descriptor.getPropertyType());
         } catch (RuntimeException rte) {
             throw new IllegalStateException("Could not generate property '" + descriptor.getName() + "' for: " + beanClass.getName(), rte);
         }
@@ -345,6 +345,9 @@ public class BeanBuilder implements ValueGenerator {
      * @return the saved bean
      */
     public <R> R save(R bean) {
+        if (bean == null) {
+            return null;
+        }
         return beanSaver.save(bean);
     }
 
@@ -384,6 +387,13 @@ public class BeanBuilder implements ValueGenerator {
      */
     public Set<PropertyReference> getSkippedProperties() {
         return skippedProperties;
+    }
+    
+    /**
+     * @param beanSaver the beanSaver to set
+     */
+    public void setBeanSaver(BeanSaver beanSaver) {
+        this.beanSaver = beanSaver;
     }
 
 }

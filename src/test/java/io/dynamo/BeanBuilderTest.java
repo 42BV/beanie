@@ -11,6 +11,7 @@ import io.dynamo.generator.ConstantValueGenerator;
 import io.dynamo.generator.FirstImplBeanGenerator;
 import io.dynamo.generator.random.RandomStringGenerator;
 import io.dynamo.generator.supported.AnnotationSupportable;
+import io.dynamo.save.UnsupportedBeanSaver;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -248,7 +249,9 @@ public class BeanBuilderTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testBuildAndSaveUnsupported() {
-        beanBuilder.start(SimpleBean.class).save();
+        BeanBuilder unsupported = new BeanBuilder(beanBuilder);
+        unsupported.setBeanSaver(new UnsupportedBeanSaver());
+        unsupported.start(SimpleBean.class).save();
     }
     
     @Test(expected = UnsupportedOperationException.class)
