@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/42bv/beanie.svg?branch=master)](https://travis-ci.org/42bv/beanie)
-[![Maven central](https://maven-badges.herokuapp.com/maven-central/org.csveed/csveed/badge.svg)](https://maven-badges.herokuapp.com/maven-central/nl.42/beanie)
+[![Maven central](https://maven-badges.herokuapp.com/maven-central/nl.42/beanie/badge.svg)](https://maven-badges.herokuapp.com/maven-central/nl.42/beanie)
 [![Apache 2](http://img.shields.io/badge/license-Apache%202-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 Library for generating and testing beans.
