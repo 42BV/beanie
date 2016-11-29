@@ -160,6 +160,10 @@ public class BeanBuilder implements ValueGenerator {
     private void validate(String preffix, Class<?> interfaceType) {
         Method[] methods = interfaceType.getDeclaredMethods();
         for (Method method : methods) {
+            // @todo -- find a better solution to deal with Jacoco meddling
+            if (method.getName().startsWith("$jacocoInit")) {
+                continue; // Ignore this method
+            }
             if (!((method.getName().startsWith(preffix)) || method.isDefault())) {
                 throw new UnsupportedOperationException("Interface methods should start with '" + preffix + "' or be default.");
             }
