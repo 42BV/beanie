@@ -12,32 +12,32 @@ Bean building
 
 Generate bean using the default API:
 
-SimpleBean bean = beanBuilder.start(SimpleBean.class)
-                                .withValue("id", 42L)
-                                .withValue("hobbies", "coding")
-                                .withValue("hobbies", "gaming")
-                                .generateValue("name", new ConstantValueGenerator("success"))
-                                .fill()
-                                    .construct();
+    SimpleBean bean = beanBuilder.start(SimpleBean.class)
+                                    .withValue("id", 42L)
+                                    .withValue("hobbies", "coding")
+                                    .withValue("hobbies", "gaming")
+                                    .generateValue("name", new ConstantValueGenerator("success"))
+                                    .fill()
+                                        .construct();
 
 Generate beans using customized builders:
 
-public interface SimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleBean> {
-    SimpleBeanBuildCommand withName(String name);
-    SimpleBeanBuildCommand withName(ValueGenerator generator);
-    SimpleBeanBuildCommand withNestedBean();
-    SimpleBeanBuildCommand withHobbies(String hobby);
-    SimpleBeanBuildCommand withHobbies(Set<String> hobies);
-}
+    public interface SimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleBean> {
+        SimpleBeanBuildCommand withName(String name);
+        SimpleBeanBuildCommand withName(ValueGenerator generator);
+        SimpleBeanBuildCommand withNestedBean();
+        SimpleBeanBuildCommand withHobbies(String hobby);
+        SimpleBeanBuildCommand withHobbies(Set<String> hobies);
+    }
 
-SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
-                                .withName(new ConstantValueGenerator("success"))
-                                .withNestedBean()
-                                .withHobbies("coding")
-                                .doWith(x -> x.getNestedBean().setValue("abc"))
-                                .map(x -> x)
-                                .withValue("id", 42L)
-                                    .construct();
+    SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
+                                    .withName(new ConstantValueGenerator("success"))
+                                    .withNestedBean()
+                                    .withHobbies("coding")
+                                    .doWith(x -> x.getNestedBean().setValue("abc"))
+                                    .map(x -> x)
+                                    .withValue("id", 42L)   
+                                        .construct();
 
 Testing
 -------
