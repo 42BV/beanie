@@ -3,9 +3,13 @@
  */
 package nl._42.beanie;
 
-import nl._42.beanie.generator.ValueGenerator;
-
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import nl._42.beanie.generator.ValueGenerator;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -27,10 +31,19 @@ public final class BeanBuildCommandAdvice implements MethodInterceptor {
     private final EditableBeanBuildCommand<?> command;
         
     private final String preffix;
+    
+    private Object proxy;
 
     public BeanBuildCommandAdvice(EditableBeanBuildCommand<?> command, String preffix) {
         this.command = command;
         this.preffix = preffix;
+    }
+    
+    /**
+     * @param proxy the proxy to set
+     */
+    public void setProxy(Object proxy) {
+        this.proxy = proxy;
     }
 
     /**
@@ -42,7 +55,8 @@ public final class BeanBuildCommandAdvice implements MethodInterceptor {
         final Object[] args = invocation.getArguments();
         
         if (method.isDefault()) {
-            throw new UnsupportedOperationException("Not capable of handling default interface methods yet.");
+            MethodHandle handle = getMethodHandle(method);
+            return handle.bindTo(proxy).invokeWithArguments(args);
         } else {
             String propertyName = getPropertyName(method, preffix);
             if (args.length == 1) {
@@ -65,6 +79,19 @@ public final class BeanBuildCommandAdvice implements MethodInterceptor {
 
     private String uncapitalize(final String propertyName) {
         return propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
+    }
+    
+    private static MethodHandle getMethodHandle(Method method) {
+        Class<?> declaringClass = method.getDeclaringClass();
+        
+        try {
+            Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+            constructor.setAccessible(true);
+            
+            return constructor.newInstance(declaringClass, MethodHandles.Lookup.PRIVATE).unreflectSpecial(method, declaringClass);
+        } catch (IllegalAccessException | NoSuchMethodException | InstantiationException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

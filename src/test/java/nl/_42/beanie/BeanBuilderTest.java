@@ -225,9 +225,7 @@ public class BeanBuilderTest {
         Assert.assertNotNull(bean.getNestedBean());
     }
     
-    // TODO: Cannot get this to work: no private access for invokespecial
-    // URL: https://rmannibucau.wordpress.com/2014/03/27/java-8-default-interface-methods-and-jdk-dynamic-proxies
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testBuildWithCustomBuilderAndDefaultMethod() {        
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
                                         .useDefaultName()

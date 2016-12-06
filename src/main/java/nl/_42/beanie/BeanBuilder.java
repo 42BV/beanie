@@ -1,5 +1,17 @@
 package nl._42.beanie;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import nl._42.beanie.generator.BeanGenerator;
 import nl._42.beanie.generator.ConstantValueGenerator;
 import nl._42.beanie.generator.DefaultValueGenerator;
@@ -13,18 +25,6 @@ import nl._42.beanie.save.BeanSaver;
 import nl._42.beanie.save.NoOperationBeanSaver;
 import nl._42.beanie.util.PropertyReference;
 import nl._42.beanie.util.Proxies;
-
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
@@ -153,8 +153,12 @@ public class BeanBuilder implements ValueGenerator {
 
         validate(preffix, interfaceType);
 
-        DefaultPointcutAdvisor advisor = buildAdvisor(preffix, instance);
-        return (T) Proxies.wrapAsProxy(interfaceType, instance, advisor);
+        BeanBuilderPointcut pointcut = new BeanBuilderPointcut(preffix);
+        BeanBuildCommandAdvice advice = new BeanBuildCommandAdvice(instance, preffix);
+        DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(pointcut, advice);
+        EditableBeanBuildCommand<?> proxy = Proxies.wrapAsProxy(interfaceType, instance, advisor);
+        advice.setProxy(proxy); // Link back to proxy for default methods
+        return (T) proxy;
     }
     
     private void validate(String preffix, Class<?> interfaceType) {
@@ -168,12 +172,6 @@ public class BeanBuilder implements ValueGenerator {
                 throw new UnsupportedOperationException("Interface methods should start with '" + preffix + "' or be default.");
             }
         }
-    }
-
-    private DefaultPointcutAdvisor buildAdvisor(String preffix, EditableBeanBuildCommand<?> instance) {
-        BeanBuilderPointcut pointcut = new BeanBuilderPointcut(preffix);
-        BeanBuildCommandAdvice advice = new BeanBuildCommandAdvice(instance, preffix);
-        return new DefaultPointcutAdvisor(pointcut, advice);
     }
 
     private static class BeanBuilderPointcut extends StaticMethodMatcherPointcut {
