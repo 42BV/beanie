@@ -42,7 +42,37 @@ public interface EditableBeanBuildCommand<T> extends BeanBuildCommand<T> {
      * @return this instance, for chaining
      */
     EditableBeanBuildCommand<T> map(Function<T, T> function);
-    
+
+    /**
+     * Perform a mapping on the intermediate object, changing the
+     * type to targetType.
+     * @param targetType The type the intermediate object should continue to have
+     * @param <M> The target class
+     * @return new instance of EditableBeanBuildCommand
+     */
+    <M> EditableBeanBuildCommand<M> map(Class<M> targetType);
+
+    /**
+     * Combination of as and map, performs a mapping on the intermediate object,
+     * changing the type to the targetType and changing the EditableBeanBuild command interface.
+     * @param interfaceType The new interface type to continue with
+     * @param targetType The type the intermediate object should continue to have
+     * @param <I> The new EditableBeanBuildCommand interface
+     * @param <M> The target class
+     * @return new instance of EditableBeanBuildCommand
+
+     */
+    <I extends EditableBeanBuildCommand<M>, M> I map(Class<I> interfaceType, Class<M> targetType);
+
+    /**
+     * Changes the interface type.
+     * This allows you to continue with another EditableBeanBuildCommand.
+     * @param interfaceType The type the intermediate object should continue to have
+     * @param <I> The new EditableBeanBuildCommand interface
+     * @return new instance of EditableBeanBuildCommand
+     */
+    <I extends EditableBeanBuildCommand<B>, B> I as(Class<I> interfaceType);
+
     /**
      * Perform an operation on the intermediate object.
      * @param consumer the consumer that should take our object

@@ -1,23 +1,7 @@
 package nl._42.beanie;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-
-import nl._42.beanie.generator.BeanGenerator;
-import nl._42.beanie.generator.ConstantValueGenerator;
-import nl._42.beanie.generator.DefaultValueGenerator;
-import nl._42.beanie.generator.PropertyValueGenerator;
-import nl._42.beanie.generator.TypeBasedValueGenerator;
-import nl._42.beanie.generator.ValueGenerator;
+import io.beanmapper.BeanMapper;
+import nl._42.beanie.generator.*;
 import nl._42.beanie.generator.supported.PredicateSupportable;
 import nl._42.beanie.generator.supported.Supportable;
 import nl._42.beanie.generator.supported.SupportableValueGenerators;
@@ -25,11 +9,17 @@ import nl._42.beanie.save.BeanSaver;
 import nl._42.beanie.save.NoOperationBeanSaver;
 import nl._42.beanie.util.PropertyReference;
 import nl._42.beanie.util.Proxies;
-
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.util.ReflectionUtils;
+
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Builds new bean instances.
@@ -65,6 +55,8 @@ public class BeanBuilder implements ValueGenerator {
      * Generator used to generate the result beans.
      */
     private final BeanGenerator beanGenerator;
+
+    private BeanMapper beanMapper;
     
     /**
      * Saves the generated beans.
@@ -112,7 +104,7 @@ public class BeanBuilder implements ValueGenerator {
      * @return the bean build command
      */
     public <T> EditableBeanBuildCommand<T> start(Class<T> beanClass) {
-        return new DefaultBeanBuildCommand<T>(this, beanClass);
+        return new DefaultBeanBuildCommand<>(this, beanClass, beanMapper);
     }
 
     /**
@@ -122,7 +114,7 @@ public class BeanBuilder implements ValueGenerator {
      * @return the bean build command
      */
     public <T> EditableBeanBuildCommand<T> start(T bean) {
-        return new DefaultBeanBuildCommand<T>(this, bean);
+        return new DefaultBeanBuildCommand<>(this, bean, beanMapper);
     }
     
     /**
@@ -131,7 +123,7 @@ public class BeanBuilder implements ValueGenerator {
      * @param interfaceType the build command interface
      * @return the builder instance, capable of building beans
      */
-    public <T extends BeanBuildCommand<?>> T startAs(Class<T> interfaceType) {
+    public <I extends BeanBuildCommand<?>> I startAs(Class<I> interfaceType) {
         final Class<?> beanClass = GenericTypeResolver.resolveTypeArguments(interfaceType, BeanBuildCommand.class)[0];
         return wrapToInterface(interfaceType, start(beanClass));
     }
@@ -142,7 +134,7 @@ public class BeanBuilder implements ValueGenerator {
      * @param interfaceType the build command interface
      * @return the builder instance, capable of building beans
      */
-    public <T extends BeanBuildCommand<B>, B> T startAs(Class<T> interfaceType, B bean) {
+    public <I extends BeanBuildCommand<B>, B> I startAs(Class<I> interfaceType, B bean) {
         return wrapToInterface(interfaceType, start(bean));
     }
 
@@ -398,4 +390,10 @@ public class BeanBuilder implements ValueGenerator {
         this.beanSaver = beanSaver;
     }
 
+    /**
+     * @param beanMapper the bean mapper to set
+     */
+    public void setBeanMapper(BeanMapper beanMapper) {
+        this.beanMapper = beanMapper;
+    }
 }
