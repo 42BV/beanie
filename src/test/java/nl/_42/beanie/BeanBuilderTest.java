@@ -27,7 +27,7 @@ public class BeanBuilderTest {
         beanBuilder = new BeanBuilder();
         beanBuilder.register(new AnnotationSupportable(SimpleAnnotation.class), new SimplePropertyValueGenerator());
 	}
-	
+
 	@Test
 	public void testGenerate() {
         SimpleBean bean = beanBuilder.generateSafely(SimpleBean.class);
@@ -255,6 +255,28 @@ public class BeanBuilderTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testInvalidMethods() {
         beanBuilder.startAs(InvalidSimpleBeanBuildCommand.class);
+    }
+    
+    @Test
+    public void testFacade() {
+        SimpleBeanBuilder builder = new SimpleBeanBuilder();
+        builder.setBeanBuilder(beanBuilder);
+
+        SimpleBean bean = builder.start().fill().construct();
+        Assert.assertNotNull(bean);
+        Assert.assertNotNull(bean.getName());
+    }
+    
+    @Test
+    public void testFacadeWrap() {
+        SimpleBean wrapped = new SimpleBean();
+        wrapped.setName("abc");
+        
+        SimpleBeanBuilder builder = new SimpleBeanBuilder();
+        builder.setBeanBuilder(beanBuilder);
+        SimpleBean bean = builder.wrap(wrapped).fill().construct();
+        Assert.assertNotNull(bean);
+        Assert.assertEquals("abc", bean.getName());
     }
 
 }
