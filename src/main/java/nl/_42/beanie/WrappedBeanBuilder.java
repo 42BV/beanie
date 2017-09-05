@@ -3,18 +3,25 @@ package nl._42.beanie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.GenericTypeResolver;
 
-public abstract class BeanBuilderFacade<T, C extends BeanBuildCommand<T>> {
+public abstract class WrappedBeanBuilder<T, C extends BeanBuildCommand<T>> {
     
     private BeanBuilder beanBuilder;
     
     private final Class<C> interfaceType;
 
+    /**
+     * Create a new wrapped bean builder, using the type argument resolver.
+     */
     @SuppressWarnings("unchecked")
-    public BeanBuilderFacade() {
-        this.interfaceType = (Class<C>) GenericTypeResolver.resolveTypeArguments(getClass(), BeanBuilderFacade.class)[1];
+    public WrappedBeanBuilder() {
+        this.interfaceType = (Class<C>) GenericTypeResolver.resolveTypeArguments(getClass(), WrappedBeanBuilder.class)[1];
     }
     
-    public BeanBuilderFacade(Class<C> interfaceType) {
+    /**
+     * Create a new wrapped bean builder.
+     * @param interfaceType the interface type
+     */
+    public WrappedBeanBuilder(Class<C> interfaceType) {
         this.interfaceType = interfaceType;
     }
     
