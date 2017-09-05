@@ -5,5 +5,5 @@ import nl._42.beanie.domain.SimpleBean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SimpleBeanBuilder extends BeanBuilderFacade<SimpleBean, SimpleBeanBuildCommand> {
+public class SimpleBeanBuilder extends WrappedBeanBuilder<SimpleBean, SimpleBeanBuildCommand> {
 }
