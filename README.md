@@ -1,10 +1,12 @@
 [![Build Status](https://travis-ci.org/42BV/beanie.svg?branch=master)](https://travis-ci.org/42BV/beanie)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/86775ea7cd154b4c89547f4b9533ea52)](https://www.codacy.com/app/42bv/beanie)
+[![BCH compliance](https://bettercodehub.com/edge/badge/42BV/beanie?branch=master)](https://bettercodehub.com/)
 [![Codecov](https://codecov.io/gh/42bv/beanie/branch/master/graph/badge.svg)](https://codecov.io/gh/42bv/beanie)
 [![Maven central](https://maven-badges.herokuapp.com/maven-central/nl.42/beanie/badge.svg)](https://maven-badges.herokuapp.com/maven-central/nl.42/beanie)
-[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/nl.42/beanie/badge.svg)](http://www.javadoc.io/doc/nl.42/beanie)
+[![Javadocs](https://www.javadoc.io/badge/nl.42/beanie.svg)](https://www.javadoc.io/doc/nl.42/beanie)
 [![Apache 2](http://img.shields.io/badge/license-Apache%202-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
-[![BCH compliance](https://bettercodehub.com/edge/badge/42BV/beanie?branch=master)](https://bettercodehub.com/)
+
+# Beanie
 
 Library for generating and testing beans.
 
