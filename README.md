@@ -4,6 +4,7 @@
 [![Maven central](https://maven-badges.herokuapp.com/maven-central/nl.42/beanie/badge.svg)](https://maven-badges.herokuapp.com/maven-central/nl.42/beanie)
 [![Javadoc](https://javadoc-emblem.rhcloud.com/doc/nl.42/beanie/badge.svg)](http://www.javadoc.io/doc/nl.42/beanie)
 [![Apache 2](http://img.shields.io/badge/license-Apache%202-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![BCH compliance](https://bettercodehub.com/edge/badge/42BV/beanie?branch=master)](https://bettercodehub.com/)
 
 Library for generating and testing beans.
 
