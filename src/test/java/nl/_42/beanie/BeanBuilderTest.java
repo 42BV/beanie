@@ -1,13 +1,20 @@
 package nl._42.beanie;
 
 import io.beanmapper.config.BeanMapperBuilder;
-import nl._42.beanie.domain.*;
+import nl._42.beanie.domain.NestedBean;
+import nl._42.beanie.domain.NestedBeanWithConstructor;
+import nl._42.beanie.domain.SimpleBean;
+import nl._42.beanie.domain.SimpleBeanResult;
+import nl._42.beanie.domain.SomeAbstract;
+import nl._42.beanie.domain.SomeImplementation;
+import nl._42.beanie.domain.SomeInterface;
 import nl._42.beanie.generator.BeanGenerator;
 import nl._42.beanie.generator.ConstantValueGenerator;
 import nl._42.beanie.generator.FirstImplBeanGenerator;
 import nl._42.beanie.generator.random.RandomStringGenerator;
 import nl._42.beanie.generator.supported.AnnotationSupportable;
 import nl._42.beanie.save.UnsupportedBeanSaver;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,10 +29,10 @@ public class BeanBuilderTest {
         beanBuilder = new BeanBuilder();
         beanBuilder.register(new AnnotationSupportable(SimpleAnnotation.class), new SimplePropertyValueGenerator());
         beanBuilder.setBeanMapper(new BeanMapperBuilder().build());
-    }
+	}
 
-    @Test
-    public void testGenerate() {
+	@Test
+	public void testGenerate() {
         SimpleBean bean = beanBuilder.generateSafely(SimpleBean.class);
         Assert.assertNotNull(bean);
 
@@ -252,6 +259,28 @@ public class BeanBuilderTest {
     public void testInvalidMethods() {
         beanBuilder.startAs(InvalidSimpleBeanBuildCommand.class);
     }
+    
+    @Test
+    public void testFacade() {
+        SimpleBeanBuilder builder = new SimpleBeanBuilder();
+        builder.setBeanBuilder(beanBuilder);
+
+        SimpleBean bean = builder.start().fill().construct();
+        Assert.assertNotNull(bean);
+        Assert.assertNotNull(bean.getName());
+    }
+    
+    @Test
+    public void testFacadeWrap() {
+        SimpleBean wrapped = new SimpleBean();
+        wrapped.setName("abc");
+        
+        SimpleBeanBuilder builder = new SimpleBeanBuilder();
+        builder.setBeanBuilder(beanBuilder);
+        SimpleBean bean = builder.wrap(wrapped).fill().construct();
+        Assert.assertNotNull(bean);
+        Assert.assertEquals("abc", bean.getName());
+    }
 
     // With mapping
 
@@ -278,4 +307,5 @@ public class BeanBuilderTest {
         Assert.assertEquals(Long.valueOf(42), beanResult.id);
         Assert.assertEquals("Awesome", beanResult.uniqueId);
     }
+
 }

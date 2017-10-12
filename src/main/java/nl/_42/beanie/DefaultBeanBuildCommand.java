@@ -4,13 +4,6 @@
 package nl._42.beanie;
 
 import io.beanmapper.BeanMapper;
-import nl._42.beanie.generator.ValueGenerator;
-import nl._42.beanie.util.PropertyReference;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.DirectFieldAccessor;
-import org.springframework.beans.PropertyAccessor;
 
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
@@ -19,6 +12,15 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import nl._42.beanie.generator.ValueGenerator;
+import nl._42.beanie.util.PropertyReference;
+
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.beans.PropertyAccessor;
 
 /**
  * Default implementation of the bean build command.
@@ -195,6 +197,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <I extends EditableBeanBuildCommand<B>, B> I as(Class<I> interfaceType) {
         return beanBuilder.startAs(interfaceType, (B) construct());
     }
