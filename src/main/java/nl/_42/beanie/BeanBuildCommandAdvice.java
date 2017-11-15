@@ -28,13 +28,13 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public final class BeanBuildCommandAdvice implements MethodInterceptor {
 
-    private final EditableBeanBuildCommand<?> command;
+    private final BeanBuildCommand<?> command;
         
     private final String preffix;
     
     private Object proxy;
 
-    public BeanBuildCommandAdvice(EditableBeanBuildCommand<?> command, String preffix) {
+    public BeanBuildCommandAdvice(BeanBuildCommand<?> command, String preffix) {
         this.command = command;
         this.preffix = preffix;
     }
@@ -82,15 +82,14 @@ public final class BeanBuildCommandAdvice implements MethodInterceptor {
     }
     
     private static MethodHandle getMethodHandle(Method method) {
-        Class<?> declaringClass = method.getDeclaringClass();
+        final Class<?> declaringClass = method.getDeclaringClass();
         
         try {
             Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
             constructor.setAccessible(true);
-            
             return constructor.newInstance(declaringClass, MethodHandles.Lookup.PRIVATE).unreflectSpecial(method, declaringClass);
         } catch (IllegalAccessException | NoSuchMethodException | InstantiationException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Could not retrieve method handle.", e);
         }
     }
 

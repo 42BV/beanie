@@ -30,6 +30,7 @@ public class WrappedBeanBuilder<T, C extends BeanBuildCommand<T>> {
      *
      * @param beanBuilder the bean builder
      * @param interfaceType the interface type
+     * @param beanBuilder the bean builder
      */
     public WrappedBeanBuilder(BeanBuilder beanBuilder, Class<C> interfaceType) {
         this.beanBuilder = beanBuilder;

@@ -128,9 +128,10 @@ public class BeanBuilder implements ValueGenerator {
      *
      * @param <T> the bean type
      * @param beanClass the type of bean to start building
+     * @param <T> the target type
      * @return the bean build command
      */
-    public <T> EditableBeanBuildCommand<T> start(Class<T> beanClass) {
+    public <T> BeanBuildCommand<T> start(Class<T> beanClass) {
         return new DefaultBeanBuildCommand<>(this, beanClass, beanConverter);
     }
 
@@ -139,9 +140,10 @@ public class BeanBuilder implements ValueGenerator {
      *
      * @param <T> the bean type
      * @param bean the initial bean
+     * @param <T> the target type
      * @return the bean build command
      */
-    public <T> EditableBeanBuildCommand<T> start(T bean) {
+    public <T> BeanBuildCommand<T> start(T bean) {
         return new DefaultBeanBuildCommand<>(this, bean, beanConverter);
     }
     
@@ -150,6 +152,7 @@ public class BeanBuilder implements ValueGenerator {
      *
      * @param <I> the interface type
      * @param interfaceType the build command interface
+     * @param <I> the target interface
      * @return the builder instance, capable of building beans
      */
     public <I extends BeanBuildCommand<?>> I startAs(Class<I> interfaceType) {
@@ -171,7 +174,7 @@ public class BeanBuilder implements ValueGenerator {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends BeanBuildCommand<?>> T wrapToInterface(Class<T> interfaceType, EditableBeanBuildCommand<?> instance) {
+    private <T extends BeanBuildCommand<?>> T wrapToInterface(Class<T> interfaceType, BeanBuildCommand<?> instance) {
         final BeanBuilderConfig annotation = interfaceType.getAnnotation(BeanBuilderConfig.class);
         final String prefix = annotation != null ? annotation.preffix() : WITH_PREFIX;
 
@@ -180,7 +183,7 @@ public class BeanBuilder implements ValueGenerator {
         BeanBuilderPointcut pointcut = new BeanBuilderPointcut(prefix);
         BeanBuildCommandAdvice advice = new BeanBuildCommandAdvice(instance, prefix);
         DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(pointcut, advice);
-        EditableBeanBuildCommand<?> proxy = Proxies.wrapAsProxy(interfaceType, instance, advisor);
+        BeanBuildCommand<?> proxy = Proxies.wrapAsProxy(interfaceType, instance, advisor);
         advice.setProxy(proxy); // Link back to proxy for default methods
         return (T) proxy;
     }
@@ -232,6 +235,7 @@ public class BeanBuilder implements ValueGenerator {
      *
      * @param <T> the bean type
      * @param beanClass the bean class
+     * @param <T> the target type
      * @return the generated bean
      */
     @SuppressWarnings("unchecked")

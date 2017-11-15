@@ -11,7 +11,7 @@ import nl._42.beanie.domain.SimpleBean;
  * @author Jeroen van Schagen
  * @since Mar 26, 2015
  */
-public interface InvalidSimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleBean> {
+public interface InvalidSimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
 
     /**
      * Changes the name with a value.

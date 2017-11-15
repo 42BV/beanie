@@ -12,7 +12,7 @@ import nl._42.beanie.domain.SimpleBean;
  * @since Mar 26, 2015
  */
 @BeanBuilderConfig(preffix = "set")
-public interface SetSimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleBean> {
+public interface SetSimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
 
     /**
      * Changes the name with a value.

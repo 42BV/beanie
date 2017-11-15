@@ -16,6 +16,7 @@ public interface BeanSaver {
      *
      * @param <T> the bean type
      * @param bean the bean to save
+     * @param <T> the target type
      * @return the saved bean
      */
     <T> T save(T bean);
