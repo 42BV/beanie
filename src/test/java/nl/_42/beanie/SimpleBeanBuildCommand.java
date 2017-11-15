@@ -14,7 +14,7 @@ import java.util.Set;
  * @author Jeroen van Schagen
  * @since Mar 26, 2015
  */
-public interface SimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleBean> {
+public interface SimpleBeanBuildCommand extends BeanBuildCommand<SimpleBean> {
 
     /**
      * Changes the name with a value.

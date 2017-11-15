@@ -198,7 +198,7 @@ public class BeanBuilderTest {
                 .withName(new ConstantValueGenerator("success"))
                 .withNestedBean()
                 .withHobbies("coding")
-                .doWith(x -> x.getNestedBean().setValue("abc"))
+                .perform(x -> x.getNestedBean().setValue("abc"))
                 .map(x -> x)
                 .withValue("id", 42L)
                 .construct();
@@ -217,7 +217,7 @@ public class BeanBuilderTest {
 
         SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class, base)
                 .withNestedBean()
-                .doWith(x -> x.getNestedBean().setValue("abc"))
+                .perform(x -> x.getNestedBean().setValue("abc"))
                 .map(x -> x)
                 .withValue("id", 42L)
                 .construct();
@@ -262,24 +262,31 @@ public class BeanBuilderTest {
     
     @Test
     public void testFacade() {
-        SimpleBeanBuilder builder = new SimpleBeanBuilder();
-        builder.setBeanBuilder(beanBuilder);
+        SimpleBeanBuilder builder = new SimpleBeanBuilder(beanBuilder);
 
         SimpleBean bean = builder.start().fill().construct();
         Assert.assertNotNull(bean);
         Assert.assertNotNull(bean.getName());
     }
-    
+
     @Test
     public void testFacadeWrap() {
         SimpleBean wrapped = new SimpleBean();
         wrapped.setName("abc");
         
-        SimpleBeanBuilder builder = new SimpleBeanBuilder();
-        builder.setBeanBuilder(beanBuilder);
+        SimpleBeanBuilder builder = new SimpleBeanBuilder(beanBuilder);
         SimpleBean bean = builder.wrap(wrapped).fill().construct();
         Assert.assertNotNull(bean);
         Assert.assertEquals("abc", bean.getName());
+    }
+    
+    @Test
+    public void testFacadeGeneric() {
+        WrappedBeanBuilder<SimpleBean, SimpleBeanBuildCommand> builder = new WrappedBeanBuilder<>(SimpleBeanBuildCommand.class, beanBuilder);
+
+        SimpleBean bean = builder.start().fill().construct();
+        Assert.assertNotNull(bean);
+        Assert.assertNotNull(bean.getName());
     }
 
     // With mapping

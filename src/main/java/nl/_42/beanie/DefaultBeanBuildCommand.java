@@ -28,7 +28,7 @@ import org.springframework.beans.PropertyAccessor;
  * @author Jeroen van Schagen
  * @since Feb 14, 2014
  */
-class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
+class DefaultBeanBuildCommand<T> implements BeanBuildCommand<T> {
 
     /**
      * Collection of all properties already touched.
@@ -91,7 +91,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
-    public EditableBeanBuildCommand<T> withValue(String propertyName, Object value) {
+    public BeanBuildCommand<T> withValue(String propertyName, Object value) {
         setPropertyValue(propertyName, value);
         markAsTouched(propertyName);
         return this;
@@ -143,7 +143,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
-    public EditableBeanBuildCommand<T> load(Object source, String... exclusionArgs) {
+    public BeanBuildCommand<T> load(Object source, String... exclusionArgs) {
         final Collection<String> exclusions = Arrays.asList(exclusionArgs);
 
         BeanWrapper sourceWrapper = new BeanWrapperImpl(source);
@@ -165,17 +165,16 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
-    public EditableBeanBuildCommand<T> map(Function<T, T> function) {
-        T result = function.apply(construct());
-        setBean(result);
-        return this;
+    public <R> BeanBuildCommand<R> map(Function<T, R> function) {
+        R result = function.apply(construct());
+        return new DefaultBeanBuildCommand<>(beanBuilder, result, beanMapper);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <M> EditableBeanBuildCommand<M> map(Class<M> targetType) {
+    public <M> BeanBuildCommand<M> map(Class<M> targetType) {
         M mapped = constructAndMap(targetType);
         return new DefaultBeanBuildCommand<>(beanBuilder, mapped, beanMapper);
     }
@@ -184,7 +183,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
-    public <I extends EditableBeanBuildCommand<M>, M> I map(Class<I> interfaceType, Class<M> targetType) {
+    public <I extends BeanBuildCommand<M>, M> I map(Class<I> interfaceType, Class<M> targetType) {
         M mapped = constructAndMap(targetType);
         return beanBuilder.startAs(interfaceType, mapped);
     }
@@ -198,15 +197,16 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <I extends EditableBeanBuildCommand<B>, B> I as(Class<I> interfaceType) {
-        return beanBuilder.startAs(interfaceType, (B) construct());
+    public <C extends BeanBuildCommand<R>, R> C as(Class<C> interfaceType) {
+        R result = (R) construct();
+        return beanBuilder.startAs(interfaceType, result);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public EditableBeanBuildCommand<T> doWith(Consumer<T> consumer) {
+    public BeanBuildCommand<T> perform(Consumer<T> consumer) {
         T bean = construct();
         consumer.accept(bean);
         setBean(bean);
@@ -217,7 +217,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
-    public EditableBeanBuildCommand<T> generateValue(String propertyName, ValueGenerator generator) {
+    public BeanBuildCommand<T> generateValue(String propertyName, ValueGenerator generator) {
         PropertyDescriptor descriptor = beanWrapper.getPropertyDescriptor(propertyName);
         Object value = generator.generate(descriptor.getPropertyType());
         return this.withValue(propertyName, value);
@@ -227,7 +227,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
-    public EditableBeanBuildCommand<T> generateValue(String... propertyNames) {
+    public BeanBuildCommand<T> generateValue(String... propertyNames) {
         for (String propertyName : propertyNames) {
             touchedProperties.add(propertyName);
             propertiesToGenerate.add(propertyName);
@@ -239,7 +239,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      * {@inheritDoc}
      */
     @Override
-    public EditableBeanBuildCommand<T> fill() {
+    public BeanBuildCommand<T> fill() {
         for (PropertyDescriptor descriptor : beanWrapper.getPropertyDescriptors()) {
             String propertyName = descriptor.getName();
             if (beanWrapper.isWritableProperty(propertyName) && !touchedProperties.contains(propertyName)) {

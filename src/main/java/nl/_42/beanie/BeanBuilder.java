@@ -1,7 +1,25 @@
 package nl._42.beanie;
 
 import io.beanmapper.BeanMapper;
-import nl._42.beanie.generator.*;
+
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
+import nl._42.beanie.generator.BeanGenerator;
+import nl._42.beanie.generator.ConstantValueGenerator;
+import nl._42.beanie.generator.DefaultValueGenerator;
+import nl._42.beanie.generator.PropertyValueGenerator;
+import nl._42.beanie.generator.TypeBasedValueGenerator;
+import nl._42.beanie.generator.ValueGenerator;
 import nl._42.beanie.generator.supported.PredicateSupportable;
 import nl._42.beanie.generator.supported.Supportable;
 import nl._42.beanie.generator.supported.SupportableValueGenerators;
@@ -9,17 +27,11 @@ import nl._42.beanie.save.BeanSaver;
 import nl._42.beanie.save.NoOperationBeanSaver;
 import nl._42.beanie.util.PropertyReference;
 import nl._42.beanie.util.Proxies;
+
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.util.ReflectionUtils;
-
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.function.Predicate;
 
 /**
  * Builds new bean instances.
@@ -101,9 +113,10 @@ public class BeanBuilder implements ValueGenerator {
      * Start building a new bean.
      * 
      * @param beanClass the type of bean to start building
+     * @param <T> the target type
      * @return the bean build command
      */
-    public <T> EditableBeanBuildCommand<T> start(Class<T> beanClass) {
+    public <T> BeanBuildCommand<T> start(Class<T> beanClass) {
         return new DefaultBeanBuildCommand<>(this, beanClass, beanMapper);
     }
 
@@ -111,9 +124,10 @@ public class BeanBuilder implements ValueGenerator {
      * Start building a new bean.
      * 
      * @param bean the initial bean
+     * @param <T> the target type
      * @return the bean build command
      */
-    public <T> EditableBeanBuildCommand<T> start(T bean) {
+    public <T> BeanBuildCommand<T> start(T bean) {
         return new DefaultBeanBuildCommand<>(this, bean, beanMapper);
     }
     
@@ -121,6 +135,7 @@ public class BeanBuilder implements ValueGenerator {
      * Start building a new bean, using a custom builder interface.
      * 
      * @param interfaceType the build command interface
+     * @param <I> the target interface
      * @return the builder instance, capable of building beans
      */
     public <I extends BeanBuildCommand<?>> I startAs(Class<I> interfaceType) {
@@ -132,14 +147,17 @@ public class BeanBuilder implements ValueGenerator {
      * Start building a new bean, using a custom builder interface.
      * 
      * @param interfaceType the build command interface
+     * @param bean the target bean
+     * @param <I> the target interface
+     * @param <T> the target type
      * @return the builder instance, capable of building beans
      */
-    public <I extends BeanBuildCommand<B>, B> I startAs(Class<I> interfaceType, B bean) {
+    public <I extends BeanBuildCommand<T>, T> I startAs(Class<I> interfaceType, T bean) {
         return wrapToInterface(interfaceType, start(bean));
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends BeanBuildCommand<?>> T wrapToInterface(Class<T> interfaceType, EditableBeanBuildCommand<?> instance) {
+    private <T extends BeanBuildCommand<?>> T wrapToInterface(Class<T> interfaceType, BeanBuildCommand<?> instance) {
         final BeanBuilderConfig annotation = interfaceType.getAnnotation(BeanBuilderConfig.class);
         final String preffix = annotation != null ? annotation.preffix() : WITH_PREFIX;
 
@@ -148,7 +166,7 @@ public class BeanBuilder implements ValueGenerator {
         BeanBuilderPointcut pointcut = new BeanBuilderPointcut(preffix);
         BeanBuildCommandAdvice advice = new BeanBuildCommandAdvice(instance, preffix);
         DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(pointcut, advice);
-        EditableBeanBuildCommand<?> proxy = Proxies.wrapAsProxy(interfaceType, instance, advisor);
+        BeanBuildCommand<?> proxy = Proxies.wrapAsProxy(interfaceType, instance, advisor);
         advice.setProxy(proxy); // Link back to proxy for default methods
         return (T) proxy;
     }
@@ -199,6 +217,7 @@ public class BeanBuilder implements ValueGenerator {
      * Generate a new bean, properly casted to the correct type.
      * 
      * @param beanClass the bean class
+     * @param <T> the target type
      * @return the generated bean
      */
     @SuppressWarnings("unchecked")
@@ -336,6 +355,7 @@ public class BeanBuilder implements ValueGenerator {
      * Saves the bean.
      * 
      * @param bean the bean to save
+     * @param <R> the result type
      * @return the saved bean
      */
     public <R> R save(R bean) {
@@ -396,4 +416,5 @@ public class BeanBuilder implements ValueGenerator {
     public void setBeanMapper(BeanMapper beanMapper) {
         this.beanMapper = beanMapper;
     }
+
 }
