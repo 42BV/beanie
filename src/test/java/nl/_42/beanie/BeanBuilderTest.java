@@ -28,7 +28,7 @@ public class BeanBuilderTest {
     public void setUp() {
         beanBuilder = new BeanBuilder();
         beanBuilder.register(new AnnotationSupportable(SimpleAnnotation.class), new SimplePropertyValueGenerator());
-        beanBuilder.setBeanMapper(new BeanMapperBuilder().build());
+        beanBuilder.setBeanMapper(new BeanMapperBuilder().setApplyStrictMappingConvention(false).build());
 	}
 
 	@Test
