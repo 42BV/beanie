@@ -17,7 +17,7 @@
 	
 	    <spring.version>4.2.6.RELEASE</spring.version>
 
-        <beanmapper.version>0.3.2</beanmapper.version>
+        <beanmapper.version>2.3.1</beanmapper.version>
     </properties>
 
     <distributionManagement>
@@ -104,7 +104,6 @@
             <groupId>io.beanmapper</groupId>
             <artifactId>beanmapper</artifactId>
             <version>${beanmapper.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
