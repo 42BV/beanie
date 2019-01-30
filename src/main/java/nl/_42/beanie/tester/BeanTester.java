@@ -5,13 +5,8 @@ import nl._42.beanie.tester.strategy.ObjectEqualizer;
 import nl._42.beanie.tester.strategy.SimpleObjectEqualizer;
 import nl._42.beanie.util.Classes;
 import nl._42.beanie.util.PropertyReference;
-
-import java.beans.PropertyDescriptor;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -19,6 +14,11 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+
+import java.beans.PropertyDescriptor;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Verifies the getter and setter methods of beans. The retrieved
@@ -28,7 +28,7 @@ import org.springframework.core.type.filter.TypeFilter;
  */
 public class BeanTester {
 
-    private static final Logger LOGGER = Logger.getLogger(BeanTester.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BeanTester.class);
 
     private final Set<PropertyReference> excludedProperties = new HashSet<PropertyReference>();
     

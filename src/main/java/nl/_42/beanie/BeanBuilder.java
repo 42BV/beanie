@@ -186,10 +186,10 @@ public class BeanBuilder implements ValueGenerator {
 
     private static class BeanBuilderPointcut extends StaticMethodMatcherPointcut {
         
-        private final String preffix;
+        private final String prefix;
 
-        public BeanBuilderPointcut(String preffix) {
-            this.preffix = preffix;
+        public BeanBuilderPointcut(String prefix) {
+            this.prefix = prefix;
         }
 
         /**
@@ -197,7 +197,7 @@ public class BeanBuilder implements ValueGenerator {
          */
         @Override
         public boolean matches(Method method, Class<?> targetClass) {
-            return (method.getName().startsWith(preffix) && method.getParameterCount() <= 1) || method.isDefault();
+            return (method.getName().startsWith(prefix) && method.getParameterCount() <= 1) || method.isDefault();
         }
 
     }

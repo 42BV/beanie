@@ -3,16 +3,12 @@
  */
 package nl._42.beanie;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import nl._42.beanie.generator.ValueGenerator;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
+import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Method;
 
 /**
  * Appends bean building logic to builders, allowing custom builder interfaces.
@@ -30,13 +26,13 @@ public final class BeanBuildCommandAdvice implements MethodInterceptor {
 
     private final BeanBuildCommand<?> command;
         
-    private final String preffix;
+    private final String prefix;
     
     private Object proxy;
 
-    public BeanBuildCommandAdvice(BeanBuildCommand<?> command, String preffix) {
+    public BeanBuildCommandAdvice(BeanBuildCommand<?> command, String prefix) {
         this.command = command;
-        this.preffix = preffix;
+        this.prefix = prefix;
     }
     
     /**
@@ -55,10 +51,10 @@ public final class BeanBuildCommandAdvice implements MethodInterceptor {
         final Object[] args = invocation.getArguments();
         
         if (method.isDefault()) {
-            MethodHandle handle = getMethodHandle(method);
-            return handle.bindTo(proxy).invokeWithArguments(args);
+            MethodHandle handle = Methods.getMethodHandle(method);
+            return handle.bindTo(proxy).invokeWithArguments();
         } else {
-            String propertyName = getPropertyName(method, preffix);
+            String propertyName = getPropertyName(method, prefix);
             if (args.length == 1) {
                 Object argument = args[0];
                 if (argument instanceof ValueGenerator) {
@@ -79,18 +75,6 @@ public final class BeanBuildCommandAdvice implements MethodInterceptor {
 
     private String uncapitalize(final String propertyName) {
         return propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
-    }
-    
-    private static MethodHandle getMethodHandle(Method method) {
-        final Class<?> declaringClass = method.getDeclaringClass();
-        
-        try {
-            Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
-            constructor.setAccessible(true);
-            return constructor.newInstance(declaringClass, MethodHandles.Lookup.PRIVATE).unreflectSpecial(method, declaringClass);
-        } catch (IllegalAccessException | NoSuchMethodException | InstantiationException | InvocationTargetException e) {
-            throw new IllegalStateException("Could not retrieve method handle.", e);
-        }
     }
 
 }
