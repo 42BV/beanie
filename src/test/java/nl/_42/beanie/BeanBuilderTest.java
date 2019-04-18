@@ -1,6 +1,6 @@
 package nl._42.beanie;
 
-import io.beanmapper.config.BeanMapperBuilder;
+import nl._42.beanie.convert.BeanMapperConverter;
 import nl._42.beanie.domain.NestedBean;
 import nl._42.beanie.domain.NestedBeanWithConstructor;
 import nl._42.beanie.domain.SimpleBean;
@@ -14,7 +14,6 @@ import nl._42.beanie.generator.FirstImplBeanGenerator;
 import nl._42.beanie.generator.random.RandomStringGenerator;
 import nl._42.beanie.generator.supported.AnnotationSupportable;
 import nl._42.beanie.save.UnsupportedBeanSaver;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +27,7 @@ public class BeanBuilderTest {
     public void setUp() {
         beanBuilder = new BeanBuilder();
         beanBuilder.register(new AnnotationSupportable(SimpleAnnotation.class), new SimplePropertyValueGenerator());
-        beanBuilder.setBeanMapper(new BeanMapperBuilder().build());
+        beanBuilder.setBeanConverter(new BeanMapperConverter());
 	}
 
 	@Test

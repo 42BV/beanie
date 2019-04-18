@@ -49,7 +49,7 @@
         <!-- Dependencies -->
         <spring.version>5.1.6.RELEASE</spring.version>
         <spring.data.version>2.1.6.RELEASE</spring.data.version>
-        <beanmapper.version>0.3.2</beanmapper.version>
+        <beanmapper.version>3.0.1</beanmapper.version>
     </properties>
 
     <dependencies>

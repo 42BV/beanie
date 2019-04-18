@@ -1,7 +1,13 @@
 package nl._42.beanie;
 
-import io.beanmapper.BeanMapper;
-import nl._42.beanie.generator.*;
+import nl._42.beanie.convert.BeanConverter;
+import nl._42.beanie.convert.UnsupportedBeanConverter;
+import nl._42.beanie.generator.BeanGenerator;
+import nl._42.beanie.generator.ConstantValueGenerator;
+import nl._42.beanie.generator.DefaultValueGenerator;
+import nl._42.beanie.generator.PropertyValueGenerator;
+import nl._42.beanie.generator.TypeBasedValueGenerator;
+import nl._42.beanie.generator.ValueGenerator;
 import nl._42.beanie.generator.supported.PredicateSupportable;
 import nl._42.beanie.generator.supported.Supportable;
 import nl._42.beanie.generator.supported.SupportableValueGenerators;
@@ -18,7 +24,12 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -56,31 +67,23 @@ public class BeanBuilder implements ValueGenerator {
      */
     private final BeanGenerator beanGenerator;
 
-    private BeanMapper beanMapper;
+    private BeanConverter beanConverter = new UnsupportedBeanConverter();
     
     /**
      * Saves the generated beans.
      */
-    private BeanSaver beanSaver;
+    private BeanSaver beanSaver = new NoOperationBeanSaver();
 
     /**
-     * Construct a new {@link BeanBuilder}.
-     * <br><br>
-     * <b>Note that using this constructor means the beans cannot be saved</b>
+     * Construct a simple {@link BeanBuilder}, please note that this
+     * builder by default does not yet support conversions and persistence.
+     *
+     * @see #setBeanConverter(BeanConverter)
+     * @see #setBeanSaver(BeanSaver)
      */
     public BeanBuilder() {
-        this(new NoOperationBeanSaver());
-    }
-
-    /**
-     * Construct a new {@link BeanBuilder}.
-     * 
-     * @param beanSaver responsible for saving the bean after creation
-     */
-    public BeanBuilder(BeanSaver beanSaver) {
         this.typeGenerator = new DefaultValueGenerator(this);
         this.beanGenerator = new BeanGenerator(this);
-        this.beanSaver = beanSaver;
     }
 
     /**
@@ -99,27 +102,30 @@ public class BeanBuilder implements ValueGenerator {
 
     /**
      * Start building a new bean.
-     * 
+     *
+     * @param <T> the bean type
      * @param beanClass the type of bean to start building
      * @return the bean build command
      */
     public <T> EditableBeanBuildCommand<T> start(Class<T> beanClass) {
-        return new DefaultBeanBuildCommand<>(this, beanClass, beanMapper);
+        return new DefaultBeanBuildCommand<>(this, beanClass, beanConverter);
     }
 
     /**
      * Start building a new bean.
-     * 
+     *
+     * @param <T> the bean type
      * @param bean the initial bean
      * @return the bean build command
      */
     public <T> EditableBeanBuildCommand<T> start(T bean) {
-        return new DefaultBeanBuildCommand<>(this, bean, beanMapper);
+        return new DefaultBeanBuildCommand<>(this, bean, beanConverter);
     }
     
     /**
      * Start building a new bean, using a custom builder interface.
-     * 
+     *
+     * @param <I> the interface type
      * @param interfaceType the build command interface
      * @return the builder instance, capable of building beans
      */
@@ -130,23 +136,26 @@ public class BeanBuilder implements ValueGenerator {
     
     /**
      * Start building a new bean, using a custom builder interface.
-     * 
+     *
+     * @param <I> the interface type
+     * @param <T> the bean type
      * @param interfaceType the build command interface
+     * @param bean the template bean
      * @return the builder instance, capable of building beans
      */
-    public <I extends BeanBuildCommand<B>, B> I startAs(Class<I> interfaceType, B bean) {
+    public <I extends BeanBuildCommand<T>, T> I startAs(Class<I> interfaceType, T bean) {
         return wrapToInterface(interfaceType, start(bean));
     }
 
     @SuppressWarnings("unchecked")
     private <T extends BeanBuildCommand<?>> T wrapToInterface(Class<T> interfaceType, EditableBeanBuildCommand<?> instance) {
         final BeanBuilderConfig annotation = interfaceType.getAnnotation(BeanBuilderConfig.class);
-        final String preffix = annotation != null ? annotation.preffix() : WITH_PREFIX;
+        final String prefix = annotation != null ? annotation.preffix() : WITH_PREFIX;
 
-        validate(preffix, interfaceType);
+        validate(prefix, interfaceType);
 
-        BeanBuilderPointcut pointcut = new BeanBuilderPointcut(preffix);
-        BeanBuildCommandAdvice advice = new BeanBuildCommandAdvice(instance, preffix);
+        BeanBuilderPointcut pointcut = new BeanBuilderPointcut(prefix);
+        BeanBuildCommandAdvice advice = new BeanBuildCommandAdvice(instance, prefix);
         DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(pointcut, advice);
         EditableBeanBuildCommand<?> proxy = Proxies.wrapAsProxy(interfaceType, instance, advisor);
         advice.setProxy(proxy); // Link back to proxy for default methods
@@ -197,7 +206,8 @@ public class BeanBuilder implements ValueGenerator {
 
     /**
      * Generate a new bean, properly casted to the correct type.
-     * 
+     *
+     * @param <T> the bean type
      * @param beanClass the bean class
      * @return the generated bean
      */
@@ -334,11 +344,12 @@ public class BeanBuilder implements ValueGenerator {
 
     /**
      * Saves the bean.
-     * 
+     *
+     * @param <T> the bean type
      * @param bean the bean to save
      * @return the saved bean
      */
-    public <R> R save(R bean) {
+    public <T> T save(T bean) {
         if (bean == null) {
             return null;
         }
@@ -384,16 +395,17 @@ public class BeanBuilder implements ValueGenerator {
     }
     
     /**
-     * @param beanSaver the beanSaver to set
+     * @param beanSaver the saver to set
      */
     public void setBeanSaver(BeanSaver beanSaver) {
         this.beanSaver = beanSaver;
     }
 
     /**
-     * @param beanMapper the bean mapper to set
+     * @param beanConverter the converter to set
      */
-    public void setBeanMapper(BeanMapper beanMapper) {
-        this.beanMapper = beanMapper;
+    public void setBeanConverter(BeanConverter beanConverter) {
+        this.beanConverter = beanConverter;
     }
+
 }

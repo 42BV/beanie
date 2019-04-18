@@ -65,13 +65,14 @@ public interface EditableBeanBuildCommand<T> extends BeanBuildCommand<T> {
     <I extends EditableBeanBuildCommand<M>, M> I map(Class<I> interfaceType, Class<M> targetType);
 
     /**
-     * Changes the interface type.
-     * This allows you to continue with another EditableBeanBuildCommand.
-     * @param interfaceType The type the intermediate object should continue to have
-     * @param <I> The new EditableBeanBuildCommand interface
-     * @return new instance of EditableBeanBuildCommand
+     * Changes the interface type. This allows you to continue with another command.
+     *
+     * @param <I> the interface type
+     * @param <T> the bean type
+     * @param interfaceType the new interface type class
+     * @return new command instance of specified type
      */
-    <I extends EditableBeanBuildCommand<B>, B> I as(Class<I> interfaceType);
+    <I extends EditableBeanBuildCommand<T>, T> I as(Class<I> interfaceType);
 
     /**
      * Perform an operation on the intermediate object.

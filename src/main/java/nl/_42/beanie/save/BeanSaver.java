@@ -13,7 +13,8 @@ public interface BeanSaver {
     
     /**
      * Saves a bean.
-     * 
+     *
+     * @param <T> the bean type
      * @param bean the bean to save
      * @return the saved bean
      */

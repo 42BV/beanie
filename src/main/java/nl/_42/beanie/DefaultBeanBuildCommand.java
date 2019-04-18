@@ -3,7 +3,14 @@
  */
 package nl._42.beanie;
 
-import io.beanmapper.BeanMapper;
+import nl._42.beanie.convert.BeanConverter;
+import nl._42.beanie.generator.ValueGenerator;
+import nl._42.beanie.util.PropertyReference;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.beans.PropertyAccessor;
 
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
@@ -12,15 +19,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import nl._42.beanie.generator.ValueGenerator;
-import nl._42.beanie.util.PropertyReference;
-
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.DirectFieldAccessor;
-import org.springframework.beans.PropertyAccessor;
 
 /**
  * Default implementation of the bean build command.
@@ -46,7 +44,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      */
     private final BeanBuilder beanBuilder;
 
-    private final BeanMapper beanMapper;
+    private final BeanConverter beanConverter;
 
     /**
      * Bean wrapper that holds a reference to the result bean.
@@ -60,15 +58,15 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      */
     private DirectFieldAccessor fieldAccessor;
 
-    public DefaultBeanBuildCommand(BeanBuilder beanBuilder, Class<T> type, BeanMapper beanMapper) {
+    public DefaultBeanBuildCommand(BeanBuilder beanBuilder, Class<T> type, BeanConverter beanConverter) {
         this.beanBuilder = beanBuilder;
-        this.beanMapper = beanMapper;
+        this.beanConverter = beanConverter;
         setBean(beanBuilder.getBeanGenerator().generate(type));
     }
     
-    public DefaultBeanBuildCommand(BeanBuilder beanBuilder, Object bean, BeanMapper beanMapper) {
+    public DefaultBeanBuildCommand(BeanBuilder beanBuilder, Object bean, BeanConverter beanConverter) {
         this.beanBuilder = beanBuilder;
-        this.beanMapper = beanMapper;
+        this.beanConverter = beanConverter;
         setBean(bean);
         markNotNullAsTouched();
     }
@@ -177,7 +175,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
     @Override
     public <M> EditableBeanBuildCommand<M> map(Class<M> targetType) {
         M mapped = constructAndMap(targetType);
-        return new DefaultBeanBuildCommand<>(beanBuilder, mapped, beanMapper);
+        return new DefaultBeanBuildCommand<>(beanBuilder, mapped, beanConverter);
     }
 
     /**
@@ -190,7 +188,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
     }
 
     private <M> M constructAndMap(Class<M> targetType) {
-        return beanMapper.map(construct(), targetType);
+        return beanConverter.convert(construct(), targetType);
     }
 
     /**

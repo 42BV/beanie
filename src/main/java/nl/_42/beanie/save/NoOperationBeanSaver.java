@@ -4,7 +4,7 @@
 package nl._42.beanie.save;
 
 /**
- * Throws an exception when trying to save beans.
+ * Does not save the bean.
  *
  * @author Jeroen van Schagen
  * @since Feb 14, 2014
