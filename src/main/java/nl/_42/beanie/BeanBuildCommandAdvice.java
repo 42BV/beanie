@@ -82,7 +82,7 @@ public final class BeanBuildCommandAdvice implements MethodInterceptor {
     }
     
     private static MethodHandle getMethodHandle(Method method) {
-        Class<?> declaringClass = method.getDeclaringClass();
+        final Class<?> declaringClass = method.getDeclaringClass();
         
         try {
             Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
@@ -90,7 +90,7 @@ public final class BeanBuildCommandAdvice implements MethodInterceptor {
             
             return constructor.newInstance(declaringClass, MethodHandles.Lookup.PRIVATE).unreflectSpecial(method, declaringClass);
         } catch (IllegalAccessException | NoSuchMethodException | InstantiationException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Could not retrieve method handle.", e);
         }
     }
 
