@@ -67,12 +67,12 @@ public class BeanBuilder implements ValueGenerator {
      */
     private final BeanGenerator beanGenerator;
 
-    private BeanConverter beanConverter = new UnsupportedBeanConverter();
+    private BeanConverter beanConverter;
     
     /**
      * Saves the generated beans.
      */
-    private BeanSaver beanSaver = new NoOperationBeanSaver();
+    private BeanSaver beanSaver;
 
     /**
      * Construct a simple {@link BeanBuilder}, please note that this
@@ -82,8 +82,31 @@ public class BeanBuilder implements ValueGenerator {
      * @see #setBeanSaver(BeanSaver)
      */
     public BeanBuilder() {
+        this(new NoOperationBeanSaver());
+    }
+
+    /**
+     * Construct a simple {@link BeanBuilder}, please note that this
+     * builder by default does not yet support conversions.
+     *
+     * @see #setBeanConverter(BeanConverter)
+     * @param beanSaver used to save constructed beans
+     */
+    public BeanBuilder(BeanSaver beanSaver) {
+        this(new UnsupportedBeanConverter(), beanSaver);
+    }
+
+    /**
+     * Construct a simple {@link BeanBuilder}.
+     *
+     * @param beanConverter used to convert beans between types
+     * @param beanSaver used to save constructed beans
+     */
+    public BeanBuilder(BeanConverter beanConverter, BeanSaver beanSaver) {
         this.typeGenerator = new DefaultValueGenerator(this);
         this.beanGenerator = new BeanGenerator(this);
+        this.beanConverter = beanConverter;
+        this.beanSaver = beanSaver;
     }
 
     /**
