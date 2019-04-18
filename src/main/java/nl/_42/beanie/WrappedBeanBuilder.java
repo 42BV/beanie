@@ -1,27 +1,38 @@
 package nl._42.beanie;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.GenericTypeResolver;
 
-public abstract class WrappedBeanBuilder<T, C extends BeanBuildCommand<T>> {
+/**
+ * Build builder specific to one type of build command.
+ *
+ * @param <T> the bean type
+ * @param <C> the command interface type
+ */
+public class WrappedBeanBuilder<T, C extends BeanBuildCommand<T>> {
     
-    private BeanBuilder beanBuilder;
+    private final BeanBuilder beanBuilder;
     
     private final Class<C> interfaceType;
 
     /**
      * Create a new wrapped bean builder, using the type argument resolver.
+     *
+     * @param beanBuilder the bean builder
      */
     @SuppressWarnings("unchecked")
-    public WrappedBeanBuilder() {
+    public WrappedBeanBuilder(BeanBuilder beanBuilder) {
+        this.beanBuilder = beanBuilder;
         this.interfaceType = (Class<C>) GenericTypeResolver.resolveTypeArguments(getClass(), WrappedBeanBuilder.class)[1];
     }
     
     /**
      * Create a new wrapped bean builder.
+     *
+     * @param beanBuilder the bean builder
      * @param interfaceType the interface type
      */
-    public WrappedBeanBuilder(Class<C> interfaceType) {
+    public WrappedBeanBuilder(BeanBuilder beanBuilder, Class<C> interfaceType) {
+        this.beanBuilder = beanBuilder;
         this.interfaceType = interfaceType;
     }
     
@@ -40,15 +51,6 @@ public abstract class WrappedBeanBuilder<T, C extends BeanBuildCommand<T>> {
      */
     public C wrap(T bean) {
         return beanBuilder.startAs(interfaceType, bean);
-    }
-    
-    /**
-     * Store the bean builder to use. (autowired)
-     * @param beanBuilder the bean builder
-     */
-    @Autowired
-    public void setBeanBuilder(BeanBuilder beanBuilder) {
-        this.beanBuilder = beanBuilder;
     }
 
 }

@@ -261,8 +261,7 @@ public class BeanBuilderTest {
     
     @Test
     public void testFacade() {
-        SimpleBeanBuilder builder = new SimpleBeanBuilder();
-        builder.setBeanBuilder(beanBuilder);
+        SimpleBeanBuilder builder = new SimpleBeanBuilder(beanBuilder);
 
         SimpleBean bean = builder.start().fill().construct();
         Assert.assertNotNull(bean);
@@ -273,9 +272,10 @@ public class BeanBuilderTest {
     public void testFacadeWrap() {
         SimpleBean wrapped = new SimpleBean();
         wrapped.setName("abc");
-        
-        SimpleBeanBuilder builder = new SimpleBeanBuilder();
-        builder.setBeanBuilder(beanBuilder);
+
+        WrappedBeanBuilder<SimpleBean, SimpleBeanBuildCommand> builder =
+          new WrappedBeanBuilder(beanBuilder, SimpleBeanBuildCommand.class);
+
         SimpleBean bean = builder.wrap(wrapped).fill().construct();
         Assert.assertNotNull(bean);
         Assert.assertEquals("abc", bean.getName());
