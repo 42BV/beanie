@@ -8,7 +8,7 @@
 
 # Beanie
 
-Testing is important to guarantee the functionality of your application. These tests often rely on complex data
+Testing is important to guarantee the functionality of an application. These tests often rely on complex data
 structure as input. 
 
 Beanie helps with the construction of these input beans, making tests as readable and understandable as possible, 
