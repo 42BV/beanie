@@ -3,11 +3,11 @@
  */
 package nl._42.beanie.save;
 
+import org.springframework.core.annotation.AnnotationUtils;
+
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
-import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * Persists entities in the entity manager. Non entity
@@ -26,7 +26,7 @@ public class JpaBeanSaver implements BeanSaver {
      */
     @Override
     public <T> T save(final T bean) {
-        if (isSaveable(bean)) {
+        if (isEntity(bean)) {
             entityManager.persist(bean);
         }
         return bean;
@@ -37,16 +37,16 @@ public class JpaBeanSaver implements BeanSaver {
      */
     @Override
     public void delete(Object bean) {
-        if (isSaveable(bean)) {
+        if (isEntity(bean)) {
             entityManager.remove(bean);
         }
     }
-    
-    private <T> boolean isSaveable(T value) {
-        return value != null && isEntity(value);
-    }
 
     private boolean isEntity(Object value) {
+        if (value == null) {
+            return false;
+        }
+
         return AnnotationUtils.findAnnotation(value.getClass(), Entity.class) != null;
     }
     

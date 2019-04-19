@@ -1,5 +1,7 @@
 package nl._42.beanie;
 
+import io.beanmapper.BeanMapper;
+import io.beanmapper.config.BeanMapperBuilder;
 import nl._42.beanie.convert.BeanMapperConverter;
 import nl._42.beanie.domain.NestedBean;
 import nl._42.beanie.domain.NestedBeanWithConstructor;
@@ -16,7 +18,6 @@ import nl._42.beanie.generator.supported.AnnotationSupportable;
 import nl._42.beanie.save.UnsupportedBeanSaver;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.internal.util.collections.Sets;
 
@@ -30,7 +31,9 @@ public class BeanBuilderTest {
     public void setUp() {
         beanBuilder = new BeanBuilder();
         beanBuilder.register(new AnnotationSupportable(SimpleAnnotation.class), new SimplePropertyValueGenerator());
-        beanBuilder.setBeanConverter(new BeanMapperConverter());
+
+        BeanMapper beanMapper = new BeanMapperBuilder().setApplyStrictMappingConvention(false).build();
+        beanBuilder.setBeanConverter(new BeanMapperConverter(beanMapper));
 	}
 
 	@Test

@@ -13,10 +13,13 @@ import nl._42.beanie.generator.supported.Supportable;
 import nl._42.beanie.generator.supported.SupportableValueGenerators;
 import nl._42.beanie.save.BeanSaver;
 import nl._42.beanie.save.NoOperationBeanSaver;
+import nl._42.beanie.save.UnsupportedBeanSaver;
 import nl._42.beanie.util.PropertyReference;
-import nl._42.beanie.util.Proxies;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.util.ReflectionUtils;
 
@@ -31,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+
+import static java.lang.String.format;
 
 /**
  * Builds new bean instances.
@@ -173,47 +178,43 @@ public class BeanBuilder implements ValueGenerator {
     @SuppressWarnings("unchecked")
     private <T extends BeanBuildCommand<?>> T wrapToInterface(Class<T> interfaceType, EditableBeanBuildCommand<?> instance) {
         final BeanBuilderConfig annotation = interfaceType.getAnnotation(BeanBuilderConfig.class);
-        final String prefix = annotation != null ? annotation.preffix() : WITH_PREFIX;
-
-        validate(prefix, interfaceType);
+        final String prefix = annotation != null ? annotation.prefix() : WITH_PREFIX;
+        validateMethods(prefix, interfaceType);
 
         BeanBuilderPointcut pointcut = new BeanBuilderPointcut(prefix);
         BeanBuildCommandAdvice advice = new BeanBuildCommandAdvice(instance, prefix);
         DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(pointcut, advice);
-        EditableBeanBuildCommand<?> proxy = Proxies.wrapAsProxy(interfaceType, instance, advisor);
-        advice.setProxy(proxy); // Link back to proxy for default methods
+        EditableBeanBuildCommand<?> proxy = wrapAsProxy(interfaceType, instance, advisor);
+        advice.setProxy(proxy);
         return (T) proxy;
     }
     
-    private void validate(String preffix, Class<?> interfaceType) {
+    private void validateMethods(String prefix, Class<?> interfaceType) {
         Method[] methods = interfaceType.getDeclaredMethods();
         for (Method method : methods) {
-            // @todo -- find a better solution to deal with Jacoco meddling
-            if (method.getName().startsWith("$jacocoInit")) {
-                continue; // Ignore this method
-            }
-            if (!((method.getName().startsWith(preffix)) || method.isDefault())) {
-                throw new UnsupportedOperationException("Interface methods should start with '" + preffix + "' or be default.");
-            }
+            validateMethod(prefix, method);
         }
     }
 
-    private static class BeanBuilderPointcut extends StaticMethodMatcherPointcut {
-        
-        private final String prefix;
-
-        public BeanBuilderPointcut(String prefix) {
-            this.prefix = prefix;
+    private void validateMethod(String prefix, Method method) {
+        // @todo -- find a better solution to deal with Jacoco meddling
+        if (method.getName().startsWith("$jacocoInit")) {
+            return;
         }
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean matches(Method method, Class<?> targetClass) {
-            return (method.getName().startsWith(prefix) && method.getParameterCount() <= 1) || method.isDefault();
+        if (!(method.isDefault() || method.getName().startsWith(prefix))) {
+            throw new UnsupportedOperationException(
+              format("Interface methods should start with '%s' or be default.", prefix)
+            );
         }
+    }
 
+    private <T> T wrapAsProxy(Class<?> interfaceType, T instance, Advisor advisor) {
+        ProxyFactory proxyFactory = new ProxyFactory();
+        proxyFactory.setTargetSource(new SingletonTargetSource(instance));
+        proxyFactory.addInterface(interfaceType);
+        proxyFactory.addAdvisor(advisor);
+        return (T) proxyFactory.getProxy();
     }
 
     /**
@@ -429,6 +430,24 @@ public class BeanBuilder implements ValueGenerator {
      */
     public void setBeanConverter(BeanConverter beanConverter) {
         this.beanConverter = beanConverter;
+    }
+
+    private static class BeanBuilderPointcut extends StaticMethodMatcherPointcut {
+
+        private final String prefix;
+
+        public BeanBuilderPointcut(String prefix) {
+            this.prefix = prefix;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean matches(Method method, Class<?> targetClass) {
+            return (method.getName().startsWith(prefix) && method.getParameterCount() <= 1) || method.isDefault();
+        }
+
     }
 
 }

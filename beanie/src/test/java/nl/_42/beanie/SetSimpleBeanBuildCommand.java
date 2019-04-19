@@ -11,7 +11,7 @@ import nl._42.beanie.domain.SimpleBean;
  * @author Jeroen van Schagen
  * @since Mar 26, 2015
  */
-@BeanBuilderConfig(preffix = "set")
+@BeanBuilderConfig(prefix = "set")
 public interface SetSimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleBean> {
 
     /**

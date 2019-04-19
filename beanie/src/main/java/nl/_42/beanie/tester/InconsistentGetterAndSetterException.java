@@ -6,14 +6,10 @@ package nl._42.beanie.tester;
  * 
  * @author Jeroen van Schagen
  */
-public class InconsistentGetterAndSetterException extends RuntimeException {
+public class InconsistentGetterAndSetterException extends AssertionError {
 
-	public InconsistentGetterAndSetterException(String message) {
+	InconsistentGetterAndSetterException(String message) {
 		super(message);
 	}
-    
-    public InconsistentGetterAndSetterException(String message, Throwable cause) {
-        super(message, cause);
-    }
 
 }

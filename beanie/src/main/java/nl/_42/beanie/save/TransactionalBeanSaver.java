@@ -4,8 +4,6 @@
 package nl._42.beanie.save;
 
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
@@ -31,14 +29,7 @@ public class TransactionalBeanSaver implements BeanSaver {
      */
     @Override
     public <T> T save(final T bean) {
-        return transactionTemplate.execute(new TransactionCallback<T>() {
-            
-            @Override
-            public T doInTransaction(TransactionStatus status) {
-                return delegate.save(bean);
-            }
-            
-        });
+        return transactionTemplate.execute(status -> delegate.save(bean));
     }
 
     /**
@@ -46,14 +37,9 @@ public class TransactionalBeanSaver implements BeanSaver {
      */
     @Override
     public void delete(final Object bean) {
-        transactionTemplate.execute(new TransactionCallback<Void>() {
-            
-            @Override
-            public Void doInTransaction(TransactionStatus status) {
-                delegate.delete(bean);
-                return null;
-            }
-            
+        transactionTemplate.execute(status -> {
+            delegate.delete(bean);
+            return null;
         });
     }
     

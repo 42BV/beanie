@@ -3,7 +3,7 @@ package nl._42.beanie.generator.supported;
 import java.lang.reflect.AccessibleObject;
 
 /**
- * Determines if something is supported for this accesible object.
+ * Determines if something is supported for this accessible object.
  *
  * @author Jeroen van Schagen
  * @since Jun 8, 2016
