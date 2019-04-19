@@ -53,10 +53,10 @@
     </properties>
 
     <modules>
-        <module>bean-builder-compatibility</module>
-        <module>bean-builder-compatibility-java8</module>
-        <module>bean-builder-compatibility-java9</module>
-        <module>bean-builder</module>
+        <module>beanie-compatibility</module>
+        <module>beanie-compatibility-java8</module>
+        <module>beanie-compatibility-java9</module>
+        <module>beanie</module>
     </modules>
 
     <dependencies>
