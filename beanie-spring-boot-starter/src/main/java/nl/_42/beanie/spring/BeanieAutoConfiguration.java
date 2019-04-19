@@ -18,6 +18,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Configuration
@@ -33,12 +35,17 @@ public class BeanieAutoConfiguration {
   @Autowired(required = false)
   private BeanSaver beanSaver;
 
+  @Autowired(required = false)
+  private List<BeanieConfigurer> configurers = new ArrayList<>();
+
   @Bean
   public BeanBuilder beanBuilder() {
     BeanConverter beanConverter = beanConverter();
     BeanSaver beanSaver = beanSaver();
 
-    return new BeanBuilder(beanConverter, beanSaver);
+    BeanBuilder beanBuilder = new BeanBuilder(beanConverter, beanSaver);
+    configurers.forEach(configurer -> configurer.configure(beanBuilder));
+    return beanBuilder;
   }
 
   private BeanConverter beanConverter() {
