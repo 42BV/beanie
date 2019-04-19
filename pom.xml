@@ -11,7 +11,7 @@
 
     <groupId>nl.42</groupId>
     <artifactId>beanie-parent</artifactId>
-    <version>3.1.0</version>
+    <version>3.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Beanie</name>
