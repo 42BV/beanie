@@ -8,47 +8,113 @@
 
 # Beanie
 
-Library for generating and testing beans.
+Testing is important to guarantee the functionality of your application. These tests often rely on complex data
+structure as input. 
 
-Bean building
--------------
+Beanie helps with the construction of these input beans, making tests as readable and understandable as possible, 
+promoting reuse of input data over multiple tests. Beans are constructed using the `BeanBuilder` API:
 
-Generate bean using the default API:
+```java
+Person person = 
+    builder.start(Person.class) // Construct person
+           .withValue("email", "jan@42.nl") // Set email
+           .withValue("hobbies", "coding") // Add hobbies
+           .withValue("hobbies", "gaming") // Add hobbies
+           .generateValue("name", new RandomStringGenerator(8, 12)) // Generate name
+           .fill() // Generate other values (irrelevant for this test)
+           .save(); // Construct and persist the person
 
-    SimpleBean bean = beanBuilder.start(SimpleBean.class)
-                                    .withValue("id", 42L)
-                                    .withValue("hobbies", "coding")
-                                    .withValue("hobbies", "gaming")
-                                    .generateValue("name", new ConstantValueGenerator("success"))
-                                    .fill()
-                                        .construct();
+```
 
-Generate beans using customized builders:
+Or define a custom builder interface for your data type. This allows for more type-safe data creation and even
+allows us to define default 'convenience' methods:
 
-    public interface SimpleBeanBuildCommand extends EditableBeanBuildCommand<SimpleBean> {
-        SimpleBeanBuildCommand withName(String name);
-        SimpleBeanBuildCommand withName(ValueGenerator generator);
-        SimpleBeanBuildCommand withNestedBean();
-        SimpleBeanBuildCommand withHobbies(String hobby);
-        SimpleBeanBuildCommand withHobbies(Set<String> hobies);
+```java
+public interface PersonBuilder extends EditableBeanBuildCommand<Person> {
+    
+    PersonBuilder withEmail(String email);
+    
+    PersonBuilder withName();
+    PersonBuilder withName(String name);
+    PersonBuilder withName(ValueGenerator generator);
+    
+    PersonBuilder withHobbies(String hobby);
+    PersonBuilder withHobbies(Set<String> hobbies);
+    
+    default PersonBuilder coder() {
+        return this.withHobbies("coding");
     }
+    
+}
+```
 
-    SimpleBean bean = beanBuilder.startAs(SimpleBeanBuildCommand.class)
-                                    .withName(new ConstantValueGenerator("success"))
-                                    .withNestedBean()
-                                    .withHobbies("coding")
-                                    .doWith(x -> x.getNestedBean().setValue("abc"))
-                                    .map(x -> x)
-                                    .withValue("id", 42L)   
-                                        .construct();
+Custom builders are also started using the `BeanBuilder`:
 
-Testing
--------
-Don't you find it annoying testing getters and setters and nullary constructors all the time? No more!
+```java
+Person person = 
+    builder.startAs(PersonBuilder.class)
+           .withEmail("jan@42.nl")
+           .withName("Jan")
+           .coder()
+           .save();
+                             
+```
+    
+## Specific builder
+
+It is recommended to create a specific builder per type of bean. This type specific builder can have factory 
+methods, such as `jan()`, which get used in multiple unit tests:
+
+```java
+@Component
+@AllArgsConstructor
+public class Persons {
+    
+    private final BeanBuilder builder;
+    
+    public Person jan() {
+        return builder.startAs(PersonBuilder.class)
+                      .withEmail("jan@42.nl")
+                      .withName("Jan")
+                      .coder()
+                      .save();
+    }
+    
+}                             
+```
+
+Usage of builders keeps our unit test simple and concise:
+
+```java
+public class PersonServiceTest {
+    
+    private PersonService personService;
+    private Persons persons;
+    
+    @Test
+    public void change_email() {
+        Person jan = persons.jan();
+        
+        Person updated = personService.changeEmail(jan, "piet@42.nl");
+        assertEquals("piet@42.nl", updated.getEmail());
+    }
+    
+}
+```
+
+## Getters and setters
+
+Test the getter and setter methods for all beans in a package, using this one liner:
+
+```java
 new BeanTester().includeAll().verifyBeans("some.package");
+```
 
-License
--------
+Bean tester will scan the package for beans and verify the getter/setter methods, using both `null` and `non-null`
+generated values. This way we test the consistency of changing a property and retrieving it afterwards.
+
+## License
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
