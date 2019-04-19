@@ -9,9 +9,7 @@
         <version>3.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>nl.42</groupId>
     <artifactId>beanie</artifactId>
-    <packaging>jar</packaging>
 
     <dependencies>
         <!-- Multi language level compatibility -->

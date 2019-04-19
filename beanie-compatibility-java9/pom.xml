@@ -9,9 +9,7 @@
         <version>3.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>nl.42</groupId>
     <artifactId>beanie-compatibility-java9</artifactId>
-    <packaging>jar</packaging>
 
     <properties>
         <java.version>9</java.version>

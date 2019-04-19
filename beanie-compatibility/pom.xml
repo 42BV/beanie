@@ -9,8 +9,6 @@
         <version>3.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>nl.42</groupId>
     <artifactId>beanie-compatibility</artifactId>
-    <packaging>jar</packaging>
 
 </project>

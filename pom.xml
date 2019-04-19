@@ -57,6 +57,7 @@
         <module>beanie-compatibility-java8</module>
         <module>beanie-compatibility-java9</module>
         <module>beanie</module>
+        <module>beanie-spring-boot-starter</module>
     </modules>
 
     <dependencies>
