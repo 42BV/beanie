@@ -12,18 +12,6 @@
     <artifactId>beanie</artifactId>
 
     <dependencies>
-        <!-- Multi language level compatibility -->
-        <dependency>
-            <groupId>nl.42</groupId>
-            <artifactId>beanie-compatibility-java8</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>nl.42</groupId>
-            <artifactId>beanie-compatibility-java9</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
