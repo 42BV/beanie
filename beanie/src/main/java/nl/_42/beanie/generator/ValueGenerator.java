@@ -5,6 +5,7 @@ package nl._42.beanie.generator;
  * 
  * @author Jeroen van Schagen
  */
+@FunctionalInterface
 public interface ValueGenerator {
 
     /**

@@ -13,7 +13,6 @@ import nl._42.beanie.generator.supported.Supportable;
 import nl._42.beanie.generator.supported.SupportableValueGenerators;
 import nl._42.beanie.save.BeanSaver;
 import nl._42.beanie.save.NoOperationBeanSaver;
-import nl._42.beanie.save.UnsupportedBeanSaver;
 import nl._42.beanie.util.PropertyReference;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.ProxyFactory;
@@ -34,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static java.lang.String.format;
 
@@ -331,7 +331,19 @@ public class BeanBuilder implements ValueGenerator {
         typeGenerator.register(valueType, generator);
         return this;
     }
-    
+
+    /**
+     * Register a value generation strategy for a specific type.
+     *
+     * @param valueType the type of value
+     * @param generator the generation strategy
+     * @return this instance
+     */
+    public <T> BeanBuilder register(Class<T> valueType, Supplier<T> generator) {
+        typeGenerator.register(valueType, generator);
+        return this;
+    }
+
     /**
      * Register a value generation strategy for a specific type.
      * 
