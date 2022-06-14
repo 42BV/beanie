@@ -120,19 +120,22 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
     private boolean shouldBeAddedToCollection(PropertyAccessor propertyAccessor, String propertyName, Object value) {
         Class<?> propertyType = propertyAccessor.getPropertyType(propertyName);
         if (propertyType == null) {
-            throw new IllegalArgumentException("Unknown property '" + propertyName + "' in " + beanWrapper.getWrappedClass().getSimpleName());
+            throw new IllegalArgumentException(
+                String.format("Unknown property '%s' in %s", propertyName, beanWrapper.getWrappedClass().getSimpleName())
+            );
         }
-        boolean isCollection = Collection.class.isAssignableFrom(propertyType);
-        return isCollection && value != null && !(value instanceof Collection);
+
+        boolean hasCollectionType = Collection.class.isAssignableFrom(propertyType);
+        return hasCollectionType && value != null && !(value instanceof Collection);
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void addValueToCollection(PropertyAccessor propertyAccessor, String propertyName, Object value) {
         Collection collection = (Collection) propertyAccessor.getPropertyValue(propertyName);
         if (collection == null) {
-            Class<?> propertyType = propertyAccessor.getPropertyType(propertyName);
-            collection = (Collection) beanBuilder.generate(propertyType);
-            propertyAccessor.setPropertyValue(propertyName, collection);
+            throw new IllegalArgumentException(
+                String.format("Collection property '%s' should not be null", propertyName)
+            );
         }
         collection.add(value);
     }

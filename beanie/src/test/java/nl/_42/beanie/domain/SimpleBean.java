@@ -2,6 +2,7 @@ package nl._42.beanie.domain;
 
 import nl._42.beanie.SimpleAnnotation;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class SimpleBean {
@@ -16,7 +17,7 @@ public class SimpleBean {
 	
 	private NestedBeanWithConstructor nestedBeanWithConstructor;
     
-    private Set<String> hobbies;
+    private Set<String> hobbies = new HashSet<>();
     
     @SimpleAnnotation
     private String annotated;

@@ -4,14 +4,12 @@
 package nl._42.beanie.generator;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Default value generator, registers a generator for all common types.
@@ -43,13 +41,16 @@ public class DefaultValueGenerator extends TypeBasedValueGenerator {
         registerValue(long.class, 0L);
         registerValue(Boolean.class, Boolean.FALSE);
         registerValue(boolean.class, false);
-        registerValue(String.class, "value");
         registerValue(BigDecimal.class, new BigDecimal("0.0"));
+        registerValue(String.class, "value");
+        registerValue(Class.class, Object.class);
+
         registerValue(java.time.LocalDate.class, java.time.LocalDate.now());
         registerValue(java.time.LocalDateTime.class, java.time.LocalDateTime.now());
         registerValue(java.util.Date.class, new java.util.Date());
         registerValue(java.sql.Date.class, new java.sql.Date(System.currentTimeMillis()));
         registerValue(Calendar.class, Calendar.getInstance());
+
         registerValue(byte[].class, new byte[0]);
         registerValue(short[].class, new short[0]);
         registerValue(int[].class, new int[0]);
@@ -58,13 +59,14 @@ public class DefaultValueGenerator extends TypeBasedValueGenerator {
         registerValue(float[].class, new float[0]);
         registerValue(boolean[].class, new boolean[0]);
         registerValue(char[].class, new char[0]);
-        registerValue(List.class, new ArrayList<>());
-        registerValue(Set.class, new HashSet<>());
-        registerValue(Collection.class, new ArrayList<>());
-        registerValue(Map.class, new HashMap<>());
-        registerValue(Class.class, Object.class);
+
+        register(Collection.class, () -> List.of());
+        register(List.class, () -> List.of());
+        register(Set.class, () -> Set.of());
+        register(Map.class, Map::of);
         register(Object[].class, new EmptyArrayValueGenerator());
         register(Enum.class, new FirstEnumValueGenerator());
+        register(UUID.class, UUID::randomUUID);
     }
 
 }

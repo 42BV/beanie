@@ -3,6 +3,7 @@ package nl._42.beanie.generator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 
 /**
  * Generates values of any type, using the behavior registered to that value type.
@@ -16,7 +17,7 @@ public class TypeBasedValueGenerator implements ValueGenerator {
     private final ValueGenerator fallback;
 
     public TypeBasedValueGenerator(ValueGenerator fallback) {
-    	generators = new LinkedHashMap<Class<?>, ValueGenerator>();
+    	generators = new LinkedHashMap<>();
         this.fallback = fallback;
     }
     
@@ -67,7 +68,7 @@ public class TypeBasedValueGenerator implements ValueGenerator {
 
     /**
      * Register a value generation strategy for a specific type.
-     * 
+     *
      * @param type the type of value
      * @param generator the generation strategy
      * @return this instance
@@ -75,6 +76,17 @@ public class TypeBasedValueGenerator implements ValueGenerator {
     public TypeBasedValueGenerator register(Class<?> type, ValueGenerator generator) {
         generators.put(type, generator);
         return this;
+    }
+
+    /**
+     * Register a value generation strategy for a specific type.
+     *
+     * @param type the type of value
+     * @param generator the generation strategy
+     * @return this instance
+     */
+    public <T> TypeBasedValueGenerator register(Class<T> type, Supplier<T> generator) {
+        return register(type, arg -> generator.get());
     }
 
     /**
