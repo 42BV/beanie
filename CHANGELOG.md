@@ -1,5 +1,9 @@
 # Releases
 
+## 3.2.0
+
+- Removed compatibility modes, please upgrade to JDK11+
+
 ## 3.1.0
 
 - Added Spring Boot starter module

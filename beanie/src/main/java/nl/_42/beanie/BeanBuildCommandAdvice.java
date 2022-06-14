@@ -3,9 +3,8 @@
  */
 package nl._42.beanie;
 
-import nl._42.beanie.compatibility.MethodFactory;
-import nl._42.beanie.generator.ValueGenerator;
 import nl._42.beanie.compatibility.Methods;
+import nl._42.beanie.generator.ValueGenerator;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -55,8 +54,7 @@ public final class BeanBuildCommandAdvice implements MethodInterceptor {
         final Object[] args = invocation.getArguments();
         
         if (method.isDefault()) {
-            Methods methods = MethodFactory.get();
-            MethodHandle handle = methods.lookup(method);
+            MethodHandle handle = Methods.getMethodHandle(method);
             return handle.bindTo(proxy).invokeWithArguments(args);
         } else {
             String propertyName = getPropertyName(method, prefix);
