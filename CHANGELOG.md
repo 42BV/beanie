@@ -1,5 +1,9 @@
 # Releases
 
+## 3.3.0
+
+- Added ability to override bean saver `.withBeanSaver(Function<T, T)`
+
 ## 3.2.0
 
 - Removed compatibility modes, please upgrade to JDK11+
