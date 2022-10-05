@@ -6,7 +6,7 @@
     <parent>
         <artifactId>beanie-parent</artifactId>
         <groupId>nl.42</groupId>
-        <version>3.3.0-SNAPSHOT</version>
+        <version>3.3.0</version>
     </parent>
 
     <artifactId>beanie-spring-boot-starter</artifactId>
