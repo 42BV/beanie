@@ -98,4 +98,11 @@ public interface EditableBeanBuildCommand<T> extends BeanBuildCommand<T> {
      */
     EditableBeanBuildCommand<T> generateValue(String... propertyNames);
 
+    /**
+     * Register a callback before saving the generated bean.
+     * @param beanSaver the bean saver
+     * @return this instance, for chaining
+     */
+    EditableBeanBuildCommand<T> setBeanSaver(Function<T, T> beanSaver);
+
 }

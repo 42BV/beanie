@@ -58,6 +58,11 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
      */
     private DirectFieldAccessor fieldAccessor;
 
+    /**
+     * Custom bean saver.
+     */
+    private Function<T, T> beanSaver;
+
     public DefaultBeanBuildCommand(BeanBuilder beanBuilder, Class<T> type, BeanConverter beanConverter) {
         this.beanBuilder = beanBuilder;
         this.beanConverter = beanConverter;
@@ -80,7 +85,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
         }
     }
     
-    private final void setBean(Object bean) {
+    private void setBean(Object bean) {
         this.beanWrapper = new BeanWrapperImpl(bean);
         this.fieldAccessor = new DirectFieldAccessor(bean);
     }
@@ -281,6 +286,14 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
     @Override
     public T save() {
         T bean = construct(true);
+        return save(bean);
+    }
+
+    private T save(T bean) {
+        if (beanSaver != null) {
+            return beanSaver.apply(bean);
+        }
+
         return beanBuilder.save(bean);
     }
 
@@ -291,6 +304,12 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
             value = beanBuilder.save(value);
         }
         withValue(propertyName, value);
+    }
+
+    @Override
+    public EditableBeanBuildCommand<T> setBeanSaver(Function<T, T> beanSaver) {
+        this.beanSaver = beanSaver;
+        return this;
     }
 
 }

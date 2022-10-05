@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.function.Function;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -44,12 +47,29 @@ public class ConfigurationTest {
     @Test
     public void save() {
         Person person =
-          beanie.start(Person.class)
-            .withValue("name", "Jan")
-            .save();
+            beanie.start(Person.class)
+                .withValue("name", "Jan")
+                .save();
 
         assertEquals("Jan", person.getName());
         assertNotNull(person.getId());
+    }
+
+    @Test
+    public void save_withCustomSave() {
+        Function<Person, Person> withName = (it) -> {
+            it.setName(String.format("%s 2", it.getName()));
+            return it;
+        };
+
+        Person person =
+            beanie.start(Person.class)
+                .withValue("name", "Jan")
+                .setBeanSaver(withName)
+                .save();
+
+        assertEquals("Jan 2", person.getName());
+        assertNull(person.getId());
     }
 
 }
