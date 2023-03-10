@@ -3,11 +3,11 @@
  */
 package nl._42.beanie.generator.random;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * 
@@ -25,9 +25,9 @@ public class RandomLocalDateTimeGeneratorTest {
         RandomLocalDateTimeGenerator generator = new RandomLocalDateTimeGenerator(min, max);
         for (int i = 0; i < 50; i++) {
             LocalDateTime time = generator.generate(null);
-            Assert.assertNotNull(time);
-            Assert.assertFalse(time.isBefore(min.atStartOfDay()));
-            Assert.assertTrue(time.isBefore(max.plusDays(1).atStartOfDay()));
+            Assertions.assertNotNull(time);
+            Assertions.assertFalse(time.isBefore(min.atStartOfDay()));
+            Assertions.assertTrue(time.isBefore(max.plusDays(1).atStartOfDay()));
         }
     }
 

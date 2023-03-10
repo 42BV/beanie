@@ -3,8 +3,8 @@
  */
 package nl._42.beanie.generator;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * 
@@ -18,10 +18,10 @@ public class UUIDStringGeneratorTest {
     public void testGenerate() {
         UUIDStringGenerator generator = new UUIDStringGenerator();
         String first = generator.generate(null);
-        Assert.assertNotNull(first);
+        Assertions.assertNotNull(first);
         String second = generator.generate(null);
-        Assert.assertNotNull(first);
-        Assert.assertNotEquals(first, second);
+        Assertions.assertNotNull(first);
+        Assertions.assertNotEquals(first, second);
     }
 
 }

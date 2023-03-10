@@ -5,9 +5,9 @@ package nl._42.beanie.save;
 
 import org.springframework.core.annotation.AnnotationUtils;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 /**
  * Persists entities in the entity manager. Non entity

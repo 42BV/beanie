@@ -16,9 +16,9 @@ import nl._42.beanie.generator.FirstImplBeanGenerator;
 import nl._42.beanie.generator.random.RandomStringGenerator;
 import nl._42.beanie.generator.supported.AnnotationSupportable;
 import nl._42.beanie.save.UnsupportedBeanSaver;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.collections.Sets;
 
 import java.util.Collections;
@@ -27,7 +27,7 @@ public class BeanBuilderTest {
 
     private BeanBuilder beanBuilder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         beanBuilder = new BeanBuilder();
         beanBuilder.register(new AnnotationSupportable(SimpleAnnotation.class), new SimplePropertyValueGenerator());
@@ -39,18 +39,18 @@ public class BeanBuilderTest {
 	@Test
 	public void testGenerate() {
         SimpleBean bean = beanBuilder.generateSafely(SimpleBean.class);
-        Assert.assertNotNull(bean);
+        Assertions.assertNotNull(bean);
 
-        Assert.assertNotNull(bean.getName());
-        Assert.assertEquals("another 'annotated'", bean.getAnnotated());
+        Assertions.assertNotNull(bean.getName());
+        Assertions.assertEquals("another 'annotated'", bean.getAnnotated());
 
         NestedBean nestedBean = bean.getNestedBean();
-        Assert.assertNotNull(nestedBean);
-        Assert.assertNotNull(nestedBean.getValue());
+        Assertions.assertNotNull(nestedBean);
+        Assertions.assertNotNull(nestedBean.getValue());
 
         NestedBeanWithConstructor nestedBeanWithConstructor = bean.getNestedBeanWithConstructor();
-        Assert.assertNotNull(nestedBeanWithConstructor);
-        Assert.assertNotNull(nestedBeanWithConstructor.getValue());
+        Assertions.assertNotNull(nestedBeanWithConstructor);
+        Assertions.assertNotNull(nestedBeanWithConstructor.getValue());
     }
 
     @Test
@@ -58,7 +58,7 @@ public class BeanBuilderTest {
         beanBuilder.registerValue(String.class, "success");
 
         SimpleBean bean = (SimpleBean) beanBuilder.generate(SimpleBean.class);
-        Assert.assertEquals("success", bean.getName());
+        Assertions.assertEquals("success", bean.getName());
     }
 
     @Test
@@ -66,7 +66,7 @@ public class BeanBuilderTest {
         beanBuilder.registerValue(String.class, "success");
 
         SimpleBean bean = (SimpleBean) new BeanBuilder(beanBuilder).generate(SimpleBean.class);
-        Assert.assertEquals("success", bean.getName());
+        Assertions.assertEquals("success", bean.getName());
     }
 
     @Test
@@ -75,19 +75,19 @@ public class BeanBuilderTest {
         beanBuilder.registerValue(SimpleBean.class, "nestedBeanWithConstructor", nestedBeanWithConstructor);
 
         SimpleBean bean = beanBuilder.start(SimpleBean.class).generateValue("nestedBeanWithConstructor").construct();
-        Assert.assertEquals(nestedBeanWithConstructor, bean.getNestedBeanWithConstructor());
+        Assertions.assertEquals(nestedBeanWithConstructor, bean.getNestedBeanWithConstructor());
     }
 
     @Test
     public void testGenerateInterfaceWithProxy() {
         SomeInterface someInterface = beanBuilder.generateSafely(SomeInterface.class);
-        Assert.assertNotNull(someInterface);
+        Assertions.assertNotNull(someInterface);
     }
 
     @Test
     public void testGenerateAbstractWithProxy() {
         SomeAbstract someAbstract = beanBuilder.generateSafely(SomeAbstract.class);
-        Assert.assertNotNull(someAbstract);
+        Assertions.assertNotNull(someAbstract);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class BeanBuilderTest {
         beanGenerator.setAbstractGenerator(new FirstImplBeanGenerator(beanGenerator));
 
         SomeAbstract someAbstract = beanBuilder.generateSafely(SomeAbstract.class);
-        Assert.assertEquals(SomeImplementation.class, someAbstract.getClass());
+        Assertions.assertEquals(SomeImplementation.class, someAbstract.getClass());
     }
 
     @Test
@@ -109,11 +109,11 @@ public class BeanBuilderTest {
                 .fill()
                 .construct();
 
-        Assert.assertEquals(Long.valueOf(42), bean.getId());
-        Assert.assertEquals("success", bean.getName());
-        Assert.assertEquals(Sets.newSet("coding", "gaming"), bean.getHobbies());
-        Assert.assertNotNull(bean.getNestedBean());
-        Assert.assertNotNull(bean.getNestedBeanWithConstructor());
+        Assertions.assertEquals(Long.valueOf(42), bean.getId());
+        Assertions.assertEquals("success", bean.getName());
+        Assertions.assertEquals(Sets.newSet("coding", "gaming"), bean.getHobbies());
+        Assertions.assertNotNull(bean.getNestedBean());
+        Assertions.assertNotNull(bean.getNestedBeanWithConstructor());
     }
 
     @Test
@@ -126,10 +126,10 @@ public class BeanBuilderTest {
                 .fill()
                 .construct();
 
-        Assert.assertEquals(Long.valueOf(42), bean.getId());
-        Assert.assertEquals("bla", bean.getName());
-        Assert.assertNotNull(bean.getNestedBean());
-        Assert.assertNotNull(bean.getNestedBeanWithConstructor());
+        Assertions.assertEquals(Long.valueOf(42), bean.getId());
+        Assertions.assertEquals("bla", bean.getName());
+        Assertions.assertNotNull(bean.getNestedBean());
+        Assertions.assertNotNull(bean.getNestedBeanWithConstructor());
     }
 
     @Test
@@ -143,17 +143,20 @@ public class BeanBuilderTest {
                 .fill()
                 .construct();
 
-        Assert.assertEquals(Long.valueOf(42), bean.getId());
-        Assert.assertEquals("bla", bean.getName());
-        Assert.assertNull(bean.getHobbies());
-        Assert.assertNotNull(bean.getNestedBean());
-        Assert.assertNotNull(bean.getNestedBeanWithConstructor());
+        Assertions.assertEquals(Long.valueOf(42), bean.getId());
+        Assertions.assertEquals("bla", bean.getName());
+        Assertions.assertEquals(0, bean.getHobbies().size());
+        Assertions.assertNotNull(bean.getNestedBean());
+        Assertions.assertNotNull(bean.getNestedBeanWithConstructor());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testBuildWithDefaultBuilderAndUnknownProperty() {
         SimpleBean base = new SimpleBean();
-        beanBuilder.start(base).withValue("unknown", "crash");
+
+        Assertions.assertThrows(IllegalArgumentException.class, () ->
+            beanBuilder.start(base).withValue("unknown", "crash")
+        );
     }
 
     @Test
@@ -165,8 +168,8 @@ public class BeanBuilderTest {
                 .fill()
                 .construct();
 
-        Assert.assertEquals(Long.valueOf(42), bean.getId());
-        Assert.assertNotNull(bean.getName());
+        Assertions.assertEquals(Long.valueOf(42), bean.getId());
+        Assertions.assertNotNull(bean.getName());
     }
 
     @Test
@@ -179,22 +182,22 @@ public class BeanBuilderTest {
                 .fill()
                 .construct();
 
-        Assert.assertEquals("Jan", bean.getName());
+        Assertions.assertEquals("Jan", bean.getName());
 
         SimpleBean clone = beanBuilder.start(SimpleBean.class)
                 .load(bean, "shortName")
                 .construct();
 
         // Copied from the simple bean
-        Assert.assertEquals("Jan", clone.getName());
-        Assert.assertEquals(bean.getNestedBean(), clone.getNestedBean());
-        Assert.assertEquals(bean.getNestedBeanWithConstructor(), clone.getNestedBeanWithConstructor());
+        Assertions.assertEquals("Jan", clone.getName());
+        Assertions.assertEquals(bean.getNestedBean(), clone.getNestedBean());
+        Assertions.assertEquals(bean.getNestedBeanWithConstructor(), clone.getNestedBeanWithConstructor());
 
         // Bean builder has skipped id, thus is not copied either
-        Assert.assertNull(clone.getId());
+        Assertions.assertNull(clone.getId());
 
         // Marked as exclusion
-        Assert.assertNull(clone.getShortName());
+        Assertions.assertNull(clone.getShortName());
     }
 
     @Test
@@ -208,11 +211,11 @@ public class BeanBuilderTest {
                 .withValue("id", 42L)
                 .construct();
 
-        Assert.assertEquals(Long.valueOf(42), bean.getId());
-        Assert.assertNull(bean.getShortName());
-        Assert.assertEquals("success", bean.getName());
-        Assert.assertEquals(Sets.newSet("coding"), bean.getHobbies());
-        Assert.assertNotNull(bean.getNestedBean());
+        Assertions.assertEquals(Long.valueOf(42), bean.getId());
+        Assertions.assertNull(bean.getShortName());
+        Assertions.assertEquals("success", bean.getName());
+        Assertions.assertEquals(Sets.newSet("coding"), bean.getHobbies());
+        Assertions.assertNotNull(bean.getNestedBean());
     }
 
     @Test
@@ -227,10 +230,10 @@ public class BeanBuilderTest {
                 .withValue("id", 42L)
                 .construct();
 
-        Assert.assertEquals(Long.valueOf(42), bean.getId());
-        Assert.assertNull(bean.getShortName());
-        Assert.assertEquals("bla", bean.getName());
-        Assert.assertNotNull(bean.getNestedBean());
+        Assertions.assertEquals(Long.valueOf(42), bean.getId());
+        Assertions.assertNull(bean.getShortName());
+        Assertions.assertEquals("bla", bean.getName());
+        Assertions.assertNotNull(bean.getNestedBean());
     }
 
     @Test
@@ -240,8 +243,8 @@ public class BeanBuilderTest {
                 .withHobbies("test")
                 .construct();
 
-        Assert.assertEquals("Default", bean.getName());
-        Assert.assertEquals(Collections.singleton("test"), bean.getHobbies());
+        Assertions.assertEquals("Default", bean.getName());
+        Assertions.assertEquals(Collections.singleton("test"), bean.getHobbies());
     }
 
     @Test
@@ -251,8 +254,8 @@ public class BeanBuilderTest {
           .withHobbies("test")
           .construct();
 
-        Assert.assertEquals("Jan de Boer", bean.getName());
-        Assert.assertEquals(Collections.singleton("test"), bean.getHobbies());
+        Assertions.assertEquals("Jan de Boer", bean.getName());
+        Assertions.assertEquals(Collections.singleton("test"), bean.getHobbies());
     }
 
     @Test
@@ -262,20 +265,25 @@ public class BeanBuilderTest {
                 .withValue("id", 42L)
                 .construct();
 
-        Assert.assertEquals(Long.valueOf(42), bean.getId());
-        Assert.assertEquals("success", bean.getName());
+        Assertions.assertEquals(Long.valueOf(42), bean.getId());
+        Assertions.assertEquals("success", bean.getName());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testBuildAndSaveUnsupported() {
         BeanBuilder unsupported = new BeanBuilder(beanBuilder);
         unsupported.setBeanSaver(new UnsupportedBeanSaver());
-        unsupported.start(SimpleBean.class).save();
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () ->
+            unsupported.start(SimpleBean.class).save()
+        );
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testInvalidMethods() {
-        beanBuilder.startAs(InvalidSimpleBeanBuildCommand.class);
+        Assertions.assertThrows(UnsupportedOperationException.class, () ->
+            beanBuilder.startAs(InvalidSimpleBeanBuildCommand.class)
+        );
     }
     
     @Test
@@ -283,8 +291,8 @@ public class BeanBuilderTest {
         SimpleBeanBuilder builder = new SimpleBeanBuilder(beanBuilder);
 
         SimpleBean bean = builder.start().fill().construct();
-        Assert.assertNotNull(bean);
-        Assert.assertNotNull(bean.getName());
+        Assertions.assertNotNull(bean);
+        Assertions.assertNotNull(bean.getName());
     }
     
     @Test
@@ -296,8 +304,8 @@ public class BeanBuilderTest {
           new WrappedBeanBuilder(beanBuilder, SimpleBeanBuildCommand.class);
 
         SimpleBean bean = builder.wrap(wrapped).fill().construct();
-        Assert.assertNotNull(bean);
-        Assert.assertEquals("abc", bean.getName());
+        Assertions.assertNotNull(bean);
+        Assertions.assertEquals("abc", bean.getName());
     }
 
     // With mapping
@@ -310,7 +318,7 @@ public class BeanBuilderTest {
                 .map(SimpleBeanResult.class)
                 .construct();
 
-        Assert.assertEquals(Long.valueOf(42), bean.id);
+        Assertions.assertEquals(Long.valueOf(42), bean.id);
     }
 
     @Test
@@ -322,8 +330,8 @@ public class BeanBuilderTest {
                 .withUniqueId("Awesome")
                 .construct();
 
-        Assert.assertEquals(Long.valueOf(42), beanResult.id);
-        Assert.assertEquals("Awesome", beanResult.uniqueId);
+        Assertions.assertEquals(Long.valueOf(42), beanResult.id);
+        Assertions.assertEquals("Awesome", beanResult.uniqueId);
     }
 
 }

@@ -6,7 +6,7 @@
     <parent>
         <artifactId>beanie-parent</artifactId>
         <groupId>nl.42</groupId>
-        <version>3.3.1-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>beanie-spring-boot-starter</artifactId>
@@ -30,8 +30,8 @@
 
         <!-- Optional plug-in dependencies -->
         <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>javax.persistence-api</artifactId>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -41,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>io.beanmapper</groupId>
-            <artifactId>beanmapper</artifactId>
+            <artifactId>beanmapper-spring</artifactId>
             <version>${beanmapper.version}</version>
             <scope>provided</scope>
         </dependency>
