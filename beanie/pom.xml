@@ -6,7 +6,7 @@
     <parent>
         <groupId>nl.42</groupId>
         <artifactId>beanie-parent</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.0</version>
     </parent>
 
     <artifactId>beanie</artifactId>
