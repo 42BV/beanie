@@ -115,14 +115,14 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void setPropertyValue(PropertyAccessor propertyAccessor, String propertyName, Object value) {
-        if (shouldBeAddedToCollection(propertyAccessor, propertyName, value)) {
+        if (isCollectionType(propertyAccessor, propertyName)) {
             addValueToCollection(propertyAccessor, propertyName, value);
         } else {
             propertyAccessor.setPropertyValue(propertyName, value);
         }
     }
     
-    private boolean shouldBeAddedToCollection(PropertyAccessor propertyAccessor, String propertyName, Object value) {
+    private boolean isCollectionType(PropertyAccessor propertyAccessor, String propertyName) {
         Class<?> propertyType = propertyAccessor.getPropertyType(propertyName);
         if (propertyType == null) {
             throw new IllegalArgumentException(
@@ -130,8 +130,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
             );
         }
 
-        boolean hasCollectionType = Collection.class.isAssignableFrom(propertyType);
-        return hasCollectionType && value != null && !(value instanceof Collection);
+        return Collection.class.isAssignableFrom(propertyType);
     }
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -142,7 +141,12 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
                 String.format("Collection property '%s' should not be null", propertyName)
             );
         }
-        collection.add(value);
+
+        if (value instanceof Collection<?> values) {
+            collection.addAll(values);
+        } else if (value != null) {
+            collection.add(value);
+        }
     }
 
     /**
@@ -162,7 +166,7 @@ class DefaultBeanBuildCommand<T> implements EditableBeanBuildCommand<T> {
         return this;
     }
 
-    private boolean isSkipped(final String propertyName, final Collection<String> exclusions) {
+    private boolean isSkipped(String propertyName, Collection<String> exclusions) {
         PropertyDescriptor descriptor = beanWrapper.getPropertyDescriptor(propertyName);
         return exclusions.contains(propertyName) || beanBuilder.getSkippedProperties().contains(new PropertyReference(descriptor));
     }

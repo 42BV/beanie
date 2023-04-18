@@ -1,16 +1,15 @@
 package nl._42.beanie.tester;
 
 import nl._42.beanie.domain.FullBean;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class BeanTesterTest {
 
 	private BeanTester beanTester;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		beanTester = new BeanTester();
 		beanTester.exclude(FullBean.class, "unsupportedValue");
@@ -22,7 +21,7 @@ public class BeanTesterTest {
 	@Test
 	public void testAllBeans() {		
         int verified = beanTester.verifyBeans(this.getClass());
-		Assert.assertTrue("Expected atleast one bean to be verified.", verified > 0);
+		Assertions.assertTrue(verified > 0, "Expected atleast one bean to be verified.");
 	}
 
 	@Test
@@ -30,19 +29,25 @@ public class BeanTesterTest {
         beanTester.inherit(false).verifyBean(FullBean.class);
 	}
 	
-	@Test(expected = InconsistentGetterAndSetterException.class)
+	@Test
 	public void testInconsistentProperty() {
-		beanTester.verifyProperty(FullBean.class, "differentValue");
+		Assertions.assertThrows(InconsistentGetterAndSetterException.class, () ->
+			beanTester.verifyProperty(FullBean.class, "differentValue")
+		);
 	}
 	
-	@Test(expected = InconsistentGetterAndSetterException.class)
+	@Test
 	public void testInconsistentPropertyType() {
-		beanTester.verifyProperty(FullBean.class, "differentTypeValue");
+		Assertions.assertThrows(InconsistentGetterAndSetterException.class, () ->
+			beanTester.verifyProperty(FullBean.class, "differentTypeValue")
+		);
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testExceptionProperty() {
-		beanTester.verifyProperty(FullBean.class, "unsupportedValue");
+		Assertions.assertThrows(IllegalStateException.class, () ->
+			beanTester.verifyProperty(FullBean.class, "unsupportedValue")
+		);
 	}
 
 }

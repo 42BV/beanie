@@ -3,8 +3,8 @@
  */
 package nl._42.beanie.generator;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * 
@@ -17,19 +17,19 @@ public class SequentialValueGeneratorTest {
     @Test
     public void testSequence() {
         SequentialValueGenerator generator = new SequentialValueGenerator(new Integer[] { 1, 2, 3 });
-        Assert.assertEquals(1, generator.generate(null));
-        Assert.assertEquals(2, generator.generate(null));
-        Assert.assertEquals(3, generator.generate(null));
-        Assert.assertNull(generator.generate(null));
+        Assertions.assertEquals(1, generator.generate(null));
+        Assertions.assertEquals(2, generator.generate(null));
+        Assertions.assertEquals(3, generator.generate(null));
+        Assertions.assertNull(generator.generate(null));
     }
     
     @Test
     public void testSequenceRepeat() {
         SequentialValueGenerator generator = new SequentialValueGenerator(new Integer[] { 1, 2, 3 }).repeatable();
-        Assert.assertEquals(1, generator.generate(null));
-        Assert.assertEquals(2, generator.generate(null));
-        Assert.assertEquals(3, generator.generate(null));
-        Assert.assertEquals(1, generator.generate(null));
+        Assertions.assertEquals(1, generator.generate(null));
+        Assertions.assertEquals(2, generator.generate(null));
+        Assertions.assertEquals(3, generator.generate(null));
+        Assertions.assertEquals(1, generator.generate(null));
     }
 
 }

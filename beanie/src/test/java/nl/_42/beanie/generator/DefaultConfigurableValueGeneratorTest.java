@@ -3,13 +3,16 @@
  */
 package nl._42.beanie.generator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class DefaultConfigurableValueGeneratorTest {
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testUnknownType() {
-        new DefaultValueGenerator(null).generate(Test.class);
+        Assertions.assertThrows(IllegalArgumentException.class, () ->
+            new DefaultValueGenerator(null).generate(Test.class)
+        );
     }
 
 }
