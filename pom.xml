@@ -11,7 +11,7 @@
 
     <groupId>nl.42</groupId>
     <artifactId>beanie-parent</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Beanie</name>
@@ -38,7 +38,7 @@
         <connection>scm:git:git@github.com:42BV/beanie.git</connection>
         <developerConnection>scm:git:git@github.com:42BV/beanie.git</developerConnection>
         <url>https://github.com/42BV/beanie</url>
-        <tag>beanie-parent-4.0.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
